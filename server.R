@@ -523,4 +523,41 @@ server <- function(input, output,session) {
           valSEIRD <- valSEIRD[-c(8)]
           return(valSEIRD)
      })
+     
+     observe(
+       hideTab(inputId = 'tabSet', target = 'Plot')
+       )
+     observe(
+       hideTab(inputId = 'tabSet', target = 'Phase Plane')
+       )
+     observe(
+       hideTab(inputId = 'tabSet', target = 'Output Summary')
+       )
+     observe(
+       hideTab(inputId = 'tabSet', target = 'Mathematical Model')
+       )
+     observeEvent(input$go,{
+       showTab(inputId = 'tabSet', target = 'Plot')
+       })
+     observeEvent(input$go,{
+       showTab(inputId = 'tabSet', target = 'Phase Plane')
+       })
+     observeEvent(input$go,{
+       showTab(inputId = 'tabSet', target = 'Output Summary')
+       })
+     observeEvent(input$go,{
+       showTab(inputId = 'tabSet', target = 'Mathematical Model')
+       }) 
+     observeEvent(input$resetAll,{
+       hideTab(inputId = 'tabSet', target = 'Plot')
+       })
+       observeEvent(input$resetAll,{
+       hideTab(inputId = 'tabSet', target = 'Phase Plane')
+       })
+       observeEvent(input$resetAll,{
+         hideTab(inputId = 'tabSet', target = 'Output Summary')
+           })
+       observeEvent(input$resetAll,{
+       hideTab(inputId = 'tabSet', target = 'Mathematical Model')
+         })
 }

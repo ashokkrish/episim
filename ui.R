@@ -410,7 +410,7 @@ fluidPage(
                                                ),
                                           ),
                                      ),
-                                     
+                                     #outside of div
                                      numericInput(
                                           inputId = "timesteps",
                                           label = "Number of Timesteps (m)",
@@ -418,6 +418,10 @@ fluidPage(
                                           min = 1,
                                           step = 1,
                                      ),
+                                     actionButton("go", "Run Simulation",
+                                                  style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
+                                     actionButton("resetAll", "Reset Values",
+                                                  style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
                         ),
                         
                         ##########################
@@ -425,7 +429,7 @@ fluidPage(
                         ##########################
                         
                         mainPanel(
-                             tabsetPanel(
+                             tabsetPanel(id = 'tabSet',
                                   tabPanel(
                                        title = "Plot",
                                        #downloadButton(outputId = "downloadPlot", label = "Save PNG/JPEG"),
