@@ -191,6 +191,15 @@ server <- function(input, output,session) {
      
      sir_values <- reactive({
           req(input$timesteps, input$betaSIR, input$gammaSIR, input$muBirth, input$muDeath)
+       #added
+       validate(
+         need(input$populationSIR, label = "Total Population (N)"),
+         need(is.integer(input$populationSIR), "Total Population must be an integer"),
+         need(input$susceptibleSIR, label = "Susceptible (S)"),
+         need(input$infectedSIR, label = "Infected (I)"),
+         need(input$recoveredSIR, label = "Recovered (R)")
+       )
+       #ended
           ode(
                y = c(
                     S = input$susceptibleSIR,
@@ -277,6 +286,16 @@ server <- function(input, output,session) {
      
      sird_values <- reactive({
           req(input$timesteps, input$betaSIRD, input$gammaSIRD, input$deltaSIRD,input$muBirth, input$muDeath)
+       #added
+       validate(
+         need(input$populationSIRD, label = "Total Population (N)"),
+         need(is.integer(input$populationSIRD), "Total Population must be an integer"),
+         need(input$susceptibleSIRD, label = "Susceptible (S)"),
+         need(input$infectedSIRD, label = "Infected (I)"),
+         need(input$recoveredSIRD, label = "Recovered (R)"),
+         need(input$deadSIRD, label = "Dead (D)")
+       )
+       #ended
           ode(
                y = c(
                     S = input$susceptibleSIRD,
@@ -364,6 +383,16 @@ server <- function(input, output,session) {
      
      seir_values <- reactive({
           req(input$timesteps, input$beta, input$gamma,input$muBirth, input$muDeath)
+       #added
+       validate(
+         need(input$population, label = "Total Population (N)"),
+         need(is.integer(input$population), "Total Population must be an integer"),
+         need(input$exposed, label = "Exposed (E)"),
+         need(input$susceptible, label = "Susceptible (S)"),
+         need(input$infected, label = "Infected (I)"),
+         need(input$recovered, label = "Recovered (R)")
+       )
+       #ended
           ode(
                y = c(
                     S = input$susceptible,
@@ -454,6 +483,17 @@ server <- function(input, output,session) {
      
      seird_values <- reactive({
           req(input$timesteps, input$betaSEIRD, input$gammaSEIRD,input$muBirth, input$muDeath)
+       #added
+       validate(
+         need(input$populationSEIRD, label = "Total Population (N)"),
+         need(is.integer(input$populationSEIRD), "Total Population must be an integer"),
+         need(input$exposedSEIRD, label = "Exposed (E)"),
+         need(input$susceptibleSEIRD, label = "Susceptible (S)"),
+         need(input$infectedSEIRD, label = "Infected (I)"),
+         need(input$recoveredSEIRD, label = "Recovered (R)"),
+         need(input$deadSEIRD, label = "Dead (D)")
+       )
+       #ended
           ode(
                y = c(
                     S = input$susceptibleSEIRD,
