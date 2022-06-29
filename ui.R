@@ -242,7 +242,7 @@ fluidPage(
                                                ),
                                                numericInput(
                                                     inputId = "deadSIRD",
-                                                    label = "Dead (D)", #modified
+                                                    label = "Dead (D)",
                                                     value = 0,
                                                     min = 0,
                                                     max = maxPopulation,
@@ -402,7 +402,7 @@ fluidPage(
                                                ),
                                                numericInput(
                                                     inputId = "deadSEIRD",
-                                                    label = "Dead (R)",
+                                                    label = "Dead (D)",
                                                     value = 0,
                                                     min = 0,
                                                     max = maxPopulation,

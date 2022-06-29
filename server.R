@@ -400,7 +400,7 @@ server <- function(input, output,session) {
      
      seir_values <- reactive({
           req(input$timesteps, input$beta, input$gamma,input$muBirth, input$muDeath)
-       #added
+  
        validate(
          need(input$population, label = "Total Population (N)"),
          need(is.integer(input$population), "Total Population must be an integer"),
@@ -409,7 +409,7 @@ server <- function(input, output,session) {
          need(input$infected, label = "Infected (I)"),
          need(input$recovered, label = "Recovered (R)")
        )
-       #ended
+       
           ode(
                y = c(
                     S = input$susceptible,
@@ -432,6 +432,8 @@ server <- function(input, output,session) {
      })
      
      output$plotSEIR <- renderPlot({
+       input$go
+       isolate({
           val <- as.data.frame(seir_values())
           
           ggplot(val, aes(x = time)) +
@@ -452,9 +454,12 @@ server <- function(input, output,session) {
                scale_color_identity(name= "SEIR", breaks = c("Blue", "Brown","Red", "Green"), 
                                     labels = c("Susceptible", "Exposed","Infected", "Recovered"), guide = "legend")
           
-     })
+       })
+          })
      
      output$SEIRPhasePlane <- renderPlot({
+       input$go
+       isolate({
           val <- as.data.frame(seir_values())
           ggplot(val, aes(x = S)) +
                geom_line(aes(y = I, color = "Blue"), size = 1.5) +
@@ -470,12 +475,17 @@ server <- function(input, output,session) {
                scale_y_continuous(expand = c(0, 0)) +
                scale_color_identity(breaks = "Blue", 
                                     labels = "Susceptible")
+       })
      })
      
      output$tableSEIR <- renderTable({
+       input$go
+       isolate({
           valSEIR <- as.data.frame(seir_values())
           valSEIR <- valSEIR[-c(7)]
           return(valSEIR)
+          
+       })
      })
      
      #############################################
@@ -500,7 +510,7 @@ server <- function(input, output,session) {
      
      seird_values <- reactive({
           req(input$timesteps, input$betaSEIRD, input$gammaSEIRD,input$muBirth, input$muDeath)
-       #added
+       
        validate(
          need(input$populationSEIRD, label = "Total Population (N)"),
          need(is.integer(input$populationSEIRD), "Total Population must be an integer"),
@@ -510,7 +520,7 @@ server <- function(input, output,session) {
          need(input$recoveredSEIRD, label = "Recovered (R)"),
          need(input$deadSEIRD, label = "Dead (D)")
        )
-       #ended
+       
           ode(
                y = c(
                     S = input$susceptibleSEIRD,
@@ -535,6 +545,8 @@ server <- function(input, output,session) {
      })
      
      output$plotSEIRD <- renderPlot({
+       input$go
+       isolate({
           val <- as.data.frame(seird_values())
           ggplot(val, aes(x = time)) +
                ggtitle("SEIRD Epidemic Model") +
@@ -555,9 +567,12 @@ server <- function(input, output,session) {
                scale_color_identity(name= "SEIRD", breaks = c("Blue", "Brown","Red", "Green", "Orange"), 
                                     labels = c("Susceptible", "Exposed","Infected", "Recovered", "Dead"), guide = "legend")
           
-     })
+       })
+          })
      
      output$SEIRDPhasePlane <- renderPlot({
+       input$go
+       isolate({
           val <- as.data.frame(seird_values())
           ggplot(val, aes(x = S)) +
                geom_line(aes(y = I, color = "Blue"), size = 1.5) +
@@ -573,12 +588,16 @@ server <- function(input, output,session) {
                scale_y_continuous(expand = c(0, 0)) +
                scale_color_identity(breaks = "Blue", 
                                     labels = "Susceptible")
+       })
      })
      
      output$tableSEIRD <- renderTable({
+       input$go
+       isolate({
           valSEIRD <- as.data.frame(seird_values())
           valSEIRD <- valSEIRD[-c(8)]
           return(valSEIRD)
+       })
      })
      
      observe(
