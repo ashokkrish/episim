@@ -191,7 +191,7 @@ server <- function(input, output,session) {
      
      sir_values <- reactive({
           req(input$timesteps, input$betaSIR, input$gammaSIR, input$muBirth, input$muDeath)
-       #added
+
        validate(
          need(input$populationSIR, label = "Total Population (N)"),
          need(is.integer(input$populationSIR), "Total Population must be an integer"),
@@ -199,7 +199,6 @@ server <- function(input, output,session) {
          need(input$infectedSIR, label = "Infected (I)"),
          need(input$recoveredSIR, label = "Recovered (R)")
        )
-       #ended
           ode(
                y = c(
                     S = input$susceptibleSIR,
@@ -220,8 +219,11 @@ server <- function(input, output,session) {
           )
      })
      
+     
      output$plotSIR <- renderPlot({
-          val <- as.data.frame(sir_values())
+       input$go
+       isolate({
+         val <- as.data.frame(sir_values())
           ggplot(val, aes(x = time)) +
                theme(axis.line = element_line(color="black"), axis.text=element_text(size=14),
                      axis.title.x = element_text(size=16,face="bold"), 
@@ -238,10 +240,12 @@ server <- function(input, output,session) {
                geom_line(aes(y = R, color = "Green"), size = 1.5) +
                scale_color_identity(name= "SIR", breaks = c("Blue", "Red", "Green"), 
                                     labels = c("Susceptible", "Infected", "Recovered"), guide = "legend")
-          
-     })
+          })
+         })
      
      output$SIRPhasePlane <- renderPlot({
+       input$go
+       isolate({
           val <- as.data.frame(sir_values())
           ggplot(val, aes(x = S)) +
                geom_line(aes(y = I, color = "Blue"), size = 1.5) +
@@ -257,13 +261,17 @@ server <- function(input, output,session) {
                xlab("Susceptible (S)")+
                scale_color_identity(breaks = "Blue", 
                                     labels = "Susceptible")
+       })
      })
      
      
      output$tableSIR <- renderTable({
+       input$go
+       isolate({
           val <- as.data.frame(sir_values())
           val <- val[-c(6)]
           return(val)
+       })
      })
      
      #############################################
@@ -286,7 +294,7 @@ server <- function(input, output,session) {
      
      sird_values <- reactive({
           req(input$timesteps, input$betaSIRD, input$gammaSIRD, input$deltaSIRD,input$muBirth, input$muDeath)
-       #added
+       
        validate(
          need(input$populationSIRD, label = "Total Population (N)"),
          need(is.integer(input$populationSIRD), "Total Population must be an integer"),
@@ -295,7 +303,7 @@ server <- function(input, output,session) {
          need(input$recoveredSIRD, label = "Recovered (R)"),
          need(input$deadSIRD, label = "Dead (D)")
        )
-       #ended
+       
           ode(
                y = c(
                     S = input$susceptibleSIRD,
@@ -318,6 +326,8 @@ server <- function(input, output,session) {
      })
      
      output$plotSIRD <- renderPlot({
+       input$go
+       isolate({
           val <- as.data.frame(sird_values())
           ggplot(val, aes(x = time)) +
                theme(axis.line = element_line(color="black"), axis.text=element_text(size=14),
@@ -337,9 +347,12 @@ server <- function(input, output,session) {
                scale_color_identity(name= "SIRD", breaks = c("Blue", "Red", "Green", "Orange"), 
                                     labels = c("Susceptible", "Infected", "Recovered", "Dead"), guide = "legend")
           
-     })
+       })
+          })
      
      output$SIRDPhasePlane <- renderPlot({
+       input$go
+       isolate({
           val <- as.data.frame(sird_values())
           ggplot(val, aes(x = S)) +
                geom_line(aes(y = I, color = "Blue"), size = 1.5) +
@@ -355,12 +368,16 @@ server <- function(input, output,session) {
                xlab("Susceptible (S)")+
                scale_color_identity(breaks = "Blue", 
                                     labels = "Susceptible")
+       })
      })
      
      output$tableSIRD <- renderTable({
+       input$go
+       isolate({
           val <- as.data.frame(sird_values())
           val <- val[-c(7)]
           return(val)
+       })
      })
      
      #############################################
