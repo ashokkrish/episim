@@ -409,15 +409,15 @@ fluidPage(
                                                     step = 1,
                                                ),
                                           ),
+                                         numericInput(
+                                           inputId = "timesteps",
+                                           label = "Number of Timesteps (m)",
+                                           value = 50,
+                                           min = 1,
+                                           step = 1,
+                                         ),
                                      ),
                                      #outside of div
-                                     numericInput(
-                                          inputId = "timesteps",
-                                          label = "Number of Timesteps (m)",
-                                          value = 50,
-                                          min = 1,
-                                          step = 1,
-                                     ),
                                      actionButton("go", "Run Simulation",
                                                   style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
                                      actionButton("resetAll", "Reset Values",

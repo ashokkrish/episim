@@ -6,6 +6,33 @@ library(deSolve)
 library(ggplot2)
 library(tidyverse)
 server <- function(input, output,session) {
+#  iv <- InputValidator$new()
+  
+#  iv$add_rule("alpha", sv_required())
+#  iv$add_rule("alpha", sv_gte(0))
+  
+#  iv$add_rule("beta", sv_required())
+#  iv$add_rule("beta", sv_gte(0))
+  
+#  iv$add_rule("gamma", sv_required())
+#  iv$add_rule("gamma", sv_gte(0))
+  
+#  iv$add_rule("sigma", sv_required())
+#  iv$add_rule("sigma", sv_gte(0))
+  
+#  iv$add_rule("delta", sv_required())
+#  iv$add_rule("delta", sv_gte(0))
+  
+#  iv$add_rule("lambda", sv_required())
+#  iv$add_rule("lambda", sv_gte(0))
+  
+#  iv$add_rule("date", sv_required())
+  
+#  iv$add_rule("timestep", sv_required())
+#  iv$add_rule("timestep", sv_integer())
+#  iv$add_rule("timestep", sv_gt(0))
+  
+#  iv$enable()
      
      #Reset vital dynamics when not checked off
      observe({
@@ -21,21 +48,21 @@ server <- function(input, output,session) {
           # SIR - TMA
           if((input$qValue == "1")&&(input$modelSelect == "SIR"))
           {
-               updateSliderInput(session, "betaSIR", value = 0.42)
-               updateSliderInput(session, "gammaSIR", value = 0.08)
-               updateNumericInput(session, "populationSIR", value = 10000)
-               updateNumericInput(session, "susceptibleSIR", value = 6000)
-               updateNumericInput(session, "infectedSIR", value = 4000)
+               updateSliderInput(session, "betaSIR", value = 0.4)
+               updateSliderInput(session, "gammaSIR", value = 0.04)
+               updateNumericInput(session, "populationSIR", value = 1000)
+               updateNumericInput(session, "susceptibleSIR", value = 997)
+               updateNumericInput(session, "infectedSIR", value = 3)
                updateNumericInput(session, "recoveredSIR", value = 0)
                updateNumericInput(session, "timesteps", value = 25)
           }
           # SIR - SMA
           if((input$qValue == "0")&&(input$modelSelect == "SIR"))
           {
-               updateSliderInput(session, "betaSIR", value = 0.00003)
-               updateSliderInput(session, "gammaSIR", value = 0.12)
-               updateNumericInput(session, "populationSIR", value = 20000)
-               updateNumericInput(session, "susceptibleSIR", value = 19999)
+               updateSliderInput(session, "betaSIR", value = 0.001)
+               updateSliderInput(session, "gammaSIR", value = 0.1)
+               updateNumericInput(session, "populationSIR", value = 500)
+               updateNumericInput(session, "susceptibleSIR", value = 499)
                updateNumericInput(session, "infectedSIR", value = 1)
                updateNumericInput(session, "recoveredSIR", value = 0)
                updateNumericInput(session, "timesteps", value = 50)
@@ -43,23 +70,23 @@ server <- function(input, output,session) {
           # SIRD - TMA
           if((input$qValue == "1")&&(input$modelSelect == "SIRD"))
           {
-               updateSliderInput(session, "betaSIRD", value = 0.35)
-               updateSliderInput(session, "gammaSIRD", value = 0.07)
-               updateSliderInput(session, "deltaSIRD", value = 0.05)
-               updateNumericInput(session, "populationSIRD", value = 10000)
-               updateNumericInput(session, "susceptibleSIRD", value = 4000)
-               updateNumericInput(session, "infectedSIRD", value = 3500)
-               updateNumericInput(session, "recoveredSIRD", value = 500)
+               updateSliderInput(session, "betaSIRD", value = 0.4)
+               updateSliderInput(session, "gammaSIRD", value = 0.04)
+               updateSliderInput(session, "deltaSIRD", value = 0)
+               updateNumericInput(session, "populationSIRD", value = 1000)
+               updateNumericInput(session, "susceptibleSIRD", value = 997)
+               updateNumericInput(session, "infectedSIRD", value = 3)
+               updateNumericInput(session, "recoveredSIRD", value = 0)
                updateNumericInput(session, "timesteps", value = 25)
           }
           #SIRD - PMA
           if((input$qValue == "0")&&(input$modelSelect == "SIRD"))
           {
-               updateSliderInput(session, "betaSIRD", value = 0.00003)
-               updateSliderInput(session, "gammaSIRD", value = 0.015)
-               updateSliderInput(session, "deltaSIRD", value = 0.08)
-               updateNumericInput(session, "populationSIRD", value = 20000)
-               updateNumericInput(session, "susceptibleSIRD", value = 19999)
+               updateSliderInput(session, "betaSIRD", value = 0.001)
+               updateSliderInput(session, "gammaSIRD", value = 0.1)
+               updateSliderInput(session, "deltaSIRD", value = 0)
+               updateNumericInput(session, "populationSIRD", value = 500)
+               updateNumericInput(session, "susceptibleSIRD", value = 499)
                updateNumericInput(session, "infectedSIRD", value = 1)
                updateNumericInput(session, "recoveredSIRD", value = 0)
                updateNumericInput(session, "timesteps", value = 50)
@@ -67,22 +94,22 @@ server <- function(input, output,session) {
           #SEIR - TMA
           if((input$qValue == "1")&&(input$modelSelect == "SEIR"))
           {
-               updateSliderInput(session, "beta", value = 0.75)
-               updateSliderInput(session, "gamma", value = 0.18)
-               updateSliderInput(session, "sigma", value = 0.048)
-               updateNumericInput(session, "population", value = 4000)
-               updateNumericInput(session, "susceptible", value = 2000)
-               updateNumericInput(session, "exposed", value = 500)
-               updateNumericInput(session, "infected", value = 1500)
+               updateSliderInput(session, "beta", value = 0.35)
+               updateSliderInput(session, "gamma", value = 0.1429)
+               updateSliderInput(session, "sigma", value = 0.0476)
+               updateNumericInput(session, "population", value = 500)
+               updateNumericInput(session, "susceptible", value = 499)
+               updateNumericInput(session, "exposed", value = 0)
+               updateNumericInput(session, "infected", value = 1)
                updateNumericInput(session, "recovered", value = 0)
                updateNumericInput(session, "timesteps", value = 20)
           }
           # SEIR - PMA
           if((input$qValue == "0")&&(input$modelSelect == "SEIR"))
           {
-               updateSliderInput(session, "beta", value = 0.16)
-               updateSliderInput(session, "gamma", value = 0.045)
-               updateSliderInput(session, "sigma", value = 0.11)
+               updateSliderInput(session, "beta", value = 0.5)
+               updateSliderInput(session, "gamma", value = 0.5)
+               updateSliderInput(session, "sigma", value = 0.1)
                updateNumericInput(session, "population", value = 53)
                updateNumericInput(session, "susceptible", value = 50)
                updateNumericInput(session, "exposed", value = 3)
@@ -93,24 +120,24 @@ server <- function(input, output,session) {
           #SEIRD - TMA
           if((input$qValue == "1")&&(input$modelSelect == "SEIRD"))
           {
-               updateSliderInput(session, "betaSEIRD", value = 0.36)
-               updateSliderInput(session, "gammaSEIRD", value = 0.45)
-               updateSliderInput(session, "sigmaSEIRD", value = 0.068)
-               updateSliderInput(session, "deltaSEIRD", value = 0.059)
-               updateNumericInput(session, "populationSEIRD", value = 10000)
-               updateNumericInput(session, "susceptibleSEIRD", value = 4000)
-               updateNumericInput(session, "exposedSEIRD", value = 3500)
-               updateNumericInput(session, "infectedSEIRD", value = 1500)
-               updateNumericInput(session, "recoveredSEIRD", value = 1000)
+               updateSliderInput(session, "betaSEIRD", value = 0.35)
+               updateSliderInput(session, "gammaSEIRD", value = 0.1429)
+               updateSliderInput(session, "sigmaSEIRD", value = 0.0476)
+               updateSliderInput(session, "deltaSEIRD", value = 0)
+               updateNumericInput(session, "populationSEIRD", value = 500)
+               updateNumericInput(session, "susceptibleSEIRD", value = 499)
+               updateNumericInput(session, "exposedSEIRD", value = 0)
+               updateNumericInput(session, "infectedSEIRD", value = 1)
+               updateNumericInput(session, "recoveredSEIRD", value = 0)
                updateNumericInput(session, "timesteps", value = 20)
           }
           #SEIRD - PMA
           if((input$qValue == "0")&&(input$modelSelect == "SEIRD"))
           {
-               updateSliderInput(session, "betaSEIRD", value = 0.16)
-               updateSliderInput(session, "gammaSEIRD", value = 0.045)
-               updateSliderInput(session, "sigmaSEIRD", value = 0.11)
-               updateSliderInput(session, "deltaSEIRD", value = 0.08)
+               updateSliderInput(session, "betaSEIRD", value = 0.5)
+               updateSliderInput(session, "gammaSEIRD", value = 0.5)
+               updateSliderInput(session, "sigmaSEIRD", value = 0.1)
+               updateSliderInput(session, "deltaSEIRD", value = 0)
                updateNumericInput(session, "populationSEIRD", value = 53)
                updateNumericInput(session, "susceptibleSEIRD", value = 50)
                updateNumericInput(session, "exposedSEIRD", value = 3)
@@ -119,6 +146,8 @@ server <- function(input, output,session) {
                updateNumericInput(session, "timesteps", value = 50)
           }
      })
+     
+     
      
      #############################################
      #####      PLOT - SIR-Stochastic        #####
@@ -190,14 +219,17 @@ server <- function(input, output,session) {
      }
      
      sir_values <- reactive({
+       
           req(input$timesteps, input$betaSIR, input$gammaSIR, input$muBirth, input$muDeath)
+       
 
        validate(
-         need(input$populationSIR, label = "Total Population (N)"),
-         need(is.integer(input$populationSIR), "Total Population must be an integer"),
-         need(input$susceptibleSIR, label = "Susceptible (S)"),
-         need(input$infectedSIR, label = "Infected (I)"),
-         need(input$recoveredSIR, label = "Recovered (R)")
+         need(input$populationSIR > 0, "Total Population (N) must be greather than 0."),
+          need(input$susceptibleSIR > 0, "Susceptible (S) must be greater than 0."),
+          need(input$infectedSIR > 0, "Infected (I) must be greater than 0."),
+          need(input$recoveredSIR >= 0, label = "Recovered (R)"),
+          #need(input$timesteps > 0 , "Timesteps must be greater than 0."),
+         need(input$populationSIR == (input$susceptibleSIR + input$infectedSIR + input$recoveredSIR), "All inputs must equal to Total Population.")
        )
           ode(
                y = c(
@@ -296,12 +328,13 @@ server <- function(input, output,session) {
           req(input$timesteps, input$betaSIRD, input$gammaSIRD, input$deltaSIRD,input$muBirth, input$muDeath)
        
        validate(
-         need(input$populationSIRD, label = "Total Population (N)"),
-         need(is.integer(input$populationSIRD), "Total Population must be an integer"),
-         need(input$susceptibleSIRD, label = "Susceptible (S)"),
-         need(input$infectedSIRD, label = "Infected (I)"),
-         need(input$recoveredSIRD, label = "Recovered (R)"),
-         need(input$deadSIRD, label = "Dead (D)")
+         need(input$populationSIRD > 0, "Total Population (N) must be greater than 0."),
+         need(input$susceptibleSIRD > 0, "Susceptible (S) must be greater than 0."),
+         need(input$infectedSIRD > 0, "Infected (I) must be greater than 0."),
+         need(input$recoveredSIRD >= 0, label = "Recovered (R)"),
+         need(input$deadSIRD >= 0, label = "Dead (D)"),
+         #need(input$timesteps > 0, "Timesteps must be greater than 0."),
+         need(input$populationSIRD == (input$susceptibleSIRD + input$infectedSIRD + input$recoveredSIRD), "All inputs must equal to Total Population.")
        )
        
           ode(
@@ -402,12 +435,13 @@ server <- function(input, output,session) {
           req(input$timesteps, input$beta, input$gamma,input$muBirth, input$muDeath)
   
        validate(
-         need(input$population, label = "Total Population (N)"),
-         need(is.integer(input$population), "Total Population must be an integer"),
-         need(input$exposed, label = "Exposed (E)"),
-         need(input$susceptible, label = "Susceptible (S)"),
-         need(input$infected, label = "Infected (I)"),
-         need(input$recovered, label = "Recovered (R)")
+         need(input$population > 0, "Total Population (N) must be greater than 0."),
+         need(input$exposed >= 0, label = "Exposed (E)"),
+         need(input$susceptible > 0, "Susceptible (S) must be greater than 0."),
+         need(input$infected > 0, "Infected (I) must be greater than 0."),
+         need(input$recovered >= 0, label = "Recovered (R)"),
+         #need(input$timesteps > 0, "Timesteps must be greater than 0."),
+         need(input$population == (input$exposed + input$susceptible + input$infected + input$recovered), "All inputs must equal to Total Population.")
        )
        
           ode(
@@ -512,13 +546,14 @@ server <- function(input, output,session) {
           req(input$timesteps, input$betaSEIRD, input$gammaSEIRD,input$muBirth, input$muDeath)
        
        validate(
-         need(input$populationSEIRD, label = "Total Population (N)"),
-         need(is.integer(input$populationSEIRD), "Total Population must be an integer"),
-         need(input$exposedSEIRD, label = "Exposed (E)"),
-         need(input$susceptibleSEIRD, label = "Susceptible (S)"),
-         need(input$infectedSEIRD, label = "Infected (I)"),
-         need(input$recoveredSEIRD, label = "Recovered (R)"),
-         need(input$deadSEIRD, label = "Dead (D)")
+         need(input$populationSEIRD > 0, "Total Population (N) must be greater than 0."),
+         need(input$exposedSEIRD >= 0, label = "Exposed (E)"),
+         need(input$susceptibleSEIRD > 0, "Susceptible (S) must be greater than 0."),
+         need(input$infectedSEIRD > 0, "Infected (I) must be greater than 0."),
+         need(input$recoveredSEIRD >= 0, label = "Recovered (R)"),
+         need(input$deadSEIRD >= 0, label = "Dead (D)"),
+         #need(input$timesteps > 0, "Timesteps must be greater than 0."),
+         need(input$populationSEIRD == (input$exposedSEIRD + input$susceptibleSEIRD + input$infectedSEIRD + input$recoveredSEIRD + input$deadSEIRD), "All inputs must equal to Total Population.")
        )
        
           ode(
@@ -636,4 +671,58 @@ server <- function(input, output,session) {
        observeEvent(input$resetAll,{
        hideTab(inputId = 'tabSet', target = 'Mathematical Model')
          })
+       observeEvent(input$resetAll,{
+         updateSliderInput(session, "betaSIR", value = 0)
+         updateSliderInput(session, "gammaSIR", value = 0)
+         updateNumericInput(session, "populationSIR", value = 0)
+         updateNumericInput(session, "susceptibleSIR", value = 0)
+         updateNumericInput(session, "infectedSIR", value = 0)
+         updateNumericInput(session, "recoveredSIR", value = 0)
+         updateNumericInput(session, "timesteps", value = 0)
+       })
+       observeEvent(input$resetAll,{
+         updateSliderInput(session, "betaSIRD", value = 0)
+         updateSliderInput(session, "gammaSIRD", value = 0)
+         updateSliderInput(session, "deltaSIRD", value = 0)
+         updateNumericInput(session, "populationSIRD", value = 0)
+         updateNumericInput(session, "susceptibleSIRD", value = 0)
+         updateNumericInput(session, "infectedSIRD", value = 0)
+         updateNumericInput(session, "recoveredSIRD", value = 0)
+         updateNumericInput(session, "timesteps", value = 0)
+       })
+       observeEvent(input$resetAll,{
+         updateSliderInput(session, "beta", value = 0)
+         updateSliderInput(session, "gamma", value = 0)
+         updateSliderInput(session, "sigma", value = 0)
+         updateNumericInput(session, "population", value = 0)
+         updateNumericInput(session, "susceptible", value = 0)
+         updateNumericInput(session, "exposed", value = 0)
+         updateNumericInput(session, "infected", value = 0)
+         updateNumericInput(session, "recovered", value = 0)
+         updateNumericInput(session, "timesteps", value = 0)
+       })
+       observeEvent(input$resetAll,{
+         updateSliderInput(session, "betaSEIRD", value = 0)
+         updateSliderInput(session, "gammaSEIRD", value = 0)
+         updateSliderInput(session, "sigmaSEIRD", value = 0)
+         updateSliderInput(session, "deltaSEIRD", value = 0)
+         updateNumericInput(session, "populationSEIRD", value = 0)
+         updateNumericInput(session, "susceptibleSEIRD", value = 0)
+         updateNumericInput(session, "exposedSEIRD", value = 0)
+         updateNumericInput(session, "infectedSEIRD", value = 0)
+         updateNumericInput(session, "recoveredSEIRD", value = 0)
+         updateNumericInput(session, "timesteps", value = 0)
+       })
+       
+  #     values <- reactiveValues()
+  #     values$allow_simulation_run <- TRUE
+  #     values$df <- data.frame(Variable = character(), Value = character()) 
+  #     output$table <- renderTable(values$df)
+       
+  #     observeEvent(input$resetAll, {
+  #       shinyjs::reset("dashboard")
+         
+  #       shinyjs::disable(id = "go")
+  #       values$allow_simulation_run <- FALSE
+  #     })
 }
