@@ -553,7 +553,7 @@ server <- function(input, output,session) {
          need(input$recoveredSEIRD >= 0, label = "Recovered (R)"),
          need(input$deadSEIRD >= 0, label = "Dead (D)"),
          #need(input$timesteps > 0, "Timesteps must be greater than 0."),
-         need(input$populationSEIRD == (input$exposedSEIRD + input$susceptibleSEIRD + input$infectedSEIRD + input$recoveredSEIRD + input$deadSEIRD), "All inputs must equal to Total Population.")
+         need(input$populationSEIRD == (input$exposedSEIRD + input$susceptibleSEIRD + input$infectedSEIRD + input$recoveredSEIRD), "All inputs must equal to Total Population.")
        )
        
           ode(
