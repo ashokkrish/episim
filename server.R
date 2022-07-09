@@ -145,6 +145,11 @@ server <- function(input, output,session) {
                updateNumericInput(session, "recoveredSEIRD", value = 0)
                updateNumericInput(session, "timesteps", value = 50)
           }
+       if(((input$qValue == "1")||(input$qValue == "0"))&&(input$modelSelect == "SIR-Stochastic"))
+          {
+         updateNumericInput(session, "populationSIR_Stoc", value = 50)
+         updateNumericInput(session, "timesteps", value = 10)
+       }
      })
      
      
@@ -156,6 +161,15 @@ server <- function(input, output,session) {
      
      
      output$plotSIR_Stoc <- renderPlot({
+       input$go
+       isolate({
+       validate(
+         need(input$populationSIR_Stoc > 0, "Total Population (N) must be greather than 0."),
+         need(input$susceptibleSIR_Stoc > 0, "Susceptible (S) must be greater than 0."),
+         need(input$infectedSIR_Stoc >= 0, "Infected (I) must be greater than 0."),
+         need(input$recoveredSIR_Stoc >= 0, label = "Recovered (R)"),
+         need(input$populationSIR_Stoc == (input$susceptibleSIR_Stoc + input$infectedSIR_Stoc + input$recoveredSIR_Stoc), "All inputs must equal to Total Population.")
+       )
           
           num.sims <- input$stochasticSIR                               
           N <- input$populationSIR_Stoc                                    
@@ -200,6 +214,8 @@ server <- function(input, output,session) {
                lines(timeseq, sim[,"R"],col = "green")
           }
           
+       })
+          
      })
      
      #############################################
@@ -226,7 +242,7 @@ server <- function(input, output,session) {
        validate(
          need(input$populationSIR > 0, "Total Population (N) must be greather than 0."),
           need(input$susceptibleSIR > 0, "Susceptible (S) must be greater than 0."),
-          need(input$infectedSIR > 0, "Infected (I) must be greater than 0."),
+          need(input$infectedSIR >= 0, "Infected (I) must be greater than 0."),
           need(input$recoveredSIR >= 0, label = "Recovered (R)"),
           #need(input$timesteps > 0 , "Timesteps must be greater than 0."),
          need(input$populationSIR == (input$susceptibleSIR + input$infectedSIR + input$recoveredSIR), "All inputs must equal to Total Population.")
@@ -330,7 +346,7 @@ server <- function(input, output,session) {
        validate(
          need(input$populationSIRD > 0, "Total Population (N) must be greater than 0."),
          need(input$susceptibleSIRD > 0, "Susceptible (S) must be greater than 0."),
-         need(input$infectedSIRD > 0, "Infected (I) must be greater than 0."),
+         need(input$infectedSIRD >= 0, "Infected (I) must be greater than 0."),
          need(input$recoveredSIRD >= 0, label = "Recovered (R)"),
          need(input$deadSIRD >= 0, label = "Dead (D)"),
          #need(input$timesteps > 0, "Timesteps must be greater than 0."),
@@ -438,7 +454,7 @@ server <- function(input, output,session) {
          need(input$population > 0, "Total Population (N) must be greater than 0."),
          need(input$exposed >= 0, label = "Exposed (E)"),
          need(input$susceptible > 0, "Susceptible (S) must be greater than 0."),
-         need(input$infected > 0, "Infected (I) must be greater than 0."),
+         need(input$infected >= 0, "Infected (I) must be greater than 0."),
          need(input$recovered >= 0, label = "Recovered (R)"),
          #need(input$timesteps > 0, "Timesteps must be greater than 0."),
          need(input$population == (input$exposed + input$susceptible + input$infected + input$recovered), "All inputs must equal to Total Population.")
@@ -549,7 +565,7 @@ server <- function(input, output,session) {
          need(input$populationSEIRD > 0, "Total Population (N) must be greater than 0."),
          need(input$exposedSEIRD >= 0, label = "Exposed (E)"),
          need(input$susceptibleSEIRD > 0, "Susceptible (S) must be greater than 0."),
-         need(input$infectedSEIRD > 0, "Infected (I) must be greater than 0."),
+         need(input$infectedSEIRD >= 0, "Infected (I) must be greater than 0."),
          need(input$recoveredSEIRD >= 0, label = "Recovered (R)"),
          need(input$deadSEIRD >= 0, label = "Dead (D)"),
          #need(input$timesteps > 0, "Timesteps must be greater than 0."),
@@ -647,6 +663,19 @@ server <- function(input, output,session) {
      observe(
        hideTab(inputId = 'tabSet', target = 'Mathematical Model')
        )
+     observe(
+       {
+       hide(id = "qValue")
+       hide(id = "muValue")
+       hide(id = "timesteps")
+     }
+     )
+     observe({
+       toggle(id = "qValue", condition = (input$modelSelect == "SIR" || input$modelSelect == "SIRD" || input$modelSelect == "SEIR" || input$modelSelect == "SEIRD" || input$modelSelect == "SIR-Stochastic"))
+       toggle(id = "muValue", condition = (input$modelSelect == "SIR" || input$modelSelect == "SIRD" || input$modelSelect == "SEIR" || input$modelSelect == "SEIRD" || input$modelSelect == "SIR-Stochastic"))
+       toggle(id = "timesteps", condition = (input$modelSelect == "SIR" || input$modelSelect == "SIRD" || input$modelSelect == "SEIR" || input$modelSelect == "SEIRD" || input$modelSelect == "SIR-Stochastic"))
+       
+     })
      observeEvent(input$go,{
        showTab(inputId = 'tabSet', target = 'Plot')
        })
@@ -714,15 +743,4 @@ server <- function(input, output,session) {
          updateNumericInput(session, "timesteps", value = 0)
        })
        
-  #     values <- reactiveValues()
-  #     values$allow_simulation_run <- TRUE
-  #     values$df <- data.frame(Variable = character(), Value = character()) 
-  #     output$table <- renderTable(values$df)
-       
-  #     observeEvent(input$resetAll, {
-  #       shinyjs::reset("dashboard")
-         
-  #       shinyjs::disable(id = "go")
-  #       values$allow_simulation_run <- FALSE
-  #     })
 }

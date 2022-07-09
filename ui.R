@@ -9,6 +9,7 @@ library(tidyverse)
 maxPopulation = 900000000
 
 fluidPage(
+  useShinyjs(), #???
      
      div(
           titlePanel("Compartmental Models of Epidemiology")
@@ -18,15 +19,23 @@ fluidPage(
           tabPanel(title = "Model",
                    sidebarLayout(
                         sidebarPanel((""),
-                                     div(
-                                          radioButtons(
-                                               inputId = "modelSelect",
-                                               label = ("Epidemic Model"),
-                                               choiceValues = list("SIR", "SIRD","SEIR","SEIRD", "SIR-Stochastic"),
-                                               choiceNames = list("SIR", "SIRD", "SEIR", "SEIRD", "SIR-Stochastic"),
-                                               inline = TRUE,
-                                               width = "1000px"
-                                          ),
+                                     pickerInput(inputId = "modelSelect",
+                                                 label = ("Epidemic Model"),
+                                                 choices = list("Please choose one model","SIR", "SIRD","SEIR","SEIRD", "SIR-Stochastic"),
+                                                 options = list("","SIR", "SIRD", "SEIR", "SEIRD", "SIR-Stochastic"),
+                                                 inline = TRUE,
+                                                 width = "100%"
+                                     ),
+                                     div( 
+                                       id = "userInput",
+                                          #radioButtons(
+                                          #     inputId = "modelSelect",
+                                          #     label = ("Epidemic Model"),
+                                          #     choiceValues = list("SIR", "SIRD","SEIR","SEIRD", "SIR-Stochastic"),
+                                          #     choiceNames = list("SIR", "SIRD", "SEIR", "SEIRD", "SIR-Stochastic"),
+                                          #     inline = TRUE,
+                                          #     width = "1000px"
+                                          #),
                                           
                                           radioButtons(
                                                inputId = "qValue",
@@ -97,7 +106,7 @@ fluidPage(
                                                numericInput(
                                                     inputId = "populationSIR_Stoc",
                                                     label = "Total Population (N)",
-                                                    value = 1000,
+                                                    value = 50,
                                                     min = 1,
                                                     max = maxPopulation,
                                                     step = 1,
@@ -137,7 +146,7 @@ fluidPage(
                                                     min = 0,
                                                     max = 1,
                                                     step = 0.00001,
-                                                    value = 0.0178,
+                                                    value = 0.001,
                                                ),
                                                sliderInput(
                                                     inputId = "gammaSIR",
@@ -145,12 +154,12 @@ fluidPage(
                                                     min = 0,
                                                     max = 5,
                                                     step = 0.00001,
-                                                    value = 2.73
+                                                    value = 0.1,
                                                ),
                                                numericInput(
                                                     inputId = "populationSIR",
                                                     label = "Total Population (N)",
-                                                    value = 261,
+                                                    value = 500,
                                                     min = 1,
                                                     max = maxPopulation,
                                                     step = 1,
@@ -158,7 +167,7 @@ fluidPage(
                                                numericInput(
                                                     inputId = "susceptibleSIR",
                                                     label = "Susceptible (S)",
-                                                    value = 254,
+                                                    value = 499,
                                                     min = 1,
                                                     max = maxPopulation,
                                                     step = 1,
@@ -166,7 +175,7 @@ fluidPage(
                                                numericInput(
                                                     inputId = "infectedSIR",
                                                     label = "Infected (I)",
-                                                    value = 7,
+                                                    value = 1,
                                                     min = 1,
                                                     max = maxPopulation,
                                                     step = 1,
@@ -190,7 +199,7 @@ fluidPage(
                                                     min = 0,
                                                     max = 0.5,
                                                     step = 0.00001,
-                                                    value = 0.00003,
+                                                    value = 0.1,
                                                ),
                                                sliderInput(
                                                     inputId = "gammaSIRD",
@@ -198,7 +207,7 @@ fluidPage(
                                                     min = 0,
                                                     max = 0.5,
                                                     step = 0.00001,
-                                                    value = 0.015
+                                                    value = 0.1
                                                ),
                                                sliderInput(
                                                     inputId = "deltaSIRD",
@@ -206,12 +215,12 @@ fluidPage(
                                                     min = 0,
                                                     max = 0.5,
                                                     step = 0.00001,
-                                                    value = 0.08
+                                                    value = 0
                                                ),
                                                numericInput(
                                                     inputId = "populationSIRD",
                                                     label = "Total Population (N)",
-                                                    value = 20000,
+                                                    value = 500,
                                                     min = 1,
                                                     max = maxPopulation,
                                                     step = 1,
@@ -219,7 +228,7 @@ fluidPage(
                                                numericInput(
                                                     inputId = "susceptibleSIRD",
                                                     label = "Susceptible (S)",
-                                                    value = 19999,
+                                                    value = 499,
                                                     min = 1,
                                                     max = maxPopulation,
                                                     step = 1,
@@ -260,7 +269,7 @@ fluidPage(
                                                     min = 0,
                                                     max = 1,
                                                     step = 0.01,
-                                                    value = 0.16,
+                                                    value = 0.5,
                                                ),
                                                sliderInput(
                                                     #TODO: Adjust min/ Max
@@ -269,7 +278,7 @@ fluidPage(
                                                     min = 0,
                                                     max = 3,
                                                     step = 0.00001,
-                                                    value = 0.045
+                                                    value = 0.5
                                                ),
                                                sliderInput(
                                                     #TODO: Adjust min/ Max
@@ -278,7 +287,7 @@ fluidPage(
                                                     min = 0,
                                                     max = 0.5,
                                                     step = 0.00001,
-                                                    value = 0.11
+                                                    value = 0.1
                                                ),
                                                numericInput(
                                                     inputId = "population",
@@ -332,7 +341,7 @@ fluidPage(
                                                     min = 0,
                                                     max = 1,
                                                     step = 0.01,
-                                                    value = 0.16,
+                                                    value = 0.5,
                                                ),
                                                sliderInput(
                                                     #TODO: Adjust min/ Max
@@ -341,7 +350,7 @@ fluidPage(
                                                     min = 0,
                                                     max = 3,
                                                     step = 0.00001,
-                                                    value = 0.045
+                                                    value = 0.5
                                                ),
                                                sliderInput(
                                                     #TODO: Adjust min/ Max
@@ -350,7 +359,7 @@ fluidPage(
                                                     min = 0,
                                                     max = 0.5,
                                                     step = 0.00001,
-                                                    value = 0.11
+                                                    value = 0.1
                                                ),
                                                sliderInput(
                                                     inputId = "deltaSEIRD",
@@ -358,7 +367,7 @@ fluidPage(
                                                     min = 0,
                                                     max = 0.5,
                                                     step = 0.00001,
-                                                    value = 0.08
+                                                    value = 0
                                                ),
                                                numericInput(
                                                     inputId = "populationSEIRD",
@@ -412,7 +421,7 @@ fluidPage(
                                          numericInput(
                                            inputId = "timesteps",
                                            label = "Number of Timesteps (m)",
-                                           value = 50,
+                                           value = 100,
                                            min = 1,
                                            step = 1,
                                          ),
