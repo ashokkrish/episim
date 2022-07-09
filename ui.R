@@ -95,7 +95,7 @@ fluidPage(
                                                     step = 1,
                                                     value = 50
                                                ),
-                                               sliderInput(
+                                               numericInput(
                                                     inputId = "betaSIR_Stoc",
                                                     label = "Transmission Rate (\\( \\beta\\))",
                                                     min = 0,
@@ -103,7 +103,7 @@ fluidPage(
                                                     step = 0.00001,
                                                     value = 0.00178,
                                                ),
-                                               sliderInput(
+                                               numericInput(
                                                     inputId = "gammaSIR_Stoc",
                                                     label = "Removal Rate  (\\( \\gamma\\))",
                                                     min = 0,
@@ -148,7 +148,7 @@ fluidPage(
                                           conditionalPanel(
                                                condition = "input.modelSelect == 'SIR'",
                                                withMathJax(),
-                                               sliderInput(
+                                               numericInput(
                                                     inputId = "betaSIR",
                                                     label = "Transmission Rate (\\( \\beta\\))",
                                                     min = 0,
@@ -156,7 +156,7 @@ fluidPage(
                                                     step = 0.00001,
                                                     value = 0.001,
                                                ),
-                                               sliderInput(
+                                               numericInput(
                                                     inputId = "gammaSIR",
                                                     label = "Removal Rate  (\\( \\gamma\\))",
                                                     min = 0,
@@ -201,7 +201,7 @@ fluidPage(
                                           conditionalPanel(
                                                condition = "input.modelSelect == 'SIRD'",
                                                withMathJax(),
-                                               sliderInput(
+                                               numericInput(
                                                     inputId = "betaSIRD",
                                                     label = "Transmission Rate (\\( \\beta\\))",
                                                     min = 0,
@@ -209,7 +209,7 @@ fluidPage(
                                                     step = 0.00001,
                                                     value = 0.1,
                                                ),
-                                               sliderInput(
+                                               numericInput(
                                                     inputId = "gammaSIRD",
                                                     label = "Removal Rate  (\\( \\gamma\\))",
                                                     min = 0,
@@ -217,7 +217,7 @@ fluidPage(
                                                     step = 0.00001,
                                                     value = 0.1
                                                ),
-                                               sliderInput(
+                                               numericInput(
                                                     inputId = "deltaSIRD",
                                                     label = "Death Rate (\\( \\delta\\))",
                                                     min = 0,
@@ -270,7 +270,7 @@ fluidPage(
                                           conditionalPanel(
                                                condition = "input.modelSelect == 'SEIR'",
                                                withMathJax(),
-                                               sliderInput(
+                                               numericInput(
                                                     #TODO: Adjust min/ Max
                                                     inputId = "beta",
                                                     label = "Exposure Rate (\\( \\beta\\))",
@@ -279,7 +279,7 @@ fluidPage(
                                                     step = 0.01,
                                                     value = 0.5,
                                                ),
-                                               sliderInput(
+                                               numericInput(
                                                     #TODO: Adjust min/ Max
                                                     inputId = "gamma",
                                                     label = "Infectiousness (\\( \\gamma\\))",
@@ -288,7 +288,7 @@ fluidPage(
                                                     step = 0.00001,
                                                     value = 0.5
                                                ),
-                                               sliderInput(
+                                               numericInput(
                                                     #TODO: Adjust min/ Max
                                                     inputId = "sigma",
                                                     label = "Removal Rate  (\\( \\sigma\\))",
@@ -342,7 +342,7 @@ fluidPage(
                                           conditionalPanel(
                                                condition = "input.modelSelect == 'SEIRD'",
                                                withMathJax(),
-                                               sliderInput(
+                                               numericInput(
                                                     #TODO: Adjust min/ Max
                                                     inputId = "betaSEIRD",
                                                     label = "Exposure Rate (\\( \\beta\\))",
@@ -351,7 +351,7 @@ fluidPage(
                                                     step = 0.01,
                                                     value = 0.5,
                                                ),
-                                               sliderInput(
+                                               numericInput(
                                                     #TODO: Adjust min/ Max
                                                     inputId = "gammaSEIRD",
                                                     label = "Infectiousness (\\( \\gamma\\))",
@@ -360,7 +360,7 @@ fluidPage(
                                                     step = 0.00001,
                                                     value = 0.5
                                                ),
-                                               sliderInput(
+                                               numericInput(
                                                     #TODO: Adjust min/ Max
                                                     inputId = "sigmaSEIRD",
                                                     label = "Removal Rate  (\\( \\sigma\\))",
@@ -369,7 +369,7 @@ fluidPage(
                                                     step = 0.00001,
                                                     value = 0.1
                                                ),
-                                               sliderInput(
+                                               numericInput(
                                                     inputId = "deltaSEIRD",
                                                     label = "Death Rate (\\( \\delta\\))",
                                                     min = 0,

@@ -48,8 +48,8 @@ server <- function(input, output,session) {
           # SIR - TMA
           if((input$qValue == "1")&&(input$modelSelect == "SIR"))
           {
-               updateSliderInput(session, "betaSIR", value = 0.4)
-               updateSliderInput(session, "gammaSIR", value = 0.04)
+               updateNumericInput(session, "betaSIR", value = 0.4)
+               updateNumericInput(session, "gammaSIR", value = 0.04)
                updateNumericInput(session, "populationSIR", value = 1000)
                updateNumericInput(session, "susceptibleSIR", value = 997)
                updateNumericInput(session, "infectedSIR", value = 3)
@@ -61,8 +61,8 @@ server <- function(input, output,session) {
           # SIR - PMA
           if((input$qValue == "0")&&(input$modelSelect == "SIR"))
           {
-               updateSliderInput(session, "betaSIR", value = 0.001)
-               updateSliderInput(session, "gammaSIR", value = 0.1)
+               updateNumericInput(session, "betaSIR", value = 0.001)
+               updateNumericInput(session, "gammaSIR", value = 0.1)
                updateNumericInput(session, "populationSIR", value = 500)
                updateNumericInput(session, "susceptibleSIR", value = 499)
                updateNumericInput(session, "infectedSIR", value = 1)
@@ -73,9 +73,9 @@ server <- function(input, output,session) {
           # SIRD - TMA
           if((input$qValue == "1")&&(input$modelSelect == "SIRD"))
           {
-               updateSliderInput(session, "betaSIRD", value = 0.4)
-               updateSliderInput(session, "gammaSIRD", value = 0.04)
-               updateSliderInput(session, "deltaSIRD", value = 0)
+               updateNumericInput(session, "betaSIRD", value = 0.4)
+               updateNumericInput(session, "gammaSIRD", value = 0.04)
+               updateNumericInput(session, "deltaSIRD", value = 0)
                updateNumericInput(session, "populationSIRD", value = 1000)
                updateNumericInput(session, "susceptibleSIRD", value = 997)
                updateNumericInput(session, "infectedSIRD", value = 3)
@@ -86,9 +86,9 @@ server <- function(input, output,session) {
           #SIRD - PMA
           if((input$qValue == "0")&&(input$modelSelect == "SIRD"))
           {
-               updateSliderInput(session, "betaSIRD", value = 0.001)
-               updateSliderInput(session, "gammaSIRD", value = 0.1)
-               updateSliderInput(session, "deltaSIRD", value = 0)
+               updateNumericInput(session, "betaSIRD", value = 0.001)
+               updateNumericInput(session, "gammaSIRD", value = 0.1)
+               updateNumericInput(session, "deltaSIRD", value = 0)
                updateNumericInput(session, "populationSIRD", value = 500)
                updateNumericInput(session, "susceptibleSIRD", value = 499)
                updateNumericInput(session, "infectedSIRD", value = 1)
@@ -99,9 +99,9 @@ server <- function(input, output,session) {
           #SEIR - TMA
           if((input$qValue == "1")&&(input$modelSelect == "SEIR"))
           {
-               updateSliderInput(session, "beta", value = 0.35)
-               updateSliderInput(session, "gamma", value = 0.1429)
-               updateSliderInput(session, "sigma", value = 0.0476)
+               updateNumericInput(session, "beta", value = 0.35)
+               updateNumericInput(session, "gamma", value = 0.1429)
+               updateNumericInput(session, "sigma", value = 0.0476)
                updateNumericInput(session, "population", value = 500)
                updateNumericInput(session, "susceptible", value = 499)
                updateNumericInput(session, "exposed", value = 0)
@@ -113,9 +113,9 @@ server <- function(input, output,session) {
           # SEIR - PMA
           if((input$qValue == "0")&&(input$modelSelect == "SEIR"))
           {
-               updateSliderInput(session, "beta", value = 0.5)
-               updateSliderInput(session, "gamma", value = 0.5)
-               updateSliderInput(session, "sigma", value = 0.1)
+               updateNumericInput(session, "beta", value = 0.5)
+               updateNumericInput(session, "gamma", value = 0.5)
+               updateNumericInput(session, "sigma", value = 0.1)
                updateNumericInput(session, "population", value = 53)
                updateNumericInput(session, "susceptible", value = 50)
                updateNumericInput(session, "exposed", value = 3)
@@ -127,10 +127,10 @@ server <- function(input, output,session) {
           #SEIRD - TMA
           if((input$qValue == "1")&&(input$modelSelect == "SEIRD"))
           {
-               updateSliderInput(session, "betaSEIRD", value = 0.35)
-               updateSliderInput(session, "gammaSEIRD", value = 0.1429)
-               updateSliderInput(session, "sigmaSEIRD", value = 0.0476)
-               updateSliderInput(session, "deltaSEIRD", value = 0)
+               updateNumericInput(session, "betaSEIRD", value = 0.35)
+               updateNumericInput(session, "gammaSEIRD", value = 0.1429)
+               updateNumericInput(session, "sigmaSEIRD", value = 0.0476)
+               updateNumericInput(session, "deltaSEIRD", value = 0)
                updateNumericInput(session, "populationSEIRD", value = 500)
                updateNumericInput(session, "susceptibleSEIRD", value = 499)
                updateNumericInput(session, "exposedSEIRD", value = 0)
@@ -142,10 +142,10 @@ server <- function(input, output,session) {
           #SEIRD - PMA
           if((input$qValue == "0")&&(input$modelSelect == "SEIRD"))
           {
-               updateSliderInput(session, "betaSEIRD", value = 0.5)
-               updateSliderInput(session, "gammaSEIRD", value = 0.5)
-               updateSliderInput(session, "sigmaSEIRD", value = 0.1)
-               updateSliderInput(session, "deltaSEIRD", value = 0)
+               updateNumericInput(session, "betaSEIRD", value = 0.5)
+               updateNumericInput(session, "gammaSEIRD", value = 0.5)
+               updateNumericInput(session, "sigmaSEIRD", value = 0.1)
+               updateNumericInput(session, "deltaSEIRD", value = 0)
                updateNumericInput(session, "populationSEIRD", value = 53)
                updateNumericInput(session, "susceptibleSEIRD", value = 50)
                updateNumericInput(session, "exposedSEIRD", value = 3)
@@ -712,26 +712,26 @@ server <- function(input, output,session) {
        # SIR-Stochastic
        
        # SIR
-       updateSliderInput(session, "betaSIR", value = 0.001)
-       updateSliderInput(session, "gammaSIR", value = 0.1)
+       updateNumericInput(session, "betaSIR", value = 0.001)
+       updateNumericInput(session, "gammaSIR", value = 0.1)
        updateNumericInput(session, "populationSIR", value = 500)
        updateNumericInput(session, "susceptibleSIR", value = 499)
        updateNumericInput(session, "infectedSIR", value = 1)
        updateNumericInput(session, "recoveredSIR", value = 0)
 
        # SIRD
-       updateSliderInput(session, "betaSIRD", value = 0.001)
-       updateSliderInput(session, "gammaSIRD", value = 0.1)
-       updateSliderInput(session, "deltaSIRD", value = 0)
+       updateNumericInput(session, "betaSIRD", value = 0.001)
+       updateNumericInput(session, "gammaSIRD", value = 0.1)
+       updateNumericInput(session, "deltaSIRD", value = 0)
        updateNumericInput(session, "populationSIRD", value = 500)
        updateNumericInput(session, "susceptibleSIRD", value = 499)
        updateNumericInput(session, "infectedSIRD", value = 1)
        updateNumericInput(session, "recoveredSIRD", value = 0)
        
        # SEIR
-       updateSliderInput(session, "beta", value = 0.5)
-       updateSliderInput(session, "gamma", value = 0.5)
-       updateSliderInput(session, "sigma", value = 0.1)
+       updateNumericInput(session, "beta", value = 0.5)
+       updateNumericInput(session, "gamma", value = 0.5)
+       updateNumericInput(session, "sigma", value = 0.1)
        updateNumericInput(session, "population", value = 53)
        updateNumericInput(session, "susceptible", value = 50)
        updateNumericInput(session, "exposed", value = 3)
@@ -739,10 +739,10 @@ server <- function(input, output,session) {
        updateNumericInput(session, "recovered", value = 0)
        
        # SEIRD
-       updateSliderInput(session, "betaSEIRD", value = 0.5)
-       updateSliderInput(session, "gammaSEIRD", value = 0.5)
-       updateSliderInput(session, "sigmaSEIRD", value = 0.1)
-       updateSliderInput(session, "deltaSEIRD", value = 0)
+       updateNumericInput(session, "betaSEIRD", value = 0.5)
+       updateNumericInput(session, "gammaSEIRD", value = 0.5)
+       updateNumericInput(session, "sigmaSEIRD", value = 0.1)
+       updateNumericInput(session, "deltaSEIRD", value = 0)
        updateNumericInput(session, "populationSEIRD", value = 53)
        updateNumericInput(session, "susceptibleSEIRD", value = 50)
        updateNumericInput(session, "exposedSEIRD", value = 3)
@@ -787,8 +787,8 @@ server <- function(input, output,session) {
          # SIR
          if(input$modelSelect == "SIR")
          {
-           updateSliderInput(session, "betaSIR", value = 0.001)
-           updateSliderInput(session, "gammaSIR", value = 0.1)
+           updateNumericInput(session, "betaSIR", value = 0.001)
+           updateNumericInput(session, "gammaSIR", value = 0.1)
            updateNumericInput(session, "populationSIR", value = 500)
            updateNumericInput(session, "susceptibleSIR", value = 499)
            updateNumericInput(session, "infectedSIR", value = 1)
@@ -799,9 +799,9 @@ server <- function(input, output,session) {
          # SIRD
          if(input$modelSelect == "SIRD")
          {
-           updateSliderInput(session, "betaSIRD", value = 0.001)
-           updateSliderInput(session, "gammaSIRD", value = 0.1)
-           updateSliderInput(session, "deltaSIRD", value = 0)
+           updateNumericInput(session, "betaSIRD", value = 0.001)
+           updateNumericInput(session, "gammaSIRD", value = 0.1)
+           updateNumericInput(session, "deltaSIRD", value = 0)
            updateNumericInput(session, "populationSIRD", value = 500)
            updateNumericInput(session, "susceptibleSIRD", value = 499)
            updateNumericInput(session, "infectedSIRD", value = 1)
@@ -812,9 +812,9 @@ server <- function(input, output,session) {
          # SEIR
          if(input$modelSelect == "SEIR")
          {
-           updateSliderInput(session, "beta", value = 0.5)
-           updateSliderInput(session, "gamma", value = 0.5)
-           updateSliderInput(session, "sigma", value = 0.1)
+           updateNumericInput(session, "beta", value = 0.5)
+           updateNumericInput(session, "gamma", value = 0.5)
+           updateNumericInput(session, "sigma", value = 0.1)
            updateNumericInput(session, "population", value = 53)
            updateNumericInput(session, "susceptible", value = 50)
            updateNumericInput(session, "exposed", value = 3)
@@ -826,10 +826,10 @@ server <- function(input, output,session) {
          # SEIRD
          if(input$modelSelect == "SEIRD")
          {
-           updateSliderInput(session, "betaSEIRD", value = 0.5)
-           updateSliderInput(session, "gammaSEIRD", value = 0.5)
-           updateSliderInput(session, "sigmaSEIRD", value = 0.1)
-           updateSliderInput(session, "deltaSEIRD", value = 0)
+           updateNumericInput(session, "betaSEIRD", value = 0.5)
+           updateNumericInput(session, "gammaSEIRD", value = 0.5)
+           updateNumericInput(session, "sigmaSEIRD", value = 0.1)
+           updateNumericInput(session, "deltaSEIRD", value = 0)
            updateNumericInput(session, "populationSEIRD", value = 53)
            updateNumericInput(session, "susceptibleSEIRD", value = 50)
            updateNumericInput(session, "exposedSEIRD", value = 3)
