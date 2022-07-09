@@ -55,9 +55,10 @@ server <- function(input, output,session) {
                updateNumericInput(session, "infectedSIR", value = 3)
                updateNumericInput(session, "recoveredSIR", value = 0)
                updateNumericInput(session, "timesteps", value = 25)
+               updateCheckboxInput(session, "muValue", value = FALSE)
           }
      
-          # SIR - SMA
+          # SIR - PMA
           if((input$qValue == "0")&&(input$modelSelect == "SIR"))
           {
                updateSliderInput(session, "betaSIR", value = 0.001)
@@ -67,6 +68,7 @@ server <- function(input, output,session) {
                updateNumericInput(session, "infectedSIR", value = 1)
                updateNumericInput(session, "recoveredSIR", value = 0)
                updateNumericInput(session, "timesteps", value = 50)
+               updateCheckboxInput(session, "muValue", value = FALSE)
           }
           # SIRD - TMA
           if((input$qValue == "1")&&(input$modelSelect == "SIRD"))
@@ -79,6 +81,7 @@ server <- function(input, output,session) {
                updateNumericInput(session, "infectedSIRD", value = 3)
                updateNumericInput(session, "recoveredSIRD", value = 0)
                updateNumericInput(session, "timesteps", value = 25)
+               updateCheckboxInput(session, "muValue", value = FALSE)
           }
           #SIRD - PMA
           if((input$qValue == "0")&&(input$modelSelect == "SIRD"))
@@ -91,6 +94,7 @@ server <- function(input, output,session) {
                updateNumericInput(session, "infectedSIRD", value = 1)
                updateNumericInput(session, "recoveredSIRD", value = 0)
                updateNumericInput(session, "timesteps", value = 50)
+               updateCheckboxInput(session, "muValue", value = FALSE)
           }
           #SEIR - TMA
           if((input$qValue == "1")&&(input$modelSelect == "SEIR"))
@@ -104,6 +108,7 @@ server <- function(input, output,session) {
                updateNumericInput(session, "infected", value = 1)
                updateNumericInput(session, "recovered", value = 0)
                updateNumericInput(session, "timesteps", value = 20)
+               updateCheckboxInput(session, "muValue", value = FALSE)
           }
           # SEIR - PMA
           if((input$qValue == "0")&&(input$modelSelect == "SEIR"))
@@ -117,6 +122,7 @@ server <- function(input, output,session) {
                updateNumericInput(session, "infected", value = 0)
                updateNumericInput(session, "recovered", value = 0)
                updateNumericInput(session, "timesteps", value = 25)
+               updateCheckboxInput(session, "muValue", value = FALSE)
           }
           #SEIRD - TMA
           if((input$qValue == "1")&&(input$modelSelect == "SEIRD"))
@@ -131,6 +137,7 @@ server <- function(input, output,session) {
                updateNumericInput(session, "infectedSEIRD", value = 1)
                updateNumericInput(session, "recoveredSEIRD", value = 0)
                updateNumericInput(session, "timesteps", value = 20)
+               updateCheckboxInput(session, "muValue", value = FALSE)
           }
           #SEIRD - PMA
           if((input$qValue == "0")&&(input$modelSelect == "SEIRD"))
@@ -145,11 +152,13 @@ server <- function(input, output,session) {
                updateNumericInput(session, "infectedSEIRD", value = 0)
                updateNumericInput(session, "recoveredSEIRD", value = 0)
                updateNumericInput(session, "timesteps", value = 50)
+               updateCheckboxInput(session, "muValue", value = FALSE)
           }
        if(((input$qValue == "1")||(input$qValue == "0"))&&(input$modelSelect == "SIR-Stochastic"))
           {
          updateNumericInput(session, "populationSIR_Stoc", value = 50)
          updateNumericInput(session, "timesteps", value = 10)
+         updateCheckboxInput(session, "muValue", value = FALSE)
        }
      })
      
@@ -169,7 +178,7 @@ server <- function(input, output,session) {
          need(input$susceptibleSIR_Stoc > 0, "Susceptible (S) must be greater than 0."),
          need(input$infectedSIR_Stoc >= 0, "Infected (I) must be greater than 0."),
          need(input$recoveredSIR_Stoc >= 0, label = "Recovered (R)"),
-         need(input$populationSIR_Stoc == (input$susceptibleSIR_Stoc + input$infectedSIR_Stoc + input$recoveredSIR_Stoc), "All inputs must equal to Total Population.")
+         need(input$populationSIR_Stoc == (input$susceptibleSIR_Stoc + input$infectedSIR_Stoc + input$recoveredSIR_Stoc), "Number of persons living in all epidemic compartments must sum to the Population Count (N)")
        )
           
           num.sims <- input$stochasticSIR                               
@@ -246,7 +255,7 @@ server <- function(input, output,session) {
           need(input$infectedSIR >= 0, "Infected (I) must be greater than 0."),
           need(input$recoveredSIR >= 0, label = "Recovered (R)"),
           #need(input$timesteps > 0 , "Timesteps must be greater than 0."),
-         need(input$populationSIR == (input$susceptibleSIR + input$infectedSIR + input$recoveredSIR), "All inputs must equal to Total Population.")
+         need(input$populationSIR == (input$susceptibleSIR + input$infectedSIR + input$recoveredSIR), "Number of persons living in all epidemic compartments must sum to the Population Count (N)")
        )
           ode(
                y = c(
@@ -351,7 +360,7 @@ server <- function(input, output,session) {
          need(input$recoveredSIRD >= 0, label = "Recovered (R)"),
          need(input$deadSIRD >= 0, label = "Dead (D)"),
          #need(input$timesteps > 0, "Timesteps must be greater than 0."),
-         need(input$populationSIRD == (input$susceptibleSIRD + input$infectedSIRD + input$recoveredSIRD), "All inputs must equal to Total Population.")
+         need(input$populationSIRD == (input$susceptibleSIRD + input$infectedSIRD + input$recoveredSIRD), "Number of persons living in all epidemic compartments must sum to the Population Count (N)")
        )
        
           ode(
@@ -458,7 +467,7 @@ server <- function(input, output,session) {
          need(input$infected >= 0, "Infected (I) must be greater than 0."),
          need(input$recovered >= 0, label = "Recovered (R)"),
          #need(input$timesteps > 0, "Timesteps must be greater than 0."),
-         need(input$population == (input$exposed + input$susceptible + input$infected + input$recovered), "All inputs must equal to Total Population.")
+         need(input$population == (input$exposed + input$susceptible + input$infected + input$recovered), "Number of persons living in all epidemic compartments must sum to the Population Count (N)")
        )
        
           ode(
@@ -570,7 +579,7 @@ server <- function(input, output,session) {
          need(input$recoveredSEIRD >= 0, label = "Recovered (R)"),
          need(input$deadSEIRD >= 0, label = "Dead (D)"),
          #need(input$timesteps > 0, "Timesteps must be greater than 0."),
-         need(input$populationSEIRD == (input$exposedSEIRD + input$susceptibleSEIRD + input$infectedSEIRD + input$recoveredSEIRD), "All inputs must equal to Total Population.")
+         need(input$populationSEIRD == (input$exposedSEIRD + input$susceptibleSEIRD + input$infectedSEIRD + input$recoveredSEIRD), "Number of persons living in all epidemic compartments must sum to the Population Count (N)")
        )
        
           ode(
@@ -652,99 +661,182 @@ server <- function(input, output,session) {
        })
      })
      
-     observe(
+     
+     
+     
+     # Hide output when no Model is selected
+     observe({
        hideTab(inputId = 'tabSet', target = 'Plot')
-       )
-     observe(
        hideTab(inputId = 'tabSet', target = 'Phase Plane')
-       )
-     observe(
        hideTab(inputId = 'tabSet', target = 'Output Summary')
-       )
-     observe(
        hideTab(inputId = 'tabSet', target = 'Mathematical Model')
-       )
-     observe(
-       {
+       })
+     
+     # Hide given elements when no Model is selected
+     observe({
        hide(id = "qValue")
        hide(id = "muValue")
        hide(id = "timesteps")
-     }
-     )
+       hide(id = "stochasticSelect")
+     })
+     
+     # Shows given elements when a Model is selected
      observe({
        toggle(id = "qValue", condition = (input$modelSelect == "SIR" || input$modelSelect == "SIRD" || input$modelSelect == "SEIR" || input$modelSelect == "SEIRD" || input$modelSelect == "SIR-Stochastic"))
        toggle(id = "muValue", condition = (input$modelSelect == "SIR" || input$modelSelect == "SIRD" || input$modelSelect == "SEIR" || input$modelSelect == "SEIRD" || input$modelSelect == "SIR-Stochastic"))
        toggle(id = "timesteps", condition = (input$modelSelect == "SIR" || input$modelSelect == "SIRD" || input$modelSelect == "SEIR" || input$modelSelect == "SEIRD" || input$modelSelect == "SIR-Stochastic"))
+       toggle(id = "stochasticSelect", condition = (input$modelSelect == "SIR" || input$modelSelect == "SIRD" || input$modelSelect == "SEIR" || input$modelSelect == "SEIRD" || input$modelSelect == "SIR-Stochastic"))
        
      })
+     
+     # Shows output once Run Simulation button is activated
      observeEvent(input$go,{
        showTab(inputId = 'tabSet', target = 'Plot')
-       })
-     observeEvent(input$go,{
        showTab(inputId = 'tabSet', target = 'Phase Plane')
-       })
-     observeEvent(input$go,{
        showTab(inputId = 'tabSet', target = 'Output Summary')
-       })
-     observeEvent(input$go,{
        showTab(inputId = 'tabSet', target = 'Mathematical Model')
-       }) 
+       })
+     
+     # Resets to default
      observeEvent(input$resetAll,{
+       
+       # Hides output
        hideTab(inputId = 'tabSet', target = 'Plot')
-       })
-       observeEvent(input$resetAll,{
        hideTab(inputId = 'tabSet', target = 'Phase Plane')
-       })
-       observeEvent(input$resetAll,{
-         hideTab(inputId = 'tabSet', target = 'Output Summary')
-           })
-       observeEvent(input$resetAll,{
+       hideTab(inputId = 'tabSet', target = 'Output Summary')
        hideTab(inputId = 'tabSet', target = 'Mathematical Model')
-         })
-       observeEvent(input$resetAll,{
-         updateSliderInput(session, "betaSIR", value = 0.001)
-         updateSliderInput(session, "gammaSIR", value = 0.1)
-         updateNumericInput(session, "populationSIR", value = 500)
-         updateNumericInput(session, "susceptibleSIR", value = 499)
-         updateNumericInput(session, "infectedSIR", value = 1)
-         updateNumericInput(session, "recoveredSIR", value = 0)
-         updateNumericInput(session, "timesteps", value = 100)
+       
+       # Model Select
+       updatePickerInput(session,"modelSelect", selected = "Please choose a model")
+       
+       # SIR-Stochastic
+       
+       # SIR
+       updateSliderInput(session, "betaSIR", value = 0.001)
+       updateSliderInput(session, "gammaSIR", value = 0.1)
+       updateNumericInput(session, "populationSIR", value = 500)
+       updateNumericInput(session, "susceptibleSIR", value = 499)
+       updateNumericInput(session, "infectedSIR", value = 1)
+       updateNumericInput(session, "recoveredSIR", value = 0)
+
+       # SIRD
+       updateSliderInput(session, "betaSIRD", value = 0.001)
+       updateSliderInput(session, "gammaSIRD", value = 0.1)
+       updateSliderInput(session, "deltaSIRD", value = 0)
+       updateNumericInput(session, "populationSIRD", value = 500)
+       updateNumericInput(session, "susceptibleSIRD", value = 499)
+       updateNumericInput(session, "infectedSIRD", value = 1)
+       updateNumericInput(session, "recoveredSIRD", value = 0)
+       
+       # SEIR
+       updateSliderInput(session, "beta", value = 0.5)
+       updateSliderInput(session, "gamma", value = 0.5)
+       updateSliderInput(session, "sigma", value = 0.1)
+       updateNumericInput(session, "population", value = 53)
+       updateNumericInput(session, "susceptible", value = 50)
+       updateNumericInput(session, "exposed", value = 3)
+       updateNumericInput(session, "infected", value = 0)
+       updateNumericInput(session, "recovered", value = 0)
+       
+       # SEIRD
+       updateSliderInput(session, "betaSEIRD", value = 0.5)
+       updateSliderInput(session, "gammaSEIRD", value = 0.5)
+       updateSliderInput(session, "sigmaSEIRD", value = 0.1)
+       updateSliderInput(session, "deltaSEIRD", value = 0)
+       updateNumericInput(session, "populationSEIRD", value = 53)
+       updateNumericInput(session, "susceptibleSEIRD", value = 50)
+       updateNumericInput(session, "exposedSEIRD", value = 3)
+       updateNumericInput(session, "infectedSEIRD", value = 0)
+       updateNumericInput(session, "recoveredSEIRD", value = 0)
+       
+       # Model Formulation
+       updateRadioButtons(session, "qValue", selected = "0")
+       
+       # Stochastic Select
+       updateRadioButtons(session, "stochasticSelect", selected = "Deterministic")
+       
+       # Vital Dynamics
+       updateCheckboxInput(session, "muValue", value = FALSE)
+       
+       # Number of Timesteps
+       updateNumericInput(session, "timesteps", value = 100)
+       
        })
-       observeEvent(input$resetAll,{
-         updateSliderInput(session, "betaSIRD", value = 0.001)
-         updateSliderInput(session, "gammaSIRD", value = 0.1)
-         updateSliderInput(session, "deltaSIRD", value = 0)
-         updateNumericInput(session, "populationSIRD", value = 500)
-         updateNumericInput(session, "susceptibleSIRD", value = 499)
-         updateNumericInput(session, "infectedSIRD", value = 1)
-         updateNumericInput(session, "recoveredSIRD", value = 0)
-         updateNumericInput(session, "timesteps", value = 100)
-       })
-       observeEvent(input$resetAll,{
-         updateSliderInput(session, "beta", value = 0.5)
-         updateSliderInput(session, "gamma", value = 0.5)
-         updateSliderInput(session, "sigma", value = 0.1)
-         updateNumericInput(session, "population", value = 53)
-         updateNumericInput(session, "susceptible", value = 50)
-         updateNumericInput(session, "exposed", value = 3)
-         updateNumericInput(session, "infected", value = 0)
-         updateNumericInput(session, "recovered", value = 0)
-         updateNumericInput(session, "timesteps", value = 100)
-       })
-       observeEvent(input$resetAll,{
-         updateSliderInput(session, "betaSEIRD", value = 0.5)
-         updateSliderInput(session, "gammaSEIRD", value = 0.5)
-         updateSliderInput(session, "sigmaSEIRD", value = 0.1)
-         updateSliderInput(session, "deltaSEIRD", value = 0)
-         updateNumericInput(session, "populationSEIRD", value = 53)
-         updateNumericInput(session, "susceptibleSEIRD", value = 50)
-         updateNumericInput(session, "exposedSEIRD", value = 3)
-         updateNumericInput(session, "infectedSEIRD", value = 0)
-         updateNumericInput(session, "recoveredSEIRD", value = 0)
-         updateNumericInput(session, "timesteps", value = 100)
-       })
-       observeEvent(input$resetAll, {
+     
+     
+     # Resetting values when choosing a new Model
+       observeEvent(input$modelSelect,{
+         
+         # Hides output
+         hideTab(inputId = 'tabSet', target = 'Plot')
+         hideTab(inputId = 'tabSet', target = 'Phase Plane')
+         hideTab(inputId = 'tabSet', target = 'Output Summary')
+         hideTab(inputId = 'tabSet', target = 'Mathematical Model')
+         
+         # Model Formulation
          updateRadioButtons(session, "qValue", selected = "0")
+         
+         # Stochastic Select
+         updateRadioButtons(session, "stochasticSelect", selected = "Deterministic")
+         
+         # Vital Dynamics
+         updateCheckboxInput(session, "muValue", value = FALSE)
+         
+         # SIR-Stochastic
+         
+         # SIR
+         if(input$modelSelect == "SIR")
+         {
+           updateSliderInput(session, "betaSIR", value = 0.001)
+           updateSliderInput(session, "gammaSIR", value = 0.1)
+           updateNumericInput(session, "populationSIR", value = 500)
+           updateNumericInput(session, "susceptibleSIR", value = 499)
+           updateNumericInput(session, "infectedSIR", value = 1)
+           updateNumericInput(session, "recoveredSIR", value = 0)
+           updateNumericInput(session, "timesteps", value = 50)
+         }
+         
+         # SIRD
+         if(input$modelSelect == "SIRD")
+         {
+           updateSliderInput(session, "betaSIRD", value = 0.001)
+           updateSliderInput(session, "gammaSIRD", value = 0.1)
+           updateSliderInput(session, "deltaSIRD", value = 0)
+           updateNumericInput(session, "populationSIRD", value = 500)
+           updateNumericInput(session, "susceptibleSIRD", value = 499)
+           updateNumericInput(session, "infectedSIRD", value = 1)
+           updateNumericInput(session, "recoveredSIRD", value = 0)
+           updateNumericInput(session, "timesteps", value = 50)
+         }
+         
+         # SEIR
+         if(input$modelSelect == "SEIR")
+         {
+           updateSliderInput(session, "beta", value = 0.5)
+           updateSliderInput(session, "gamma", value = 0.5)
+           updateSliderInput(session, "sigma", value = 0.1)
+           updateNumericInput(session, "population", value = 53)
+           updateNumericInput(session, "susceptible", value = 50)
+           updateNumericInput(session, "exposed", value = 3)
+           updateNumericInput(session, "infected", value = 0)
+           updateNumericInput(session, "recovered", value = 0)
+           updateNumericInput(session, "timesteps", value = 25)
+         }
+         
+         # SEIRD
+         if(input$modelSelect == "SEIRD")
+         {
+           updateSliderInput(session, "betaSEIRD", value = 0.5)
+           updateSliderInput(session, "gammaSEIRD", value = 0.5)
+           updateSliderInput(session, "sigmaSEIRD", value = 0.1)
+           updateSliderInput(session, "deltaSEIRD", value = 0)
+           updateNumericInput(session, "populationSEIRD", value = 53)
+           updateNumericInput(session, "susceptibleSEIRD", value = 50)
+           updateNumericInput(session, "exposedSEIRD", value = 3)
+           updateNumericInput(session, "infectedSEIRD", value = 0)
+           updateNumericInput(session, "recoveredSEIRD", value = 0)
+           updateNumericInput(session, "timesteps", value = 50)
+         }
        })
        
 }

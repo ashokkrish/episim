@@ -9,7 +9,7 @@ library(tidyverse)
 maxPopulation = 900000000
 
 fluidPage(
-  useShinyjs(), #???
+  useShinyjs(),
      
      div(
           titlePanel("Compartmental Models of Epidemiology")
@@ -21,13 +21,13 @@ fluidPage(
                         sidebarPanel((""),
                                      pickerInput(inputId = "modelSelect",
                                                  label = ("Epidemic Model"),
-                                                 choices = list("Please choose one model","SIR", "SIRD","SEIR","SEIRD", "SIR-Stochastic"),
+                                                 choices = list("Please choose a model","SIR", "SIRD","SEIR","SEIRD", "SIR-Stochastic"),
                                                  options = list("","SIR", "SIRD", "SEIR", "SEIRD", "SIR-Stochastic"),
                                                  inline = TRUE,
-                                                 width = "100%"
+                                                 width = "240px"
                                      ),
                                      div( 
-                                       id = "userInput",
+                                       #id = "userInput",
                                           #radioButtons(
                                           #     inputId = "modelSelect",
                                           #     label = ("Epidemic Model"),
@@ -46,6 +46,14 @@ fluidPage(
                                                width = "1000px",
                                                selected = "0"
                                           ),
+                                          radioButtons(inputId = "stochasticSelect",
+                                                       label = strong("Model Stochasticity"),
+                                                       choiceValues = list("Deterministic","Stochastic"),
+                                                       choiceNames = list("Deterministic","Stochastic"),
+                                                       selected = "Deterministic", #character(0), #
+                                                       inline = TRUE,
+                                                       width = "1000px"),
+                                          
                                           
                                           checkboxInput(
                                                "muValue",
@@ -106,7 +114,7 @@ fluidPage(
                                                numericInput(
                                                     inputId = "populationSIR_Stoc",
                                                     label = "Total Population (N)",
-                                                    value = 50,
+                                                    value = 1000,
                                                     min = 1,
                                                     max = maxPopulation,
                                                     step = 1,
@@ -628,9 +636,10 @@ fluidPage(
                p("Department of Mathematics & Computing,"),
                p("Calgary, AB, Canada"),
                br(),
+               h3("Disclaimer", style = "font-weight:bold"),
+               br(),
+               p("This tool uses a mathematical model to simulate epidemic model outcomes based on user-defined parameters. The output of the model depends on model assumptions, parameter choices. It is not a medical predictor, and should be used for informational and research purposes only. Please carefully consider the parameters you choose. Interpret and use the simulated results responsibly. Authors are not liable for any direct or indirect consequences of this usage.")
                
-               # p(
-               #      "This app was written by Jan Banta for his senior undergraduate project for the COMP 5690 course."
-               # )
+             
           )
      ))
