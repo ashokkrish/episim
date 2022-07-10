@@ -24,8 +24,8 @@ fluidPage(
                                                  choices = list("Please choose a model","SIR", "SIRD","SEIR","SEIRD", "SIR-Stochastic"),
                                                  options = list("","SIR", "SIRD", "SEIR", "SEIRD", "SIR-Stochastic"),
                                                  inline = TRUE,
-                                                 width = "240px"
-                                     ),
+                                                 width = "300px"                                     
+                                                 ),
                                      div( 
                                        #id = "userInput",
                                           #radioButtons(
@@ -43,7 +43,7 @@ fluidPage(
                                                choiceValues = list(1, 0),
                                                choiceNames = list("True-Mass Action", "Pseudo-Mass Action"),
                                                inline = TRUE,
-                                               width = "1000px",
+                                               width = "300px",
                                                selected = "0"
                                           ),
                                           radioButtons(inputId = "stochasticSelect",
@@ -52,13 +52,14 @@ fluidPage(
                                                        choiceNames = list("Deterministic","Stochastic"),
                                                        selected = "Deterministic", #character(0), #
                                                        inline = TRUE,
-                                                       width = "1000px"),
+                                                       width = "300px"),
                                           
                                           
                                           checkboxInput(
                                                "muValue",
                                                label = "Vital Dynamics",
-                                               value = FALSE
+                                               value = FALSE,
+                                               width = "300px"
                                           ),
                                           
                                           withMathJax(),
@@ -71,7 +72,8 @@ fluidPage(
                                                     min = 0,
                                                     max = 0.1,
                                                     step = 0.0001,
-                                                    value = 0.00
+                                                    value = 0.00,
+                                                    width = "300px"
                                                ),
                                                numericInput(
                                                     #TODO: Adjust min/ Max
@@ -80,7 +82,8 @@ fluidPage(
                                                     min = 0,
                                                     max = 0.1,
                                                     step = 0.0001,
-                                                    value = 0.00
+                                                    value = 0.00,
+                                                    width = "300px"
                                                )
                                           ),
                                           
@@ -93,7 +96,8 @@ fluidPage(
                                                     min = 1,
                                                     max = 100,
                                                     step = 1,
-                                                    value = 50
+                                                    value = 50,
+                                                    width = "300px"
                                                ),
                                                numericInput(
                                                     inputId = "betaSIR_Stoc",
@@ -102,7 +106,7 @@ fluidPage(
                                                     max = 1,
                                                     step = 0.00001,
                                                     value = 0.00178,
-                                                    width = "240px"
+                                                    width = "300px"
                                                ),
                                                numericInput(
                                                     inputId = "gammaSIR_Stoc",
@@ -111,7 +115,7 @@ fluidPage(
                                                     max = 5,
                                                     step = 0.00001,
                                                     value = 2.73,
-                                                    width = "240px"
+                                                    width = "300px"
                                                ),
                                                numericInput(
                                                     inputId = "populationSIR_Stoc",
@@ -120,7 +124,7 @@ fluidPage(
                                                     min = 1,
                                                     max = maxPopulation,
                                                     step = 1,
-                                                    width = "240px"
+                                                    width = "300px"
                                                ),
                                                numericInput(
                                                     inputId = "susceptibleSIR_Stoc",
@@ -129,7 +133,7 @@ fluidPage(
                                                     min = 1,
                                                     max = maxPopulation,
                                                     step = 1,
-                                                    width = "240px"
+                                                    width = "300px"
                                                ),
                                                numericInput(
                                                     inputId = "infectedSIR_Stoc",
@@ -138,7 +142,7 @@ fluidPage(
                                                     min = 1,
                                                     max = maxPopulation,
                                                     step = 1,
-                                                    width = "240px"
+                                                    width = "300px"
                                                ),
                                                numericInput(
                                                     inputId = "recoveredSIR_Stoc",
@@ -147,7 +151,7 @@ fluidPage(
                                                     min = 0,
                                                     max = maxPopulation,
                                                     step = 1,
-                                                    width = "240px"
+                                                    width = "300px"
                                                )
                                           ),
                                           
@@ -161,7 +165,7 @@ fluidPage(
                                                     max = 1,
                                                     step = 0.00001,
                                                     value = 0.001,
-                                                    width = "240px"
+                                                    width = "300px"
                                                ),
                                                numericInput(
                                                     inputId = "gammaSIR",
@@ -170,7 +174,7 @@ fluidPage(
                                                     max = 5,
                                                     step = 0.00001,
                                                     value = 0.1,
-                                                    width = "240px"
+                                                    width = "300px"
                                                ),
                                                numericInput(
                                                     inputId = "populationSIR",
@@ -179,7 +183,7 @@ fluidPage(
                                                     min = 1,
                                                     max = maxPopulation,
                                                     step = 1,
-                                                    width = "240px"
+                                                    width = "300px"
                                                ),
                                                numericInput(
                                                     inputId = "susceptibleSIR",
@@ -188,7 +192,7 @@ fluidPage(
                                                     min = 1,
                                                     max = maxPopulation,
                                                     step = 1,
-                                                    width = "240px"
+                                                    width = "300px"
                                                ),
                                                numericInput(
                                                     inputId = "infectedSIR",
@@ -197,7 +201,7 @@ fluidPage(
                                                     min = 1,
                                                     max = maxPopulation,
                                                     step = 1,
-                                                    width = "240px"
+                                                    width = "300px"
                                                ),
                                                numericInput(
                                                     inputId = "recoveredSIR",
@@ -206,7 +210,7 @@ fluidPage(
                                                     min = 0,
                                                     max = maxPopulation,
                                                     step = 1,
-                                                    width = "240px"
+                                                    width = "300px"
                                                ),
                                           ),
                                           
@@ -220,7 +224,7 @@ fluidPage(
                                                     max = 0.5,
                                                     step = 0.00001,
                                                     value = 0.1,
-                                                    width = "240px"
+                                                    width = "300px"
                                                ),
                                                numericInput(
                                                     inputId = "gammaSIRD",
@@ -229,7 +233,7 @@ fluidPage(
                                                     max = 0.5,
                                                     step = 0.00001,
                                                     value = 0.1,
-                                                    width = "240px"
+                                                    width = "300px"
                                                ),
                                                numericInput(
                                                     inputId = "deltaSIRD",
@@ -237,8 +241,8 @@ fluidPage(
                                                     min = 0,
                                                     max = 0.5,
                                                     step = 0.00001,
-                                                    value = 0,
-                                                    width = "240px"
+                                                    value = 0.05,
+                                                    width = "300px"
                                                ),
                                                numericInput(
                                                     inputId = "populationSIRD",
@@ -247,7 +251,7 @@ fluidPage(
                                                     min = 1,
                                                     max = maxPopulation,
                                                     step = 1,
-                                                    width = "240px"
+                                                    width = "300px"
                                                ),
                                                numericInput(
                                                     inputId = "susceptibleSIRD",
@@ -256,7 +260,7 @@ fluidPage(
                                                     min = 1,
                                                     max = maxPopulation,
                                                     step = 1,
-                                                    width = "240px"
+                                                    width = "300px"
                                                ),
                                                numericInput(
                                                     inputId = "infectedSIRD",
@@ -265,7 +269,7 @@ fluidPage(
                                                     min = 1,
                                                     max = maxPopulation,
                                                     step = 1,
-                                                    width = "240px"
+                                                    width = "300px"
                                                ),
                                                numericInput(
                                                     inputId = "recoveredSIRD",
@@ -274,7 +278,7 @@ fluidPage(
                                                     min = 0,
                                                     max = maxPopulation,
                                                     step = 1,
-                                                    width = "240px"
+                                                    width = "300px"
                                                ),
                                                numericInput(
                                                     inputId = "deadSIRD",
@@ -283,7 +287,7 @@ fluidPage(
                                                     min = 0,
                                                     max = maxPopulation,
                                                     step = 1,
-                                                    width = "240px"
+                                                    width = "300px"
                                                ),
                                           ),
                                           
@@ -298,7 +302,7 @@ fluidPage(
                                                     max = 1,
                                                     step = 0.01,
                                                     value = 0.5,
-                                                    width = "240px"
+                                                    width = "300px"
                                                ),
                                                numericInput(
                                                     #TODO: Adjust min/ Max
@@ -308,7 +312,7 @@ fluidPage(
                                                     max = 3,
                                                     step = 0.00001,
                                                     value = 0.5,
-                                                    width = "240px"
+                                                    width = "300px"
                                                ),
                                                numericInput(
                                                     #TODO: Adjust min/ Max
@@ -318,7 +322,7 @@ fluidPage(
                                                     max = 0.5,
                                                     step = 0.00001,
                                                     value = 0.1,
-                                                    width = "240px"
+                                                    width = "300px"
                                                ),
                                                numericInput(
                                                     inputId = "population",
@@ -327,7 +331,7 @@ fluidPage(
                                                     min = 1,
                                                     max = maxPopulation,
                                                     step = 1,
-                                                    width = "240px"
+                                                    width = "300px"
                                                ),
                                                numericInput(
                                                     inputId = "susceptible",
@@ -336,7 +340,7 @@ fluidPage(
                                                     min = 1,
                                                     max = maxPopulation,
                                                     step = 1,
-                                                    width = "240px"
+                                                    width = "300px"
                                                ),
                                                numericInput(
                                                     inputId = "exposed",
@@ -345,7 +349,7 @@ fluidPage(
                                                     min = 0,
                                                     max = maxPopulation,
                                                     step = 1,
-                                                    width = "240px"
+                                                    width = "300px"
                                                ),
                                                numericInput(
                                                     inputId = "infected",
@@ -354,7 +358,7 @@ fluidPage(
                                                     min = 1,
                                                     max = maxPopulation,
                                                     step = 1,
-                                                    width = "240px"
+                                                    width = "300px"
                                                ),
                                                numericInput(
                                                     inputId = "recovered",
@@ -363,7 +367,7 @@ fluidPage(
                                                     min = 1,
                                                     max = maxPopulation,
                                                     step = 1,
-                                                    width = "240px"
+                                                    width = "300px"
                                                ),
                                           ),
                                           
@@ -378,7 +382,7 @@ fluidPage(
                                                     max = 1,
                                                     step = 0.01,
                                                     value = 0.5,
-                                                    width = "240px"
+                                                    width = "300px"
                                                ),
                                                numericInput(
                                                     #TODO: Adjust min/ Max
@@ -388,7 +392,7 @@ fluidPage(
                                                     max = 3,
                                                     step = 0.00001,
                                                     value = 0.5,
-                                                    width = "240px"
+                                                    width = "300px"
                                                ),
                                                numericInput(
                                                     #TODO: Adjust min/ Max
@@ -398,7 +402,7 @@ fluidPage(
                                                     max = 0.5,
                                                     step = 0.00001,
                                                     value = 0.1,
-                                                    width = "240px"
+                                                    width = "300px"
                                                ),
                                                numericInput(
                                                     inputId = "deltaSEIRD",
@@ -406,8 +410,8 @@ fluidPage(
                                                     min = 0,
                                                     max = 0.5,
                                                     step = 0.00001,
-                                                    value = 0,
-                                                    width = "240px"
+                                                    value = 0.05,
+                                                    width = "300px"
                                                ),
                                                numericInput(
                                                     inputId = "populationSEIRD",
@@ -416,7 +420,7 @@ fluidPage(
                                                     min = 1,
                                                     max = maxPopulation,
                                                     step = 1,
-                                                    width = "240px"
+                                                    width = "300px"
                                                ),
                                                numericInput(
                                                     inputId = "susceptibleSEIRD",
@@ -425,7 +429,7 @@ fluidPage(
                                                     min = 1,
                                                     max = maxPopulation,
                                                     step = 1,
-                                                    width = "240px"
+                                                    width = "300px"
                                                ),
                                                numericInput(
                                                     inputId = "exposedSEIRD",
@@ -434,7 +438,7 @@ fluidPage(
                                                     min = 0,
                                                     max = maxPopulation,
                                                     step = 1,
-                                                    width = "240px"
+                                                    width = "300px"
                                                ),
                                                numericInput(
                                                     inputId = "infectedSEIRD",
@@ -443,7 +447,7 @@ fluidPage(
                                                     min = 1,
                                                     max = maxPopulation,
                                                     step = 1,
-                                                    width = "240px"
+                                                    width = "300px"
                                                ),
                                                numericInput(
                                                     inputId = "recoveredSEIRD",
@@ -452,7 +456,7 @@ fluidPage(
                                                     min = 1,
                                                     max = maxPopulation,
                                                     step = 1,
-                                                    width = "240px"
+                                                    width = "300px"
                                                ),
                                                numericInput(
                                                     inputId = "deadSEIRD",
@@ -461,7 +465,7 @@ fluidPage(
                                                     min = 0,
                                                     max = maxPopulation,
                                                     step = 1,
-                                                    width = "240px"
+                                                    width = "300px"
                                                ),
                                           ),
                                          numericInput(
@@ -470,7 +474,7 @@ fluidPage(
                                            value = 100,
                                            min = 1,
                                            step = 1,
-                                           width = "240px"
+                                           width = "300px"
                                          ),
                                      ),
                                      #outside of div
