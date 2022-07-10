@@ -64,7 +64,7 @@ fluidPage(
                                           withMathJax(),
                                           conditionalPanel(
                                                condition = "input.muValue == '1'",
-                                               sliderInput(
+                                               numericInput(
                                                     #TODO: Adjust min/ Max
                                                     inputId = "muBirth",
                                                     label = "Birth Rate (\\( \\mu_B\\))",
@@ -73,7 +73,7 @@ fluidPage(
                                                     step = 0.0001,
                                                     value = 0.00
                                                ),
-                                               sliderInput(
+                                               numericInput(
                                                     #TODO: Adjust min/ Max
                                                     inputId = "muDeath",
                                                     label = "Death Rate due to Natural Causes (\\( \\mu_D\\))",
@@ -87,7 +87,7 @@ fluidPage(
                                           conditionalPanel(
                                                condition = "input.modelSelect == 'SIR-Stochastic'",
                                                withMathJax(),
-                                               sliderInput(
+                                               numericInput(
                                                     inputId = "stochasticSIR",
                                                     label = "Number of Simulations",
                                                     min = 1,

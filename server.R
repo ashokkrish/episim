@@ -5,43 +5,176 @@ library(shinyWidgets)
 library(deSolve)
 library(ggplot2)
 library(tidyverse)
+library(shinyvalidate)
 server <- function(input, output,session) {
-#  iv <- InputValidator$new()
   
-#  iv$add_rule("alpha", sv_required())
-#  iv$add_rule("alpha", sv_gte(0))
+  # Data validation
+  iv <- InputValidator$new()
   
-#  iv$add_rule("beta", sv_required())
-#  iv$add_rule("beta", sv_gte(0))
+  # muValue
+  iv$add_rule("muBirth", sv_required())
+  iv$add_rule("muBirth", sv_gte(0))
+  iv$add_rule("muBirth", sv_lte(0.1))
   
-#  iv$add_rule("gamma", sv_required())
-#  iv$add_rule("gamma", sv_gte(0))
+  iv$add_rule("muDeath", sv_required())
+  iv$add_rule("muDeath", sv_gte(0))
+  iv$add_rule("muDeath", sv_lte(0.1))
   
-#  iv$add_rule("sigma", sv_required())
-#  iv$add_rule("sigma", sv_gte(0))
+  # SIR-Stochastic
+  iv$add_rule("stochasticSIR", sv_required())
+  iv$add_rule("stochasticSIR", sv_integer())
+  iv$add_rule("stochasticSIR", sv_gt(0))
+  iv$add_rule("stochasticSIR", sv_lte(100))
   
-#  iv$add_rule("delta", sv_required())
-#  iv$add_rule("delta", sv_gte(0))
+  iv$add_rule("betaSIR_Stoc", sv_required())
+  iv$add_rule("betaSIR_Stoc", sv_gte(0))
+  iv$add_rule("betaSIR_Stoc", sv_lte(1))
   
-#  iv$add_rule("lambda", sv_required())
-#  iv$add_rule("lambda", sv_gte(0))
+  iv$add_rule("gammaSIR_Stoc", sv_required())
+  iv$add_rule("gammaSIR_Stoc", sv_gte(0))
+  iv$add_rule("gammaSIR_Stoc", sv_lte(5))
   
-#  iv$add_rule("date", sv_required())
+  iv$add_rule("populationSIR_Stoc", sv_required())
+  iv$add_rule("populationSIR_Stoc", sv_gt(0))
   
-#  iv$add_rule("timestep", sv_required())
-#  iv$add_rule("timestep", sv_integer())
-#  iv$add_rule("timestep", sv_gt(0))
+  iv$add_rule("susceptibleSIR_Stoc", sv_required())
+  iv$add_rule("susceptibleSIR_Stoc", sv_gt(0))
   
-#  iv$enable()
+  iv$add_rule("infectedSIR_Stoc", sv_required())
+  iv$add_rule("infectedSIR_Stoc", sv_gte(0))
+  
+  iv$add_rule("recoveredSIR_Stoc", sv_required())
+  iv$add_rule("recoveredSIR_Stoc", sv_gte(0))
+  
+  # SIR
+  iv$add_rule("betaSIR", sv_required())
+  iv$add_rule("betaSIR", sv_gte(0))
+  iv$add_rule("betaSIR", sv_lte(1))
+  
+  iv$add_rule("gammaSIR", sv_required())
+  iv$add_rule("gammaSIR", sv_gte(0))
+  iv$add_rule("gammaSIR", sv_lte(5))
+  
+  iv$add_rule("populationSIR", sv_required())
+  iv$add_rule("populationSIR", sv_gt(0))
+  
+  iv$add_rule("susceptibleSIR", sv_required())
+  iv$add_rule("susceptibleSIR", sv_gt(0))
+  
+  iv$add_rule("infectedSIR", sv_required())
+  iv$add_rule("infectedSIR", sv_gte(0))
+  
+  iv$add_rule("recoveredSIR", sv_required())
+  iv$add_rule("recoveredSIR", sv_gte(0))
+  
+  # SIRD
+  iv$add_rule("betaSIRD", sv_required())
+  iv$add_rule("betaSIRD", sv_gte(0))
+  iv$add_rule("betaSIRD", sv_lte(0.5))
+  
+  iv$add_rule("gammaSIRD", sv_required())
+  iv$add_rule("gammaSIRD", sv_gte(0))
+  iv$add_rule("gammaSIRD", sv_lte(0.5))
+  
+  iv$add_rule("deltaSIRD", sv_required())
+  iv$add_rule("deltaSIRD", sv_gte(0))
+  iv$add_rule("deltaSIRD", sv_lte(0.5))
+  
+  iv$add_rule("populationSIRD", sv_required())
+  iv$add_rule("populationSIRD", sv_gt(0))
+  
+  iv$add_rule("susceptibleSIRD", sv_required())
+  iv$add_rule("susceptibleSIRD", sv_gt(0))
+  
+  iv$add_rule("infectedSIRD", sv_required())
+  iv$add_rule("infectedSIRD", sv_gte(0))
+  
+  iv$add_rule("recoveredSIRD", sv_required())
+  iv$add_rule("recoveredSIRD", sv_gte(0))
+  
+  iv$add_rule("deadSIRD", sv_required())
+  iv$add_rule("deadSIRD", sv_gte(0))
+  
+  # SEIR
+  iv$add_rule("beta", sv_required())
+  iv$add_rule("beta", sv_gte(0))
+  iv$add_rule("beta", sv_lte(1))
+  
+  
+  iv$add_rule("gamma", sv_required())
+  iv$add_rule("gamma", sv_gte(0))
+  iv$add_rule("gamma", sv_lte(3))
+  
+  iv$add_rule("sigma", sv_required())
+  iv$add_rule("sigma", sv_gte(0))
+  iv$add_rule("sigma", sv_lte(0.5))
+  
+  iv$add_rule("population", sv_required())
+  iv$add_rule("population", sv_gt(0))
+  
+  iv$add_rule("susceptible", sv_required())
+  iv$add_rule("susceptible", sv_gt(0))
+  
+  iv$add_rule("exposed", sv_required())
+  iv$add_rule("exposed", sv_gte(0))
+  
+  iv$add_rule("infected", sv_required())
+  iv$add_rule("infected", sv_gte(0))
+  
+  iv$add_rule("recovered", sv_required())
+  iv$add_rule("recovered", sv_gte(0))
+  
+  # SEIRD
+  iv$add_rule("betaSEIRD", sv_required())
+  iv$add_rule("betaSEIRD", sv_gte(0))
+  iv$add_rule("betaSEIRD", sv_lte(1))
+  
+  
+  iv$add_rule("gammaSEIRD", sv_required())
+  iv$add_rule("gammaSEIRD", sv_gte(0))
+  iv$add_rule("gammaSEIRD", sv_lte(3))
+  
+  iv$add_rule("sigmaSEIRD", sv_required())
+  iv$add_rule("sigmaSEIRD", sv_gte(0))
+  iv$add_rule("sigmaSEIRD", sv_lte(0.5))
+  
+  iv$add_rule("deltaSEIRD", sv_required())
+  iv$add_rule("deltaSEIRD", sv_gte(0))
+  iv$add_rule("deltaSEIRD", sv_lte(0.5))
+  
+  iv$add_rule("populationSEIRD", sv_required())
+  iv$add_rule("populationSEIRD", sv_gt(0))
+  
+  iv$add_rule("susceptibleSEIRD", sv_required())
+  iv$add_rule("susceptibleSEIRD", sv_gt(0))
+  
+  iv$add_rule("exposedSEIRD", sv_required())
+  iv$add_rule("exposedSEIRD", sv_gte(0))
+  
+  iv$add_rule("infectedSEIRD", sv_required())
+  iv$add_rule("infectedSEIRD", sv_gte(0))
+  
+  iv$add_rule("recoveredSEIRD", sv_required())
+  iv$add_rule("recoveredSEIRD", sv_gte(0))
+  
+  iv$add_rule("deadSEIRD", sv_required())
+  iv$add_rule("deadSEIRD", sv_gte(0))
+  
+  # Timesteps
+  iv$add_rule("timesteps", sv_required())
+  iv$add_rule("timesteps", sv_integer())
+  iv$add_rule("timesteps", sv_gt(0))
+  
+  iv$enable()
      
      #Reset vital dynamics when not checked off
      observe({
           input$muValue
-          updateSliderInput(session, "muBirth", value =0)
+          updateNumericInput(session, "muBirth", value =0)
      })
      observe({
           input$muValue
-          updateSliderInput(session, "muDeath", value =0)
+          updateNumericInput(session, "muDeath", value =0)
      })
      
      observeEvent(input$qValue,{
@@ -156,7 +289,13 @@ server <- function(input, output,session) {
           }
        if(((input$qValue == "1")||(input$qValue == "0"))&&(input$modelSelect == "SIR-Stochastic"))
           {
-         updateNumericInput(session, "populationSIR_Stoc", value = 50)
+         updateNumericInput(session, "stochasticSIR", value = 50)
+         updateNumericInput(session, "betaSIR_Stoc", value = 0.00178)
+         updateNumericInput(session, "gammaSIR_Stoc", value = 2.73)
+         updateNumericInput(session, "populationSIR_Stoc", value = 1000)
+         updateNumericInput(session, "susceptibleSIR_Stoc", value = 990)
+         updateNumericInput(session, "infectedSIR_Stoc", value = 10)
+         updateNumericInput(session, "recoveredSIR_Stoc", value = 0)
          updateNumericInput(session, "timesteps", value = 10)
          updateCheckboxInput(session, "muValue", value = FALSE)
        }
@@ -174,10 +313,14 @@ server <- function(input, output,session) {
        input$go
        isolate({
        validate(
-         need(input$populationSIR_Stoc > 0, "Total Population (N) must be greather than 0."),
-         need(input$susceptibleSIR_Stoc > 0, "Susceptible (S) must be greater than 0."),
-         need(input$infectedSIR_Stoc >= 0, "Infected (I) must be greater than 0."),
-         need(input$recoveredSIR_Stoc >= 0, label = "Recovered (R)"),
+         need(input$stochasticSIR > 0, "Enter a valid value for parameters"),
+         need(input$betaSIR_Stoc >= 0,"Enter a valid value for parameters"),
+         need(input$gammaSIR_Stoc >= 0, "Enter a valid value for parameters"),
+         need(input$populationSIR_Stoc > 0, "Enter a valid value for parameters"),
+         need(input$susceptibleSIR_Stoc > 0, "Enter a valid value for parameters"),
+         need(input$infectedSIR_Stoc >= 0, "Enter a valid value for parameters"),
+         need(input$recoveredSIR_Stoc >= 0, "Enter a valid value for parameters"),
+         need(input$timesteps > 0, "Enter a valid value for parameters"),
          need(input$populationSIR_Stoc == (input$susceptibleSIR_Stoc + input$infectedSIR_Stoc + input$recoveredSIR_Stoc), "Number of persons living in all epidemic compartments must sum to the Population Count (N)")
        )
           
@@ -250,13 +393,17 @@ server <- function(input, output,session) {
        
 
        validate(
-         need(input$populationSIR > 0, "Total Population (N) must be greather than 0."),
-          need(input$susceptibleSIR > 0, "Susceptible (S) must be greater than 0."),
-          need(input$infectedSIR >= 0, "Infected (I) must be greater than 0."),
-          need(input$recoveredSIR >= 0, label = "Recovered (R)"),
-          #need(input$timesteps > 0 , "Timesteps must be greater than 0."),
+         need(input$betaSIR >= 0, "Enter a valid value for parameters"),
+         need(input$gammaSIR >= 0, "Enter a valid value for parameters"),
+         need(input$populationSIR > 0, "Enter a valid value for parameters"),
+         need(input$susceptibleSIR > 0, "Enter a valid value for parameters"),
+          need(input$infectedSIR >= 0, "Enter a valid value for parameters"),
+          need(input$recoveredSIR >= 0, "Enter a valid value for parameters"),
+          need(input$timesteps > 0 , "Enter a valid value for parameters"),
          need(input$populationSIR == (input$susceptibleSIR + input$infectedSIR + input$recoveredSIR), "Number of persons living in all epidemic compartments must sum to the Population Count (N)")
        )
+       
+       
           ode(
                y = c(
                     S = input$susceptibleSIR,
@@ -354,12 +501,15 @@ server <- function(input, output,session) {
           req(input$timesteps, input$betaSIRD, input$gammaSIRD, input$deltaSIRD,input$muBirth, input$muDeath)
        
        validate(
-         need(input$populationSIRD > 0, "Total Population (N) must be greater than 0."),
-         need(input$susceptibleSIRD > 0, "Susceptible (S) must be greater than 0."),
-         need(input$infectedSIRD >= 0, "Infected (I) must be greater than 0."),
-         need(input$recoveredSIRD >= 0, label = "Recovered (R)"),
-         need(input$deadSIRD >= 0, label = "Dead (D)"),
-         #need(input$timesteps > 0, "Timesteps must be greater than 0."),
+         need(input$betaSIRD >= 0,"Enter a valid value for parameters"),
+         need(input$gammaSIRD >= 0,"Enter a valid value for parameters"),
+         need(input$deltaSIRD >= 0,"Enter a valid value for parameters"),
+         need(input$populationSIRD > 0, "Enter a valid value for parameters"),
+         need(input$susceptibleSIRD > 0, "Enter a valid value for parameters"),
+         need(input$infectedSIRD >= 0, "Enter a valid value for parameters"),
+         need(input$recoveredSIRD >= 0, "Enter a valid value for parameters"),
+         need(input$deadSIRD >= 0, "Enter a valid value for parameters"),
+         need(input$timesteps > 0, "Timesteps must be greater than 0."),
          need(input$populationSIRD == (input$susceptibleSIRD + input$infectedSIRD + input$recoveredSIRD), "Number of persons living in all epidemic compartments must sum to the Population Count (N)")
        )
        
@@ -461,12 +611,15 @@ server <- function(input, output,session) {
           req(input$timesteps, input$beta, input$gamma,input$muBirth, input$muDeath)
   
        validate(
-         need(input$population > 0, "Total Population (N) must be greater than 0."),
-         need(input$exposed >= 0, label = "Exposed (E)"),
-         need(input$susceptible > 0, "Susceptible (S) must be greater than 0."),
-         need(input$infected >= 0, "Infected (I) must be greater than 0."),
-         need(input$recovered >= 0, label = "Recovered (R)"),
-         #need(input$timesteps > 0, "Timesteps must be greater than 0."),
+         need(input$beta >= 0,"Enter a valid value for parameters"),
+         need(input$gamma >= 0,"Enter a valid value for parameters"),
+         need(input$sigma >= 0,"Enter a valid value for parameters"),
+         need(input$population > 0, "Enter a valid value for parameters"),
+         need(input$exposed >= 0, "Enter a valid value for parameters"),
+         need(input$susceptible > 0, "Enter a valid value for parameters"),
+         need(input$infected >= 0, "Enter a valid value for parameters"),
+         need(input$recovered >= 0, "Enter a valid value for parameters"),
+         need(input$timesteps > 0, "Enter a valid value for parameters."),
          need(input$population == (input$exposed + input$susceptible + input$infected + input$recovered), "Number of persons living in all epidemic compartments must sum to the Population Count (N)")
        )
        
@@ -572,13 +725,17 @@ server <- function(input, output,session) {
           req(input$timesteps, input$betaSEIRD, input$gammaSEIRD,input$muBirth, input$muDeath)
        
        validate(
-         need(input$populationSEIRD > 0, "Total Population (N) must be greater than 0."),
-         need(input$exposedSEIRD >= 0, label = "Exposed (E)"),
-         need(input$susceptibleSEIRD > 0, "Susceptible (S) must be greater than 0."),
-         need(input$infectedSEIRD >= 0, "Infected (I) must be greater than 0."),
-         need(input$recoveredSEIRD >= 0, label = "Recovered (R)"),
-         need(input$deadSEIRD >= 0, label = "Dead (D)"),
-         #need(input$timesteps > 0, "Timesteps must be greater than 0."),
+         need(input$betaSEIRD >= 0,"Enter a valid value for parameters"),
+         need(input$gammaSEIRD >= 0,"Enter a valid value for parameters"),
+         need(input$sigmaSEIRD >= 0,"Enter a valid value for parameters"),
+         need(input$deltaSEIRD >= 0,"Enter a valid value for parameters"),
+         need(input$populationSEIRD > 0, "Enter a valid value for parameters"),
+         need(input$exposedSEIRD >= 0, "Enter a valid value for parameters"),
+         need(input$susceptibleSEIRD > 0, "Enter a valid value for parameters"),
+         need(input$infectedSEIRD >= 0, "Enter a valid value for parameters"),
+         need(input$recoveredSEIRD >= 0, "Enter a valid value for parameters"),
+         need(input$deadSEIRD >= 0, "Enter a valid value for parameters"),
+         need(input$timesteps > 0, "Enter a valid value for parameters"),
          need(input$populationSEIRD == (input$exposedSEIRD + input$susceptibleSEIRD + input$infectedSEIRD + input$recoveredSEIRD), "Number of persons living in all epidemic compartments must sum to the Population Count (N)")
        )
        
@@ -710,6 +867,13 @@ server <- function(input, output,session) {
        updatePickerInput(session,"modelSelect", selected = "Please choose a model")
        
        # SIR-Stochastic
+       updateNumericInput(session, "stochasticSIR", value = 50)
+       updateNumericInput(session, "betaSIR_Stoc", value = 0.00178)
+       updateNumericInput(session, "gammaSIR_Stoc", value = 2.73)
+       updateNumericInput(session, "populationSIR_Stoc", value = 1000)
+       updateNumericInput(session, "susceptibleSIR_Stoc", value = 990)
+       updateNumericInput(session, "infectedSIR_Stoc", value = 10)
+       updateNumericInput(session, "recoveredSIR_Stoc", value = 0)
        
        # SIR
        updateNumericInput(session, "betaSIR", value = 0.001)
@@ -783,6 +947,17 @@ server <- function(input, output,session) {
          updateCheckboxInput(session, "muValue", value = FALSE)
          
          # SIR-Stochastic
+         if(input$modelSelect == "SIR-Stochastic")
+       {
+         updateNumericInput(session, "stochasticSIR", value = 50)
+         updateNumericInput(session, "betaSIR_Stoc", value = 0.00178)
+         updateNumericInput(session, "gammaSIR_Stoc", value = 2.73)
+         updateNumericInput(session, "populationSIR_Stoc", value = 1000)
+         updateNumericInput(session, "susceptibleSIR_Stoc", value = 990)
+         updateNumericInput(session, "infectedSIR_Stoc", value = 10)
+         updateNumericInput(session, "recoveredSIR_Stoc", value = 0)
+         updateNumericInput(session, "timesteps", value = 10)
+       }
          
          # SIR
          if(input$modelSelect == "SIR")
