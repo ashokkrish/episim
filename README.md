@@ -1,10 +1,5 @@
 # episim: Compartmental Models of Epidemiology
 
-## Shiny app authors
-
-* **Jan Banta** | *Lead Developer and maintainer*
-* **Ashok Krishnamurthy** | *Template design, model structure and coding tips*
-
 ## Overview
 
 Run the app by loading `app.R` and clicking `Run App`.
