@@ -169,6 +169,10 @@ server <- function(input, output, session) {
   })
 
   observeEvent(input$qValue, {
+
+    ## In all cases the following input must be reset to FALSE.
+    updateCheckboxInput(session, "muValue", value = FALSE)
+
     ## SIR - TMA
     if ((input$qValue == "1") && (input$modelSelect == "SIR")) {
       updateNumericInputsByNameAndValue(list(
@@ -180,7 +184,6 @@ server <- function(input, output, session) {
         recoveredSIR = 0,
         timesteps = 25
       ))
-      updateCheckboxInput(session, "muValue", value = FALSE)
     }
 
     ## SIR - PMA
@@ -194,7 +197,6 @@ server <- function(input, output, session) {
         recoveredSIR = 0,
         timesteps = 50
       ))
-      updateCheckboxInput(session, "muValue", value = FALSE)
     }
 
     # SIRD - TMA
@@ -209,7 +211,6 @@ server <- function(input, output, session) {
         recoveredSIRD = 0,
         timesteps = 25
       ))
-      updateCheckboxInput(session, "muValue", value = FALSE)
     }
 
     # SIRD - PMA
@@ -224,7 +225,6 @@ server <- function(input, output, session) {
         recoveredSIRD = 0,
         timesteps = 50
       ))
-      updateCheckboxInput(session, "muValue", value = FALSE)
     }
 
     # SEIR - TMA
@@ -240,7 +240,6 @@ server <- function(input, output, session) {
         recovered = 0,
         timesteps = 20
       ))
-      updateCheckboxInput(session, "muValue", value = FALSE)
     }
 
     # SEIR - PMA
@@ -256,7 +255,6 @@ server <- function(input, output, session) {
         recovered = 0,
         timesteps = 25
       ))
-      updateCheckboxInput(session, "muValue", value = FALSE)
     }
 
     # SEIRD - TMA
@@ -273,7 +271,6 @@ server <- function(input, output, session) {
         recoveredSEIRD = 0,
         timesteps = 20
       ))
-      updateCheckboxInput(session, "muValue", value = FALSE)
     }
 
     # SEIRD - PMA
@@ -290,10 +287,9 @@ server <- function(input, output, session) {
         recoveredSEIRD = 0,
         timesteps = 50
       ))
-      updateCheckboxInput(session, "muValue", value = FALSE)
     }
 
-    if (((input$qValue == "1") || (input$qValue == "0")) && (input$modelSelect == "SIR-Stochastic")) {
+    if (input$modelSelect == "SIR-Stochastic") {
       updateNumericInputsByNameAndValue(list(
         stochasticSIR = 50,
         betaSIR_Stoc = 0.00178,
@@ -304,7 +300,6 @@ server <- function(input, output, session) {
         recoveredSIR_Stoc = 0,
         timesteps = 10
       ))
-      updateCheckboxInput(session, "muValue", value = FALSE)
     }
   })
 
@@ -851,9 +846,6 @@ server <- function(input, output, session) {
     })
   })
 
-
-
-
   # Hide output when no Model is selected
   observe({
     hideTab(inputId = "tabSet", target = "Plot")
@@ -872,10 +864,12 @@ server <- function(input, output, session) {
 
   # Shows given elements when a Model is selected
   observe({
-    toggle(id = "qValue", condition = (input$modelSelect == "SIR" || input$modelSelect == "SIRD" || input$modelSelect == "SEIR" || input$modelSelect == "SEIRD" || input$modelSelect == "SIR-Stochastic"))
-    toggle(id = "muValue", condition = (input$modelSelect == "SIR" || input$modelSelect == "SIRD" || input$modelSelect == "SEIR" || input$modelSelect == "SEIRD" || input$modelSelect == "SIR-Stochastic"))
-    toggle(id = "timesteps", condition = (input$modelSelect == "SIR" || input$modelSelect == "SIRD" || input$modelSelect == "SEIR" || input$modelSelect == "SEIRD" || input$modelSelect == "SIR-Stochastic"))
-    toggle(id = "stochasticSelect", condition = (input$modelSelect == "SIR" || input$modelSelect == "SIRD" || input$modelSelect == "SEIR" || input$modelSelect == "SEIRD" || input$modelSelect == "SIR-Stochastic"))
+    if(input$modelSelect %in% c("SIR", "SIRD", "SEIR", "SEIRD", "SIR-Stochastic")) {
+      toggle("qValue")
+      toggle("muValue")
+      toggle("timesteps")
+      toggle("stochasticSelect")
+    }
   })
 
   # Shows output once Run Simulation button is activated
@@ -898,29 +892,80 @@ server <- function(input, output, session) {
     # Model Select
     updatePickerInput(session, "modelSelect", selected = "Please choose a model")
 
-    lapply(
-      X = list(
-        `SIR-Stochastic` = list(stochasticSIR = 50, betaSIR_Stoc = 0.00178, gammaSIR_Stoc = 2.73, populationSIR_Stoc = 1000, susceptibleSIR_Stoc = 990, infectedSIR_Stoc = 10, recoveredSIR_Stoc = 0),
-        SIRD = list(betaSIRD = 0.001, gammaSIRD = 0.1, deltaSIRD = 0.05, populationSIRD = 500, susceptibleSIRD = 499, infectedSIRD = 1, recoveredSIRD = 0),
-        SEIR = list(beta = 0.5, gamma = 0.5, sigma = 0.1, population = 53, susceptible = 50, exposed = 3, infected = 0, recovered = 0),
-        SEIRD = list(betaSEIRD = 0.5, gammaSEIRD = 0.5, sigmaSEIRD = 0.1, deltaSEIRD = 0.05, populationSEIRD = 53, susceptibleSEIRD = 50, exposedSEIRD = 3, infectedSEIRD = 0, recoveredSEIRD = 0),
-        SIR = list(betaSIR = 0.001, gammaSIR = 0.1, populationSIR = 500, susceptibleSIR = 499, infectedSIR = 1, recoveredSIR = 0),
-        SIRD = list(betaSIRD = 0.001, gammaSIRD = 0.1, deltaSIRD = 0.05, populationSIRD = 500, susceptibleSIRD = 499, infectedSIRD = 1, recoveredSIRD = 0)
-      ),
-      FUN = updateNumericInputsByNameAndValue
-    )
+    # NOTE: The names of the components in X are unimportant to the execution of
+    # the following statement. The names merely document which set of parameters
+    # are applicable to a given model; the parameter values are the defaults for
+    # the model.
+    lapply(list(
+      `SIR-Stochastic` =
+        list(stochasticSIR = 50,
+             betaSIR_Stoc = 0.00178,
+             gammaSIR_Stoc = 2.73,
+             populationSIR_Stoc = 1000,
+             susceptibleSIR_Stoc = 990,
+             infectedSIR_Stoc = 10,
+             recoveredSIR_Stoc = 0),
+
+      SIRD =
+        list(betaSIRD = 0.001,
+             gammaSIRD = 0.1,
+             deltaSIRD = 0.05,
+             populationSIRD = 500,
+             susceptibleSIRD = 499,
+             infectedSIRD = 1,
+             recoveredSIRD = 0),
+
+      SEIR =
+        list(beta = 0.5,
+             gamma = 0.5,
+             sigma = 0.1,
+             population = 53,
+             susceptible = 50,
+             exposed = 3,
+             infected = 0,
+             recovered = 0),
+
+      SEIRD =
+        list(betaSEIRD = 0.5,
+             gammaSEIRD = 0.5,
+             sigmaSEIRD = 0.1,
+             deltaSEIRD = 0.05,
+             populationSEIRD = 53,
+             susceptibleSEIRD = 50,
+             exposedSEIRD = 3,
+             infectedSEIRD = 0,
+             recoveredSEIRD = 0),
+
+      SIR =
+        list(betaSIR = 0.001,
+             gammaSIR = 0.1,
+             populationSIR = 500,
+             susceptibleSIR = 499,
+             infectedSIR = 1,
+             recoveredSIR = 0),
+
+      SIRD =
+        list(betaSIRD = 0.001,
+             gammaSIRD = 0.1,
+             deltaSIRD = 0.05,
+             populationSIRD = 500,
+             susceptibleSIRD = 499,
+             infectedSIRD = 1,
+             recoveredSIRD = 0)),
+
+      updateNumericInputsByNameAndValue)
 
     # Model Formulation
-    updateRadioButtons(session, "qValue", selected = "0")
+    updateRadioButtons("qValue", selected = "0")
 
     # Stochastic Select
-    updateRadioButtons(session, "stochasticSelect", selected = "Deterministic")
+    updateRadioButtons("stochasticSelect", selected = "Deterministic")
 
     # Vital Dynamics
-    updateCheckboxInput(session, "muValue", value = FALSE)
+    updateCheckboxInput("muValue", value = FALSE)
 
     # Number of Timesteps
-    updateNumericInput(session, "timesteps", value = 100)
+    updateNumericInput("timesteps", value = 100)
   })
 
   # Resetting values when choosing a new Model
@@ -931,13 +976,13 @@ server <- function(input, output, session) {
     }
 
     # Model Formulation
-    updateRadioButtons(session, "qValue", selected = "0")
+    updateRadioButtons("qValue", selected = "0")
 
     # Stochastic Select
-    updateRadioButtons(session, "stochasticSelect", selected = "Deterministic")
+    updateRadioButtons("stochasticSelect", selected = "Deterministic")
 
     # Vital Dynamics
-    updateCheckboxInput(session, "muValue", value = FALSE)
+    updateCheckboxInput("muValue", value = FALSE)
 
     "SIR-Stochastic" %ifModelSelection%
       list(
