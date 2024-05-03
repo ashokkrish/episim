@@ -898,52 +898,15 @@ server <- function(input, output, session) {
     # Model Select
     updatePickerInput(session, "modelSelect", selected = "Please choose a model")
 
-    # SIR
-    updateNumericInput(session, "betaSIR", value = 0.001)
-    updateNumericInput(session, "gammaSIR", value = 0.1)
-    updateNumericInput(session, "populationSIR", value = 500)
-    updateNumericInput(session, "susceptibleSIR", value = 499)
-    updateNumericInput(session, "infectedSIR", value = 1)
-    updateNumericInput(session, "recoveredSIR", value = 0)
-
-    # SIRD
-    updateNumericInput(session, "betaSIRD", value = 0.001)
-    updateNumericInput(session, "gammaSIRD", value = 0.1)
-    updateNumericInput(session, "deltaSIRD", value = 0.05)
-    updateNumericInput(session, "populationSIRD", value = 500)
-    updateNumericInput(session, "susceptibleSIRD", value = 499)
-    updateNumericInput(session, "infectedSIRD", value = 1)
-    updateNumericInput(session, "recoveredSIRD", value = 0)
-
     lapply(
-      X =
-        list(
-          `SIR-Stochastic` = list(
-            stochasticSIR = 50, betaSIR_Stoc = 0.00178,
-            gammaSIR_Stoc = 2.73, populationSIR_Stoc = 1000,
-            susceptibleSIR_Stoc = 990, infectedSIR_Stoc = 10,
-            recoveredSIR_Stoc = 0
-          ),
-          SIRD = list(
-            betaSIRD = 0.001, gammaSIRD = 0.1,
-            deltaSIRD = 0.05, populationSIRD = 500,
-            susceptibleSIRD = 499, infectedSIRD = 1,
-            recoveredSIRD = 0
-          ),
-          SEIR = list(
-            beta = 0.5, gamma = 0.5,
-            sigma = 0.1, population = 53,
-            susceptible = 50, exposed = 3,
-            infected = 0, recovered = 0
-          ),
-          SEIRD = list(
-            betaSEIRD = 0.5, gammaSEIRD = 0.5,
-            sigmaSEIRD = 0.1, deltaSEIRD = 0.05,
-            populationSEIRD = 53, susceptibleSEIRD = 50,
-            exposedSEIRD = 3, infectedSEIRD = 0,
-            recoveredSEIRD = 0
-          )
-        ),
+      X = list(
+        `SIR-Stochastic` = list(stochasticSIR = 50, betaSIR_Stoc = 0.00178, gammaSIR_Stoc = 2.73, populationSIR_Stoc = 1000, susceptibleSIR_Stoc = 990, infectedSIR_Stoc = 10, recoveredSIR_Stoc = 0),
+        SIRD = list(betaSIRD = 0.001, gammaSIRD = 0.1, deltaSIRD = 0.05, populationSIRD = 500, susceptibleSIRD = 499, infectedSIRD = 1, recoveredSIRD = 0),
+        SEIR = list(beta = 0.5, gamma = 0.5, sigma = 0.1, population = 53, susceptible = 50, exposed = 3, infected = 0, recovered = 0),
+        SEIRD = list(betaSEIRD = 0.5, gammaSEIRD = 0.5, sigmaSEIRD = 0.1, deltaSEIRD = 0.05, populationSEIRD = 53, susceptibleSEIRD = 50, exposedSEIRD = 3, infectedSEIRD = 0, recoveredSEIRD = 0),
+        SIR = list(betaSIR = 0.001, gammaSIR = 0.1, populationSIR = 500, susceptibleSIR = 499, infectedSIR = 1, recoveredSIR = 0),
+        SIRD = list(betaSIRD = 0.001, gammaSIRD = 0.1, deltaSIRD = 0.05, populationSIRD = 500, susceptibleSIRD = 499, infectedSIRD = 1, recoveredSIRD = 0)
+      ),
       FUN = updateNumericInputsByNameAndValue
     )
 
