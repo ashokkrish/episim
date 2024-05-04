@@ -1,175 +1,111 @@
-`%ifModelSelectionUpdateInputs%` <- function(modelSelectionString, params) {
-  if (input$modelSelect == modelSelectionString) {
-    updateNumericInputsByNameAndValue(params)
-  }
-}
-
-# MAYBE: Replace the following two function definitions with a function
-# generator that will write functions to take a list with named components and
-# apply a function using the names of the components (coerced to character) and
-# the values, with any given function? Probably overkill, since I only need two.
-updateNumericInputsByNameAndValue <- function(params) {
-  mapply(params, params,
-    USE.NAMES = TRUE,
-    \(name, value) updateNumericInput(as.character(name), value)
-  )
-}
-
-addInputValidationRules <- function(ruleList) {
-  mapply(ruleList, ruleList, USE.NAMES = TRUE,
-         \(name, value) iv$add_rule(as.character(name), value))
-}
-
-## # MAYBE DONE: this might work, but the use of `...`/dots is probably wrong.
-## makeFunctionAppliedToNamesAndValuesOfList <- function(anon) {
-##   \(pairlist) mapply(pairlist, pairlist, USE.NAMES = TRUE, anon)
-## }
-### EXAMPLE:
-## updateNumericInputsByNameAndValue <-
-##   makeFunctionAppliedToNamesAndValuesOfList(\(name, value) {
-##     updateNumericInput(name, value)
-##   })
+## TODO: see if it is tenable to elide the session argument from the widget
+## updating functions.
 
 server <- function(input, output, session) {
+  ## MAYBE TODO: move these three utility functions back out of the server
+  ## function and instead ensure that their discover their own environment, and
+  ## don't complain about missing objects during definition.
+  `%ifModelSelectionUpdateInputs%` <- function(modelSelectionString, params) {
+    if (input$modelSelect == modelSelectionString) {
+      updateNumericInputsByNameAndValue(params)
+    }
+  }
+
+  updateNumericInputsByNameAndValue <- function(params) {
+    ## I wish this was less than eighty characters so it could be on one line.
+    invisible(lapply(params,
+      updateNumericInput,
+      session = session,
+      inputId = names(params)
+    ))
+  }
+
+  addThenEnableValidatorRules <- function(validator, inputIdRulePairs) {
+    function(rules, inputId) {
+      lapply(rules, validator$add_rule, inputId = inputId)
+      validator$add_rule(rule = sv_required(), inputId = inputId)
+    } |>
+    mapply(inputIdRulePairs, names(inputIdRulePairs))
+
+    validator$enable()
+    invisible(validator)
+  }
+
   ## Data validation
-  iv <- InputValidator$new()
+  rules <- list(
+    ## Vital statistics
+    muBirth = c(sv_between(0, 0.1)),
+    muDeath = c(sv_between(0, 0.1)),
 
-  addInputValidationRules(
-    list(
-      ## muValue
-      muBirth = sv_required(),
-      muBirth = sv_gte(0),
-      muBirth = sv_lte(0.1),
-      muDeath = sv_required(),
-      muDeath = sv_gte(0),
-      muDeath = sv_lte(0.1),
+    ## SIR_Stochastic
+    stochasticSIR = c(sv_integer(), sv_between(0, 100, c(FALSE, TRUE))),
+    betaSIR_Stoc        = c(sv_between(0, 1)),
+    gammaSIR_Stoc       = c(sv_between(0, 5)),
+    populationSIR_Stoc  = c(sv_gt(0)),
+    susceptibleSIR_Stoc = c(sv_gt(0)),
+    infectedSIR_Stoc    = c(sv_gte(0)),
+    recoveredSIR_Stoc   = c(sv_gte(0)),
 
-      ## SIR-Stochastic
-      stochasticSIR = sv_required(),
-      stochasticSIR = sv_integer(),
-      stochasticSIR = sv_gt(0),
-      stochasticSIR = sv_lte(100),
-      betaSIR_Stoc = sv_required(),
-      betaSIR_Stoc = sv_gte(0),
-      betaSIR_Stoc = sv_lte(1),
-      gammaSIR_Stoc = sv_required(),
-      gammaSIR_Stoc = sv_gte(0),
-      gammaSIR_Stoc = sv_lte(5),
-      populationSIR_Stoc = sv_required(),
-      populationSIR_Stoc = sv_gt(0),
-      susceptibleSIR_Stoc = sv_required(),
-      susceptibleSIR_Stoc = sv_gt(0),
-      infectedSIR_Stoc = sv_required(),
-      infectedSIR_Stoc = sv_gte(0),
-      recoveredSIR_Stoc = sv_required(),
-      recoveredSIR_Stoc = sv_gte(0),
+    ## SIR
+    betaSIR        = c(sv_between(0, 1)),
+    gammaSIR       = c(sv_between(0, 5)),
+    populationSIR  = c(sv_gt(0)),
+    susceptibleSIR = c(sv_gt(0)),
+    infectedSIR    = c(sv_gte(0)),
+    recoveredSIR   = c(sv_gte(0)),
 
-      ## SIR
-      betaSIR = sv_required(),
-      betaSIR = sv_gte(0),
-      betaSIR = sv_lte(1),
-      gammaSIR = sv_required(),
-      gammaSIR = sv_gte(0),
-      gammaSIR = sv_lte(5),
-      populationSIR = sv_required(),
-      populationSIR = sv_gt(0),
-      susceptibleSIR = sv_required(),
-      susceptibleSIR = sv_gt(0),
-      infectedSIR = sv_required(),
-      infectedSIR = sv_gte(0),
-      recoveredSIR = sv_required(),
-      recoveredSIR = sv_gte(0),
+    ## SIRD
+    betaSIRD        = c(sv_between(0, 0.5)),
+    gammaSIRD       = c(sv_between(0, 0.5)),
+    deltaSIRD       = c(sv_between(0, 0.5)),
+    populationSIRD  = c(sv_gt(0)),
+    susceptibleSIRD = c(sv_gt(0)),
+    infectedSIRD    = c(sv_gte(0)),
+    recoveredSIRD   = c(sv_gte(0)),
+    deadSIRD        = c(sv_gte(0)),
 
-      ## SIRD
-      betaSIRD = sv_required(),
-      betaSIRD = sv_gte(0),
-      betaSIRD = sv_lte(0.5),
-      gammaSIRD = sv_required(),
-      gammaSIRD = sv_gte(0),
-      gammaSIRD = sv_lte(0.5),
-      deltaSIRD = sv_required(),
-      deltaSIRD = sv_gte(0),
-      deltaSIRD = sv_lte(0.5),
-      populationSIRD = sv_required(),
-      populationSIRD = sv_gt(0),
-      susceptibleSIRD = sv_required(),
-      susceptibleSIRD = sv_gt(0),
-      infectedSIRD = sv_required(),
-      infectedSIRD = sv_gte(0),
-      recoveredSIRD = sv_required(),
-      recoveredSIRD = sv_gte(0),
-      deadSIRD = sv_required(),
-      deadSIRD = sv_gte(0),
+    ## SEIR,
+    beta        = c(sv_between(0, 1)),
+    gamma       = c(sv_between(0, 3)),
+    sigma       = c(sv_between(0, 0.5)),
+    population  = c(sv_gt(0)),
+    susceptible = c(sv_gt(0)),
+    exposed     = c(sv_gte(0)),
+    infected    = c(sv_gte(0)),
+    recovered   = c(sv_gte(0)),
 
-      ## SEIR,
-      beta = sv_required(),
-      beta = sv_gte(0),
-      beta = sv_lte(1),
-      gamma = sv_required(),
-      gamma = sv_gte(0),
-      gamma = sv_lte(3),
-      sigma = sv_required(),
-      sigma = sv_gte(0),
-      sigma = sv_lte(0.5),
-      population = sv_required(),
-      population = sv_gt(0),
-      susceptible = sv_required(),
-      susceptible = sv_gt(0),
-      exposed = sv_required(),
-      exposed = sv_gte(0),
-      infected = sv_required(),
-      infected = sv_gte(0),
-      recovered = sv_required(),
-      recovered = sv_gte(0),
+    ## SEIRD
+    betaSEIRD        = c(sv_between(0, 1)),
+    gammaSEIRD       = c(sv_between(0, 3)),
+    sigmaSEIRD       = c(sv_between(0, 0.5)),
+    deltaSEIRD       = c(sv_between(0, 0.5)),
+    populationSEIRD  = c(sv_gt(0)),
+    susceptibleSEIRD = c(sv_gt(0)),
+    exposedSEIRD     = c(sv_gte(0)),
+    infectedSEIRD    = c(sv_gte(0)),
+    recoveredSEIRD   = c(sv_gte(0)),
+    deadSEIRD        = c(sv_gte(0)),
 
-      ## SEIRD
-      betaSEIRD = sv_required(),
-      betaSEIRD = sv_gte(0),
-      betaSEIRD = sv_lte(1),
-      gammaSEIRD = sv_required(),
-      gammaSEIRD = sv_gte(0),
-      gammaSEIRD = sv_lte(3),
-      sigmaSEIRD = sv_required(),
-      sigmaSEIRD = sv_gte(0),
-      sigmaSEIRD = sv_lte(0.5),
-      deltaSEIRD = sv_required(),
-      deltaSEIRD = sv_gte(0),
-      deltaSEIRD = sv_lte(0.5),
-      populationSEIRD = sv_required(),
-      populationSEIRD = sv_gt(0),
-      susceptibleSEIRD = sv_required(),
-      susceptibleSEIRD = sv_gt(0),
-      exposedSEIRD = sv_required(),
-      exposedSEIRD = sv_gte(0),
-      infectedSEIRD = sv_required(),
-      infectedSEIRD = sv_gte(0),
-      recoveredSEIRD = sv_required(),
-      recoveredSEIRD = sv_gte(0),
-      deadSEIRD = sv_required(),
-      deadSEIRD = sv_gte(0),
+    timesteps = c(sv_integer(), sv_gt(0)))
 
-      ## Timesteps
-      timesteps = sv_required(),
-      timesteps = sv_integer(),
-      timesteps = sv_gt(0)
-    )
-  )
+  inputValidator <- addThenEnableValidatorRules(InputValidator$new(), rules)
 
-  iv$enable()
-
-  ## Reset vital dynamics when not checked off
+  ## TODO: change the observation to set these values when the widget is changed
+  ## to the off state. Reset vital dynamics when not checked off (meaning off or
+  ## on? selected or deselected? yes or no?)
   observe({
     input$muValue
     updateNumericInput(session, "muBirth", value = 0)
-  })
-
-  observe({
-    input$muValue
     updateNumericInput(session, "muDeath", value = 0)
   })
 
+  ## FIXME: are there any missing parameters? I used my editor's undo
+  ## feature after ridding these conditional updates of duplicated blocks
+  ## (where the condition of PMA or TMA was irrelevant, or models had the
+  ## same parameter values). I undid that change because I was unsure of
+  ## it once I noticed that some of these do have different parameters
+  ## (like delta).
   observeEvent(input$qValue, {
-
     ## In all cases the following input must be reset to FALSE.
     updateCheckboxInput(session, "muValue", value = FALSE)
 
@@ -199,7 +135,7 @@ server <- function(input, output, session) {
       ))
     }
 
-    # SIRD - TMA
+    ## SIRD - TMA
     if ((input$qValue == "1") && (input$modelSelect == "SIRD")) {
       updateNumericInputsByNameAndValue(list(
         betaSIRD = 0.4,
@@ -213,7 +149,7 @@ server <- function(input, output, session) {
       ))
     }
 
-    # SIRD - PMA
+    ## SIRD - PMA
     if ((input$qValue == "0") && (input$modelSelect == "SIRD")) {
       updateNumericInputsByNameAndValue(list(
         betaSIRD = 0.001,
@@ -227,7 +163,7 @@ server <- function(input, output, session) {
       ))
     }
 
-    # SEIR - TMA
+    ## SEIR - TMA
     if ((input$qValue == "1") && (input$modelSelect == "SEIR")) {
       updateNumericInputsByNameAndValue(list(
         beta = 0.35,
@@ -242,7 +178,7 @@ server <- function(input, output, session) {
       ))
     }
 
-    # SEIR - PMA
+    ## SEIR - PMA
     if ((input$qValue == "0") && (input$modelSelect == "SEIR")) {
       updateNumericInputsByNameAndValue(list(
         beta = 0.5,
@@ -257,7 +193,7 @@ server <- function(input, output, session) {
       ))
     }
 
-    # SEIRD - TMA
+    ## SEIRD - TMA
     if ((input$qValue == "1") && (input$modelSelect == "SEIRD")) {
       updateNumericInputsByNameAndValue(list(
         betaSEIRD = 0.35,
@@ -273,7 +209,7 @@ server <- function(input, output, session) {
       ))
     }
 
-    # SEIRD - PMA
+    ## SEIRD - PMA
     if ((input$qValue == "0") && (input$modelSelect == "SEIRD")) {
       updateNumericInputsByNameAndValue(list(
         betaSEIRD = 0.5,
@@ -289,6 +225,7 @@ server <- function(input, output, session) {
       ))
     }
 
+    ## SIR-Stochastic
     if (input$modelSelect == "SIR-Stochastic") {
       updateNumericInputsByNameAndValue(list(
         stochasticSIR = 50,
@@ -677,6 +614,7 @@ server <- function(input, output, session) {
         xlab("Time") +
         scale_x_continuous(expand = c(0, 0)) +
         scale_y_continuous(expand = c(0, 0)) +
+        #
         geom_line(aes(x = time, y = S, color = "Blue"), linewidth = 1.5) +
         geom_line(aes(x = time, y = E, color = "Brown"), linewidth = 1.5) +
         geom_line(aes(x = time, y = I, color = "Red"), linewidth = 1.5) +
@@ -693,9 +631,13 @@ server <- function(input, output, session) {
     isolate({
       val <- as.data.frame(seir_values())
       ggplot(val, aes(x = S)) +
-        geom_line(aes(y = I, color = "Blue"), linewidth = 1.5) +
+
+        ## MAYBE FIXME: linewidth is unused, apparently. See if removing it
+        ## doesn't break anything.
+        geom_line(aes(y = I, color = "Blue")) +
         theme(
-          axis.line = element_line(color = "black"), axis.text = element_text(linewidth = 14),
+          axis.line = element_line(color = "black"),
+          axis.text = element_text(linewidth = 14),
           axis.title.x = element_text(size = 16, face = "bold"),
           axis.title.y = element_text(size = 16, face = "bold")
         ) +
@@ -864,7 +806,7 @@ server <- function(input, output, session) {
 
   # Shows given elements when a Model is selected
   observe({
-    if(input$modelSelect %in% c("SIR", "SIRD", "SEIR", "SEIRD", "SIR-Stochastic")) {
+    if (input$modelSelect %in% c("SIR", "SIRD", "SEIR", "SEIRD", "SIR-Stochastic")) {
       toggle("qValue")
       toggle("muValue")
       toggle("timesteps")
@@ -896,95 +838,97 @@ server <- function(input, output, session) {
     # the following statement. The names merely document which set of parameters
     # are applicable to a given model; the parameter values are the defaults for
     # the model.
-    lapply(list(
-      `SIR-Stochastic` =
-        list(stochasticSIR = 50,
-             betaSIR_Stoc = 0.00178,
-             gammaSIR_Stoc = 2.73,
-             populationSIR_Stoc = 1000,
-             susceptibleSIR_Stoc = 990,
-             infectedSIR_Stoc = 10,
-             recoveredSIR_Stoc = 0),
+    lapply(
+      list(
+        `SIR-Stochastic` =
+          list(
+            stochasticSIR = 50,
+            betaSIR_Stoc = 0.00178,
+            gammaSIR_Stoc = 2.73,
+            populationSIR_Stoc = 1000,
+            susceptibleSIR_Stoc = 990,
+            infectedSIR_Stoc = 10,
+            recoveredSIR_Stoc = 0
+          ),
+        SIRD =
+          list(
+            betaSIRD = 0.001,
+            gammaSIRD = 0.1,
+            deltaSIRD = 0.05,
+            populationSIRD = 500,
+            susceptibleSIRD = 499,
+            infectedSIRD = 1,
+            recoveredSIRD = 0
+          ),
+        SEIR =
+          list(
+            beta = 0.5,
+            gamma = 0.5,
+            sigma = 0.1,
+            population = 53,
+            susceptible = 50,
+            exposed = 3,
+            infected = 0,
+            recovered = 0
+          ),
+        SEIRD =
+          list(
+            betaSEIRD = 0.5,
+            gammaSEIRD = 0.5,
+            sigmaSEIRD = 0.1,
+            deltaSEIRD = 0.05,
+            populationSEIRD = 53,
+            susceptibleSEIRD = 50,
+            exposedSEIRD = 3,
+            infectedSEIRD = 0,
+            recoveredSEIRD = 0
+          ),
+        SIR =
+          list(
+            betaSIR = 0.001,
+            gammaSIR = 0.1,
+            populationSIR = 500,
+            susceptibleSIR = 499,
+            infectedSIR = 1,
+            recoveredSIR = 0
+          ),
+        SIRD =
+          list(
+            betaSIRD = 0.001,
+            gammaSIRD = 0.1,
+            deltaSIRD = 0.05,
+            populationSIRD = 500,
+            susceptibleSIRD = 499,
+            infectedSIRD = 1,
+            recoveredSIRD = 0
+          )
+      ),
+      updateNumericInputsByNameAndValue
+    )
 
-      SIRD =
-        list(betaSIRD = 0.001,
-             gammaSIRD = 0.1,
-             deltaSIRD = 0.05,
-             populationSIRD = 500,
-             susceptibleSIRD = 499,
-             infectedSIRD = 1,
-             recoveredSIRD = 0),
+    ## Total mass action or pseudo mass action
+    updateRadioButtons(session, "qValue", selected = "0")
 
-      SEIR =
-        list(beta = 0.5,
-             gamma = 0.5,
-             sigma = 0.1,
-             population = 53,
-             susceptible = 50,
-             exposed = 3,
-             infected = 0,
-             recovered = 0),
-
-      SEIRD =
-        list(betaSEIRD = 0.5,
-             gammaSEIRD = 0.5,
-             sigmaSEIRD = 0.1,
-             deltaSEIRD = 0.05,
-             populationSEIRD = 53,
-             susceptibleSEIRD = 50,
-             exposedSEIRD = 3,
-             infectedSEIRD = 0,
-             recoveredSEIRD = 0),
-
-      SIR =
-        list(betaSIR = 0.001,
-             gammaSIR = 0.1,
-             populationSIR = 500,
-             susceptibleSIR = 499,
-             infectedSIR = 1,
-             recoveredSIR = 0),
-
-      SIRD =
-        list(betaSIRD = 0.001,
-             gammaSIRD = 0.1,
-             deltaSIRD = 0.05,
-             populationSIRD = 500,
-             susceptibleSIRD = 499,
-             infectedSIRD = 1,
-             recoveredSIRD = 0)),
-
-      updateNumericInputsByNameAndValue)
-
-    # Model Formulation
-    updateRadioButtons("qValue", selected = "0")
-
-    # Stochastic Select
-    updateRadioButtons("stochasticSelect", selected = "Deterministic")
-
-    # Vital Dynamics
-    updateCheckboxInput("muValue", value = FALSE)
-
-    # Number of Timesteps
-    updateNumericInput("timesteps", value = 100)
+    updateRadioButtons(session, "stochasticSelect", selected = "Deterministic")
+    updateCheckboxInput(session, "muValue", value = FALSE) # Vital Dynamics
+    updateNumericInput(session, "timesteps", value = 100)
   })
 
-  # Resetting values when choosing a new Model
+  ## Whenever the model selection changes the widgets throughout the application
+  ## are reset to their default values.
   observeEvent(input$modelSelect, {
-    # Hides output
-    for(tab in c("Plot", "Phase Plane", "Output Summary", "Mathematical Model")) {
-      hideTab(inputId = "tabSet", tab)
-    }
+    # Hide output tabs when the application is reset.
+    tabs <- c("Plot", "Phase Plane", "Output Summary", "Mathematical Model")
+    for (tab in tabs) hideTab(inputId = "tabSet", tab)
 
-    # Model Formulation
-    updateRadioButtons("qValue", selected = "0")
+    ## Total mass action or pseudo mass action
+    updateRadioButtons(session, "qValue", selected = "0")
 
-    # Stochastic Select
-    updateRadioButtons("stochasticSelect", selected = "Deterministic")
+    updateRadioButtons(session, "stochasticSelect", selected = "Deterministic")
+    updateCheckboxInput(session, "muValue", value = FALSE) # Vital Dynamics
 
-    # Vital Dynamics
-    updateCheckboxInput("muValue", value = FALSE)
 
-    "SIR-Stochastic" %ifModelSelection%
+    "SIR-Stochastic" %ifModelSelectionUpdateInputs%
       list(
         stochasticSIR = 50,
         betaSIR_Stoc = 0.00178,
@@ -996,7 +940,7 @@ server <- function(input, output, session) {
         timesteps = 10
       )
 
-    "SIRD" %ifModelSelection%
+    "SIRD" %ifModelSelectionUpdateInputs%
       list(
         betaSIRD = 0.001,
         gammaSIRD = 0.1,
@@ -1008,7 +952,7 @@ server <- function(input, output, session) {
         timesteps = 50
       )
 
-    "SEIR" %ifModelSelection%
+    "SEIR" %ifModelSelectionUpdateInputs%
       list(
         beta = 0.5,
         gamma = 0.5,
@@ -1021,7 +965,7 @@ server <- function(input, output, session) {
         timesteps = 25
       )
 
-    "SEIRD" %ifModelSelection%
+    "SEIRD" %ifModelSelectionUpdateInputs%
       list(
         betaSEIRD = 0.5,
         gammaSEIRD = 0.5,
