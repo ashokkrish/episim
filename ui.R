@@ -666,12 +666,11 @@ fluidPage(
                
                h3("Development Team", style = "font-weight:bold"),
                br(),
-               p(span("Jan Banta", style = "font-weight:bold")),
-               p("Lead Developer"),
+               p(span("Tobias Wondwossen, Khanh Le, Bryce Carson", style = "font-weight:bold")),
+               p("Lead Developer - Undergraduate Students"),
                p("Mount Royal University,"),
                p("Department of Mathematics & Computing,"),
                p("Calgary, AB, Canada"),
-               p("Github ",a("link", href="https://github.com/ashokkrish/episim", target="_blank")),
                br(),
                
                p(span("Ashok Krishnamurthy, PhD", style = "font-weight:bold")),
@@ -680,10 +679,14 @@ fluidPage(
                p("Department of Mathematics & Computing,"),
                p("Calgary, AB, Canada"),
                br(),
+               p("Email:",a("akrishnamurthy@mtroyal.ca", href="mailto:akrishnamurthy@mtroyal.ca")), 
+               p("Website:", a(href="https://bit.ly/2YKrXjX","https://bit.ly/2YKrXjX", target="_blank")),
+               p("Github: ",a(href="https://github.com/ashokkrish/episim","https://github.com/ashokkrish/episim", target="_blank")),
+               br(),
+               br(),
                h3("Disclaimer", style = "font-weight:bold"),
                br(),
                p("This tool uses a mathematical model to simulate epidemic model outcomes based on user-defined parameters. The output of the model depends on model assumptions, parameter choices. It is not a medical predictor, and should be used for informational and research purposes only. Please carefully consider the parameters you choose. Interpret and use the simulated results responsibly. Authors are not liable for any direct or indirect consequences of this usage.")
-               
              
           )
      ))
