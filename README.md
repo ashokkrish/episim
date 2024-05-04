@@ -1,6 +1,11 @@
 # episim: Compartmental Models of Epidemiology
 
 ## Overview
+Non-spatial epidemic modeling refers to the study and simulation of disease spread without explicitly considering the spatial location or geographic distribution of individuals or populations. In contrast to spatial epidemic modeling, which takes into account the physical locations of individuals or groups, non-spatial models focus on the dynamics of disease transmission within a population without considering the spatial relationships.
+
+These models typically involve mathematical equations and simulations to represent the interactions between individuals, the transmission of the infectious agent, and the progression of the disease over time. Non-spatial models often use compartments to categorize individuals based on their health status, such as susceptible, infected, and recovered (SIR models) or susceptible, exposed, infected, and recovered (SEIR models).
+
+Non-spatial epidemic models are valuable for understanding the basic dynamics of disease spread, estimating key parameters like transmission rates and recovery rates, and assessing the potential impact of interventions such as vaccination or social distancing measures. While spatial models are crucial for capturing the geographical patterns of disease transmission, non-spatial models provide a simpler and more abstract representation that can be computationally efficient and easier to analyze mathematically.
 
 Run the app by loading `app.R` and clicking `Run App`.
 
@@ -18,10 +23,15 @@ The contents of the repository are currently the following:
 - `server.R`: server side code
 - `www`: a folder that contains the flowcharts for the mathematical models
 
+## Credits
+This interactive [R Shiny](https://shiny.rstudio.com/) app would not be possible without the help from our team of research assistants [Tobias Wondwossen](https://github.com/Toby-exe), [Khanh Le](https://github.com/kle6951), [Bryce Carson](https://github.com/bryce-carson)
+
 ## References
 
 ## Feedback
+The app is maintained by Dr. Ashok Krishnamurthy.
 
-[Ashok Krishnamurthy](mailto:akrishnamurthy@mtroyal.ca)  
+Contact: [Ashok Krishnamurthy, Ph.D.](mailto:akrishnamurthy@mtroyal.ca)  
+Website: <https://bit.ly/2YKrXjX>  
 
 This interactive R Shiny app is maintained by Ashok Krishnamurthy. We welcome questions, insights, and feedback.
