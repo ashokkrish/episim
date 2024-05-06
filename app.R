@@ -3,6 +3,11 @@
 # exploratory data analysis scripts shared directly between users. Packages and
 # Shiny applications should never contain such code. Package dependencies should
 # be satisfied using package metadata.
+#
+# FIXME: this needs to be evaluated a second time, otherwise shinyjs::useShinyjs
+# is not found. TODO: consult Shiny documentation concerning the initialization
+# of applications and the treatment of app.R within RStudio specifically (this
+# problem is not apparent in ESS).
 packagesloaded <-
   c("deSolve",
     "shiny",
