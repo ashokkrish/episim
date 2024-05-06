@@ -3,13 +3,9 @@
 # exploratory data analysis scripts shared directly between users. Packages and
 # Shiny applications should never contain such code. Package dependencies should
 # be satisfied using package metadata.
-#
-# FIXME: this needs to be evaluated a second time, otherwise shinyjs::useShinyjs
-# is not found. TODO: consult Shiny documentation concerning the initialization
-# of applications and the treatment of app.R within RStudio specifically (this
-# problem is not apparent in ESS).
 packagesloaded <-
   c("tidyverse",
+    "here",
     "deSolve",
     "shiny",
     "shinyhelper",
@@ -22,10 +18,11 @@ packagesloaded <-
 
 if (!packagesloaded) exit()
 
-## rprojroot may not be appropriate if it has any dependency on RStudio; we
-## might not use anything RStudio/posit related in production.
-##
-## NOTE DONT: This package is intended for interactive use only. Use
-## ‘rprojroot::has_file()’ or the other functions in the ‘rprojroot’ package for
-## more control, or for package development.
+## NEXT: switch to using the rpojroot package when preparing this Shiny
+## application for deployment, because the here package is a lightweight wrapper
+## around that. There may be shortcomings to the switch, or there may be cons to
+## not switching. Close examination of the final production environment being
+## prepared by T.W. will determine what we finally use. For now, during
+## interactive development of the application, here is a perfect solution.
+here::i_am("global.R")
 shinyAppDir(here::here()) # and hurrah!
