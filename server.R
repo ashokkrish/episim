@@ -21,11 +21,12 @@ server <- function(input, output, session) {
   }
 
   addThenEnableValidatorRules <- function(validator, inputIdRulePairs) {
-    function(rules, inputId) {
+    mapply(\(rules, inputId) {
       lapply(rules, validator$add_rule, inputId = inputId)
       validator$add_rule(rule = sv_required(), inputId = inputId)
-    } |>
-    mapply(inputIdRulePairs, names(inputIdRulePairs))
+    },
+    inputIdRulePairs,
+    names(inputIdRulePairs))
 
     validator$enable()
     invisible(validator)
