@@ -9,13 +9,13 @@
 # of applications and the treatment of app.R within RStudio specifically (this
 # problem is not apparent in ESS).
 packagesloaded <-
-  c("deSolve",
+  c("tidyverse",
+    "deSolve",
     "shiny",
     "shinyhelper",
     "shinyjs",
     "shinyvalidate",
-    "shinyWidgets",
-    "tidyverse") |>
+    "shinyWidgets") |>
   lapply(FUN = require, character.only = TRUE) |>
   as.logical() |>
   all()
