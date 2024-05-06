@@ -637,7 +637,7 @@ server <- function(input, output, session) {
         geom_line(aes(y = I, color = "Blue")) +
         theme(
           axis.line = element_line(color = "black"),
-          axis.text = element_text(linewidth = 14),
+          axis.text = element_text(size = 14),
           axis.title.x = element_text(size = 16, face = "bold"),
           axis.title.y = element_text(size = 16, face = "bold")
         ) +
