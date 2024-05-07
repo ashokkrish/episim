@@ -11,8 +11,8 @@ modelConfigurationPanel <- function() {
     pickerInput(
       inputId = "modelSelect",
       label = ("Epidemic Model"),
-      choices = list("Please choose a model", "SIR", "SIRD", "SEIR", "SEIRD", "SIR-Stochastic"),
-      options = list("", "SIR", "SIRD", "SEIR", "SEIRD", "SIR-Stochastic"),
+      choices = list("Please choose a model", "SIR","SIRS", "SIRD", "SEIR", "SEIRD", "SIR-Stochastic"),
+      options = list("", "SIR", "SIRS","SIRD", "SEIR", "SEIRD", "SIR-Stochastic"),
       inline = TRUE,
       width = "300px"
     ),
@@ -183,6 +183,64 @@ modelConfigurationPanel <- function() {
         ),
         numericInput(
           inputId = "recoveredSIR",
+          label = "Recovered (R)",
+          value = 0,
+          min = 0,
+          max = maxPopulation,
+          step = 1,
+          width = "300px"
+        ),
+      ),
+      conditionalPanel(
+        condition = "input.modelSelect == 'SIRS'",
+        withMathJax(),
+        numericInput(
+          inputId = "betaSIRS",
+          label = "Transmission Rate (\\( \\beta\\))",
+          min = 0,
+          max = 1,
+          step = 0.00001,
+          value = 0.001,
+          width = "300px"
+        ),
+        numericInput(
+          inputId = "gammaSIRS",
+          label = "Removal Rate  (\\( \\gamma\\))",
+          min = 0,
+          max = 0.5,
+          step = 0.00001,
+          value = 0.1,
+          width = "300px"
+        ),
+        numericInput(
+          inputId = "populationSIRS",
+          label = "Total Population (N)",
+          value = 500,
+          min = 1,
+          max = maxPopulation,
+          step = 1,
+          width = "300px"
+        ),
+        numericInput(
+          inputId = "susceptibleSIRS",
+          label = "Susceptible (S)",
+          value = 499,
+          min = 1,
+          max = maxPopulation,
+          step = 1,
+          width = "300px"
+        ),
+        numericInput(
+          inputId = "infectedSIRS",
+          label = "Infected (I)",
+          value = 1,
+          min = 1,
+          max = maxPopulation,
+          step = 1,
+          width = "300px"
+        ),
+        numericInput(
+          inputId = "recoveredSIRS",
           label = "Recovered (R)",
           value = 0,
           min = 0,
@@ -475,6 +533,10 @@ mainPanel(
               img(src = "SIR.jpg", height = "100px")
             ),
             conditionalPanel(
+              condition = "input.modelSelect = 'SIRS'"
+              # KHANH'S NOTE: TODO -> implement plotOutput for SIRS
+            ),
+            conditionalPanel(
               condition = "input.modelSelect == 'SIR-Stochastic'",
               plotOutput("plotSIR_Stoc")
             ),
@@ -500,6 +562,10 @@ mainPanel(
             conditionalPanel(
               condition = "input.modelSelect == 'SIR'",
               plotOutput("SIRPhasePlane")
+            ),
+            conditionalPanel(
+              condition = "input.modelSelect == 'SIRS'"
+              # KHANH'S NOTE: TODO -> implement phase plane for SIRS
             ),
             conditionalPanel(
               condition = "input.modelSelect == 'SIRD'",
