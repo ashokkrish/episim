@@ -3,6 +3,10 @@
 ## ignored. There is no reason to evaluate these function definitions in the
 ## global environment manually, because that is going to happen regardless.
 
+## TODO: convert all strings containing LaTeX to raw strings to avoid the use of
+## backslashes. Further, only use the $\LaTeX{}$ quoting form, not the
+## parenthesized indicator to MathJax, unless that is absolutely required.
+
 maxPopulation <- 900000000
 
 modelOptions <- function(modelSelection) {
@@ -15,13 +19,16 @@ modelOptions <- function(modelSelection) {
       choiceNames = list("True-Mass Action", "Pseudo-Mass Action"),
       inline = TRUE,
       width = "300px",
-      selected = "0"
+      selected = "0" # Change to the number zero?
     ),
     radioButtons(
       inputId = "stochasticSelect",
       label = strong("Model Stochasticity"),
       choiceValues = list("Deterministic", "Stochastic"),
       choiceNames = list("Deterministic", "Stochastic"),
+      ## What do these pre-existing comments possibly imply? The selected is not
+      ## a character vector of length zero, it's a character vector of length
+      ## one. What did the writer mean?
       selected = "Deterministic", # character(0), #
       inline = TRUE,
       width = "300px"
@@ -543,10 +550,18 @@ runSimulationOrResetButtons <- function() {
   )
 }
 
+## TODO: refactor this, making tabPanel functions for the plot, phase-plane,
+## table, and model equations; the arguments of the tabsetPanel function call
+## will be calls to these functions to construct the contents of each tab.
 modelResultsPanel <- function() {
   mainPanel(
     tabsetPanel(
       id = "tabSet",
+      ## TODO: "remove the conditionalPanels"; the function for this tab---and
+      ## the other tabs---should be refactored. There is no reason that there
+      ## should be a slot/component in the OUTPUT object/list for each plot. The
+      ## server should simply assign whatever plot should be generated to a
+      ## singular PLOT output, and that is always the one displayed.
       tabPanel(
         title = "Plot",
         # downloadButton(outputId = "downloadPlot", label = "Save PNG/JPEG"),
@@ -579,6 +594,7 @@ modelResultsPanel <- function() {
           img(src = "SEIRD.jpg", height = "200px")
         )
       ),
+      ## TODO: see the prior TODO.
       tabPanel(
         title = "Phase Plane",
         # downloadButton(outputId = "downloadPlane", label = "Save PNG/JPEG"),
@@ -603,6 +619,7 @@ modelResultsPanel <- function() {
           plotOutput("SEIRDPhasePlane")
         )
       ),
+      ## TODO: see the prior TODO.
       tabPanel(
         title = "Output Summary",
         conditionalPanel(
@@ -622,6 +639,7 @@ modelResultsPanel <- function() {
           tableOutput("tableSEIRD")
         )
       ),
+      ## TODO: see the prior TODO.
       tabPanel(
         title = "Mathematical Model",
         conditionalPanel(
