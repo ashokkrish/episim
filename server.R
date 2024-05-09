@@ -6,9 +6,11 @@ server <- function(input, output, session) {
   ## function and instead ensure that their discover their own environment, and
   ## don't complain about missing objects during definition.
   `%ifModelSelectionUpdateInputs%` <- function(modelSelectionString, params) {
-    if (input$modelSelect == modelSelectionString) {
-      updateNumericInputsByNameAndValue(params)
-    }
+    reactive({
+      if (input$modelSelect == modelSelectionString) {
+        updateNumericInputsByNameAndValue(params)
+      }
+    })
   }
 
   updateNumericInputsByNameAndValue <- function(params) {
@@ -259,22 +261,16 @@ server <- function(input, output, session) {
     hideTab(inputId = "tabSet", target = "Mathematical Model")
   })
 
-  # Hide given elements when no Model is selected
+  # Toggle the visibility of the given input widgets when any model is selected.
   observe({
-    hide(id = "qValue")
-    hide(id = "muValue")
-    hide(id = "timesteps")
-    hide(id = "stochasticSelect")
-  })
-
-  # Shows given elements when a Model is selected
-  observe({
-    if (input$modelSelect %in% c("SIR", "SIRD", "SEIR", "SEIRD", "SIR-Stochastic")) {
-      toggle("qValue")
-      toggle("muValue")
-      toggle("timesteps")
-      toggle("stochasticSelect")
-    }
+    lapply(
+      list("modelConfiguration", "actionButtons"),
+      if (input$modelSelect %in% c("SIR", "SIRS", "SIRD", "SEIR", "SEIRD")) {
+        show
+      } else {
+        hide
+      }
+    )
   })
 
   # Shows output once Run Simulation button is activated
