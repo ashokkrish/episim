@@ -1,5 +1,5 @@
-SIR_LaTeX <- function() {
-  switch(input$muValue + 1, # See the function help for why this addition is used.
+SIR_LaTeX <- function(mu) {
+  switch(mu + 1, # See the function help for why this addition is used.
     helpText(
       r"(Susceptible $$\frac{dS}{dt} = - \beta \frac{ S I}{N^q}$$)",
       r"(Infectious $$\frac{dI}{dt} = \frac{\beta S I}{N^q} - \gamma I $$)",
@@ -22,11 +22,14 @@ SIR_LaTeX <- function() {
 }
 
 ## Khanh TODO: Please write the switch statement with the appropriate LaTeX, in
-## raw strings as in the other functions in this file, for this model.
+## raw strings as in the other functions in this file, for this model. NOTE: if,
+## and only if, the function needs the value of the mu parameter should you give
+## the function the formal parameter; if needed, then make the function call in
+## server.R pass input$muValue also.
 SIRS_LaTeX <- function() {}
 
-SIRD_LaTeX <- function() {
-  switch(input$muValue + 1,
+SIRD_LaTeX <- function(mu) {
+  switch(mu + 1,
     helpText(
       r"(Susceptible $$\frac{dS}{dt} = - \beta \frac{ S I}{N^q}$$)",
       r"(Infectious $$\frac{dI}{dt} = \frac{\beta S I}{N^q} - \gamma I - \delta I $$)",
@@ -46,8 +49,8 @@ SIRD_LaTeX <- function() {
   )
 }
 
-SEIR_LaTeX <- function() {
-  switch(input$muValue + 1,
+SEIR_LaTeX <- function(mu) {
+  switch(mu + 1,
     helpText(
       r"(Susceptible $$\frac{dS}{dt} = - \beta \frac{ S I}{N^q}$$)",
       r"(Exposed $$\frac{dE}{dt} = \beta \frac{ S I}{N^q} - \gamma E $$)",
@@ -67,8 +70,8 @@ SEIR_LaTeX <- function() {
   )
 }
 
-SEIRD_LaTeX <- function() {
-  switch(input$muValue + 1,
+SEIRD_LaTeX <- function(mu) {
+  switch(mu + 1,
     helpText(
       r"(Susceptible $$\frac{dS}{dt} = - \beta \frac{ S I}{N^q}$$)",
       r"(Exposed $$\frac{dE}{dt} = \beta \frac{ S I}{N^q} - \gamma E $$)",
@@ -86,20 +89,6 @@ SEIRD_LaTeX <- function() {
       r"(Dead $$ \frac{dD}{dt} = \delta I $$)",
       r"(Reproductive ratio $$R_0 =  \frac{\beta}{\gamma}$$)",
       "q-Value", br(), r"($$ 1, frequency-dependent $$)", br(), r"($$ 0, density-dependent $$)"
-    )
-  )
-}
-
-outputModelLaTeX <- function() {
-  renderUI(
-    tagList(
-      withMathJax(switch(input$modelSelect,
-        SIR = SIR_LaTeX(),
-        SIRS = SIRS_LaTeX(),
-        SIRD = SIRD_LaTeX(),
-        SEIR = SEIR_LaTeX(),
-        SEIRD = SEIRD_LaTeX()
-      ))
     )
   )
 }

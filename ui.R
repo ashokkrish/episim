@@ -5,7 +5,7 @@
 
 maxPopulation <- 900000000
 
-modelOptions <- function(modelSelection) {
+modelOptions <- function() {
   div(id = "modelOptions",
     radioButtons("qValue", "Model Formulation",
       choices = list("Pseudo-Mass Action" = 0, "True-Mass Action" = 1),
@@ -40,40 +40,31 @@ vitalDynamicsParameters <-
                  "300px"))
 
 modelConfigurationPanel <- function() {
-  sidebarPanel(
-    pickerInput(
-      "modelSelect",
-      "Epidemic Model",
-      list("Please choose a model" = "",
-           SIR = "SIR",
-           SIRS = "SIRS",
-           SIRD = "SIRD",
-           SEIR = "SEIR",
-           SEIRD = "SEIRD"),
-      ## FIXME: is this having any effect, given width is not "fit"?
-      inline = TRUE,
-      width = "300px"),
-
-    ## TODO: uncomment this when the rest of this function is cleaned up.
-    div(id = "modelConfiguration",
-        ## TODO: define these functions fully, and make them switch behaviour
-        ## upon the argument for conditional UI.
-        modelOptions(input$modelSelect),
-        modelParameters(input$modelSelect),
-        modelVariables(input$modelSelect),
-
+  sidebarPanel(id = "inputPanel",
+    pickerInput("modelSelect", "Epidemic Model",
+                list("Please choose a model" = "",
+                     SIR = "SIR",
+                     SIRS = "SIRS",
+                     SIRD = "SIRD",
+                     SEIR = "SEIR",
+                     SEIRD = "SEIRD"),
+                ## FIXME: is this having any effect, given width is not "fit"?
+                inline = TRUE,
+                width = "300px"),
+    div(id = "modelConfiguration", style = "display: none;",
+        modelOptions(),
+        modelParameters(),
+        modelVariables(),
         numericInput("timesteps", "Number of Timesteps (m)",
                      100, 1,
                      step = 1,
                      width = "300px")),
-
-    runSimulationOrResetButtons()
-  )
+    runSimulationOrResetButtons())
 }
 
 runSimulationOrResetButtons <- function() {
-  actionButtonStyle <- "color: #fff; background-color: #337ab7; border-color: #2e6da4"
-  div(id = "actionButtons",
+  actionButtonStyle <- "color: #fff; background-color: #337ab7; border-color: #2e6da4;"
+  div(id = "actionButtons", style = "display: none;",
     actionButton("go", "Run Simulation", style = actionButtonStyle),
     actionButton("resetAll", "Reset Values", style = actionButtonStyle)
   )
@@ -83,7 +74,7 @@ runSimulationOrResetButtons <- function() {
 ## table, and model equations; the arguments of the tabsetPanel function call
 ## will be calls to these functions to construct the contents of each tab.
 modelResultsPanel <- function() {
-  mainPanel(
+  mainPanel(id = "outputPanel", style = "display: none;",
     tabsetPanel(
       id = "tabSet",
       tabPanel("Plot", plotOutput("modelPlot"), imageOutput("modelDiagram")),
@@ -136,7 +127,7 @@ alpha <- function() {}
 AY <- function() {}
 BEE <- function() {}
 
-modelParameters <- function(modelSelection) {
+modelParameters <- function() {
   div(id = "parameters",
     div(id = "commonParameters", beta(), gamma()),
     div(id = "optionalParameters", vitalDynamicsParameters),
@@ -154,7 +145,7 @@ modelParameters <- function(modelSelection) {
 ### calling environment, the common, optional, and additional variable functions
 ### need to display or not display. This should be controlled within the
 ### function bodies so that this function remains simple.
-modelVariables <- function(modelSelection) {
+modelVariables <- function() {
   div(id = "variables",
     div(id = "commonVariables", S(), I(), R(), K()),
     div(id = "optionalVariables", stochasticVariables),
@@ -182,10 +173,9 @@ vitalDynamics <- function() {}
 
 ### Design
 episimModelTab <- function() {
-  tabPanel(
-    "Model",
-    sidebarLayout(modelConfigurationPanel(), modelResultsPanel())
-  )
+  tabPanel("Model",
+    sidebarLayout(withMathJax(modelConfigurationPanel()),
+                  modelResultsPanel()))
 }
 
 bold <- function(...) p(..., style = "font-weight: bold")
@@ -246,10 +236,7 @@ of this usage.)"))
   )
 }
 
-fluidPage(
-  useShinyjs(),
-  withMathJax(
-    div(titlePanel("Compartmental Models of Epidemiology")),
-    navbarPage(title = "", episimModelTab(), episimModelAuthorshipTab())
-  )
-)
+fluidPage(useShinyjs(),
+          withMathJax(navbarPage("Compartmental Models of Epidemiology",
+                                 episimModelTab(),
+                                 episimModelAuthorshipTab())))

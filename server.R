@@ -93,11 +93,15 @@ server <- function(input, output, session) {
 
   inputValidator <- addThenEnableValidatorRules(InputValidator$new(), rules)
 
-  ## TODO: change the observation to set these values when the widget is changed
-  ## to the off state. Reset vital dynamics when not checked off (meaning off or
-  ## on? selected or deselected? yes or no?)
-  observe({
-    input$muValue
+
+  ## FIXME: when a value is set by the user, and then Vital Dynamics is
+  ## disabled, the effective value should be zero to control how the models
+  ## operate. If Vital Dynamics is re-enabled the previous value should be
+  ## restored unless the user has reset all values using the reset action
+  ## button. NOTE: use a simple variable to store the previous value; that
+  ## variable must also be reset to zero when the entire application is reset so
+  ## that the "historical" value the user entered is forgotten.
+  observeEvent(input$muValue, {
     updateNumericInput(session, "muBirth", value = 0)
     updateNumericInput(session, "muDeath", value = 0)
   })
@@ -115,12 +119,12 @@ server <- function(input, output, session) {
     ## SIR - TMA
     if ((input$qValue == "1") && (input$modelSelect == "SIR")) {
       updateNumericInputsByNameAndValue(list(
-        betaSIR = 0.4,
-        gammaSIR = 0.04,
-        populationSIR = 1000,
-        susceptibleSIR = 997,
-        infectedSIR = 3,
-        recoveredSIR = 0,
+        beta = 0.4,
+        gamma = 0.04,
+        population = 1000,
+        susceptible = 997,
+        infected = 3,
+        recovered = 0,
         timesteps = 25
       ))
     }
@@ -128,12 +132,12 @@ server <- function(input, output, session) {
     ## SIR - PMA
     if ((input$qValue == "0") && (input$modelSelect == "SIR")) {
       updateNumericInputsByNameAndValue(list(
-        betaSIR = 0.001,
-        gammaSIR = 0.1,
-        populationSIR = 500,
-        susceptibleSIR = 499,
-        infectedSIR = 1,
-        recoveredSIR = 0,
+        beta = 0.001,
+        gamma = 0.1,
+        population = 500,
+        susceptible = 499,
+        infected = 1,
+        recovered = 0,
         timesteps = 50
       ))
     }
@@ -141,13 +145,13 @@ server <- function(input, output, session) {
     ## SIRD - TMA
     if ((input$qValue == "1") && (input$modelSelect == "SIRD")) {
       updateNumericInputsByNameAndValue(list(
-        betaSIRD = 0.4,
-        gammaSIRD = 0.04,
-        deltaSIRD = 0.05,
-        populationSIRD = 1000,
-        susceptibleSIRD = 997,
-        infectedSIRD = 3,
-        recoveredSIRD = 0,
+        beta = 0.4,
+        gamma = 0.04,
+        delta = 0.05,
+        population = 1000,
+        susceptible = 997,
+        infected = 3,
+        recovered = 0,
         timesteps = 25
       ))
     }
@@ -155,13 +159,13 @@ server <- function(input, output, session) {
     ## SIRD - PMA
     if ((input$qValue == "0") && (input$modelSelect == "SIRD")) {
       updateNumericInputsByNameAndValue(list(
-        betaSIRD = 0.001,
-        gammaSIRD = 0.1,
-        deltaSIRD = 0.05,
-        populationSIRD = 500,
-        susceptibleSIRD = 499,
-        infectedSIRD = 1,
-        recoveredSIRD = 0,
+        beta = 0.001,
+        gamma = 0.1,
+        delta = 0.05,
+        population = 500,
+        susceptible = 499,
+        infected = 1,
+        recovered = 0,
         timesteps = 50
       ))
     }
@@ -199,69 +203,52 @@ server <- function(input, output, session) {
     ## SEIRD - TMA
     if ((input$qValue == "1") && (input$modelSelect == "SEIRD")) {
       updateNumericInputsByNameAndValue(list(
-        betaSEIRD = 0.35,
-        gammaSEIRD = 0.1429,
-        sigmaSEIRD = 0.0476,
-        deltaSEIRD = 0.05,
-        populationSEIRD = 500,
-        susceptibleSEIRD = 499,
-        exposedSEIRD = 0,
-        infectedSEIRD = 1,
-        recoveredSEIRD = 0,
+        beta = 0.35,
+        gamma = 0.1429,
+        sigma = 0.0476,
+        delta = 0.05,
+        population = 500,
+        susceptible = 499,
+        exposed = 0,
+        infected = 1,
+        recovered = 0,
         timesteps = 20
       ))
     }
 
     ## SEIRD - PMA
-    if ((input$qValue == "0") && (input$modelSelect == "SEIRD")) {
+    if (input$qValue == "0" && input$modelSelect == "SEIRD") {
       updateNumericInputsByNameAndValue(list(
-        betaSEIRD = 0.5,
-        gammaSEIRD = 0.5,
-        sigmaSEIRD = 0.1,
-        deltaSEIRD = 0.05,
-        populationSEIRD = 53,
-        susceptibleSEIRD = 50,
-        exposedSEIRD = 3,
-        infectedSEIRD = 0,
-        recoveredSEIRD = 0,
+        beta = 0.5,
+        gamma = 0.5,
+        sigma = 0.1,
+        delta = 0.05,
+        population = 53,
+        susceptible = 50,
+        exposed = 3,
+        infected = 0,
+        recovered = 0,
         timesteps = 50
       ))
     }
 
     ## SIR-Stochastic
-    if (input$modelSelect == "SIR-Stochastic") {
+    if (input$modelSelect == "SIR" && input$stochasticSelect == 1) {
       updateNumericInputsByNameAndValue(list(
-        stochasticSIR = 50,
-        betaSIR_Stoc = 0.00178,
-        gammaSIR_Stoc = 2.73,
-        populationSIR_Stoc = 1000,
-        susceptibleSIR_Stoc = 990,
-        infectedSIR_Stoc = 10,
-        recoveredSIR_Stoc = 0,
+        stochasticModelVariableNumberOfReplicates = 50,
+        beta = 0.00178,
+        gamma = 2.73,
+        population = 1000,
+        susceptible = 990,
+        infected = 10,
+        recovered = 0,
         timesteps = 10
       ))
     }
   })
 
-  sir_stochastic_plot()
-
-  sir_plot()
-
-  sird_plot()
-
-  seir_plot()
-
-  seird_plot()
-
-  # Hide output when no Model is selected
-  observe({
-    hideTab(inputId = "tabSet", target = "Plot")
-    hideTab(inputId = "tabSet", target = "Phase Plane")
-    hideTab(inputId = "tabSet", target = "Output Summary")
-    hideTab(inputId = "tabSet", target = "Mathematical Model")
-  })
-
-  # Toggle the visibility of the given input widgets when any model is selected.
+  # Toggle the visibility of the given input widgets and action buttons when any
+  # model is selected.
   observe({
     lapply(
       list("modelConfiguration", "actionButtons"),
@@ -273,25 +260,29 @@ server <- function(input, output, session) {
     )
   })
 
-  # Shows output once Run Simulation button is activated
+  ## Toggle the visibility of the outputPanel based on the user's interactions
+  ## with the actionButtons.
   observeEvent(input$go, {
-    showTab(inputId = "tabSet", target = "Plot")
-    showTab(inputId = "tabSet", target = "Phase Plane")
-    showTab(inputId = "tabSet", target = "Output Summary")
-    showTab(inputId = "tabSet", target = "Mathematical Model")
+    show("outputPanel")
+    ## The LaTeX is rendered dynamically based upon the selected model.
+    ## Rendering occurs every time the GO action button is pressed. This will
+    ## allow more flexibility later on, if needed.
+    output$modelLaTeX <- renderUI(
+      tagList(
+        withMathJax(
+          switch(input$modelSelect,
+                 SIR = SIR_LaTeX(input$muValue),
+                 SIRS = SIRS_LaTeX(),
+                 SIRD = SIRD_LaTeX(input$muValue),
+                 SEIR = SEIR_LaTeX(input$muValue),
+                 SEIRD = SEIRD_LaTeX(input$muValue)))))
   })
-
-  ## Reset the reactive UI elements to their default values. First, hide
-  ## specific tabs in the tabset (TODO: determine if the whole tabset can be
-  ## hidden instead of looping through targets within the tabSet). Next, update
-  ## the model selection dropdown to the default unselected item. Third, set the
   observeEvent(input$resetAll, {
-    for (tab in c("Plot", "Phase Plane", "Output Summary", "Mathematical Model")) {
-      hideTab(inputId = "tabSet", tab)
-    }
+    hide("outputPanel")
 
     # Model Select
-    updatePickerInput(session, "modelSelect", selected = "Please choose a model")
+    ## updatePickerInput(session, "modelSelect", selected = 0)
+    updatePickerInput("modelSelect", selected = 0)
 
     # NOTE: The names of the components in X are unimportant to the execution of
     # the following statement. The names merely document which set of parameters
@@ -376,9 +367,8 @@ server <- function(input, output, session) {
   ## Whenever the model selection changes the widgets throughout the application
   ## are reset to their default values.
   observeEvent(input$modelSelect, {
-    # Hide output tabs when the application is reset.
-    tabs <- c("Plot", "Phase Plane", "Output Summary", "Mathematical Model")
-    for (tab in tabs) hideTab(inputId = "tabSet", tab)
+    # Hide output tabs when the model changes.
+    hide("outputPanel")
 
     ## Total mass action or pseudo mass action
     updateRadioButtons(session, "qValue", selected = "0")
