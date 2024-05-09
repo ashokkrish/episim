@@ -16,7 +16,8 @@ packagesloaded <-
   as.logical() |>
   all()
 
-if (!packagesloaded) exit()
+## "Five is alive!," but our application must die.
+if (!packagesloaded) quit(5)
 
 ## NEXT: switch to using the rpojroot package when preparing this Shiny
 ## application for deployment, because the here package is a lightweight wrapper
