@@ -237,6 +237,7 @@ of this usage.)"))
 }
 
 fluidPage(useShinyjs(),
-          withMathJax(navbarPage("Compartmental Models of Epidemiology",
+          div(titlePanel("Compartmental Models of Epidemiology"))
+          withMathJax(navbarPage(title = "",
                                  episimModelTab(),
                                  episimModelAuthorshipTab())))
