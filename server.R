@@ -277,6 +277,7 @@ server <- function(input, output, session) {
                  SEIR = SEIR_LaTeX(input$muValue),
                  SEIRD = SEIRD_LaTeX(input$muValue)))))
   })
+
   observeEvent(input$resetAll, {
     hide("outputPanel")
 
