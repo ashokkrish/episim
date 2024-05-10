@@ -64,9 +64,9 @@ plotSIRD <- function() {
     ggplot2::scale_x_continuous(expand = c(0, 0)) +
     ggplot2::scale_y_continuous(expand = c(0, 0)) +
     ggplot2::geom_line(aes(y = S, color = "Blue"), linewidth = 1.5) +
-    geom_line(aes(y = I, color = "Red"), linewidth = 1.5) +
-    geom_line(aes(y = R, color = "Green"), linewidth = 1.5) +
-    geom_line(aes(y = D, color = "Orange"), linewidth = 1.5) +
+    ggplot2::geom_line(aes(y = I, color = "Red"), linewidth = 1.5) +
+    ggplot2::geom_line(aes(y = R, color = "Green"), linewidth = 1.5) +
+    ggplot2::geom_line(aes(y = D, color = "Orange"), linewidth = 1.5) +
     ggplot2::scale_color_identity(
       name = "SIRD", breaks = c("Blue", "Red", "Green", "Orange"),
       labels = c("Susceptible", "Infected", "Recovered", "Dead"), guide = "legend"
@@ -99,7 +99,7 @@ solveAndRenderSIRD <- function() {
   expr <- quote({
     output$modelPlot <- renderPlot(plotSIRD())
     output$modelPhasePlane <- renderPlot(plotPhasePlaneSIRD())
-    output$modelSummaryTable <- renderTable(return(solveSIRD()[-c(6)]))
+    output$modelSummaryTable <- renderTable((solveSIRD())[-c(6)])
   })
 
   eval.parent(expr)
