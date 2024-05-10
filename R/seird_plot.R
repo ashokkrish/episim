@@ -69,11 +69,11 @@ plotSEIRD <- function() {
     ggplot2::xlab("Time") +
     ggplot2::scale_x_continuous(expand = c(0, 0)) +
     ggplot2::scale_y_continuous(expand = c(0, 0)) +
-    ggplot2::geom_line(aes(x = time, y = S, color = "Blue"), linewidth = 1.5) +
-    ggplot2::geom_line(aes(x = time, y = E, color = "Brown"), linewidth = 1.5) +
-    ggplot2::geom_line(aes(x = time, y = I, color = "Red"), linewidth = 1.5) +
-    ggplot2::geom_line(aes(x = time, y = R, color = "Green"), linewidth = 1.5) +
-    ggplot2::geom_line(aes(x = time, y = D, color = "Orange"), linewidth = 1.5) +
+    ggplot2::geom_line(ggplot2::aes(x = time, y = S, color = "Blue"), linewidth = 1.5) +
+    ggplot2::geom_line(ggplot2::aes(x = time, y = E, color = "Brown"), linewidth = 1.5) +
+    ggplot2::geom_line(ggplot2::aes(x = time, y = I, color = "Red"), linewidth = 1.5) +
+    ggplot2::geom_line(ggplot2::aes(x = time, y = R, color = "Green"), linewidth = 1.5) +
+    ggplot2::geom_line(ggplot2::aes(x = time, y = D, color = "Orange"), linewidth = 1.5) +
     ggplot2::scale_color_identity(
       name = "SEIRD",
       breaks = c("Blue", "Brown", "Red", "Green", "Orange"),
@@ -84,7 +84,7 @@ plotSEIRD <- function() {
 
 plotPhasePlaneSEIRD <- function() {
   ggplot2::ggplot(solveSEIRD(), ggplot2::aes(x = S)) +
-    ggplot2::geom_line(aes(y = I, color = "Blue"), linewidth = 1.5) +
+    ggplot2::geom_line(ggplot2::aes(y = I, color = "Blue"), linewidth = 1.5) +
     ggplot2::theme(
       axis.line = ggplot2::element_line(color = "black"),
       axis.text = ggplot2::element_text(size = 14),
