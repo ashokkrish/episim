@@ -8,8 +8,8 @@ equationsSEIRD <- function(time, variables, parameters) {
   q <- variables[7]
   dS <- (parameters["muB"] * N) - (parameters["muD"] * S) - (parameters["beta"] * ((S * I) / (N^q)))
   dE <- (parameters["beta"] * ((S * I) / (N^q))) - (parameters["gamma"] * E) - (parameters["muD"] * E)
-  dI <- (parameters["gamma"] * E) - (parameters["delta"] * I) - (parameters["delta"] * I) - (parameters["muD"] * I)
-  dR <- (parameters["delta"] * I) - (parameters["muD"] * R)
+  dI <- (parameters["gamma"] * E) - (parameters["sigma"] * I) - (parameters["delta"] * I) - (parameters["muD"] * I)
+  dR <- (parameters["sigma"] * I) - (parameters["muD"] * R)
   dD <- (parameters["delta"] * I)
   dN <- dS + dE + dI + dR
   list(c(dS, dE, dI, dR, dD, dN, q))
@@ -55,7 +55,7 @@ solveSEIRD <- function(
 }
 
 plotSEIRD <- function() {
-  ggplot2::ggplot(solveSEIRD(), aes(x = time)) +
+  ggplot2::ggplot(solveSEIRD(), ggplot2::aes(x = time)) +
     ggplot2::theme(
       axis.line = ggplot2::element_line(color = "black"),
       axis.text = ggplot2::element_text(size = 14),
@@ -83,7 +83,7 @@ plotSEIRD <- function() {
 }
 
 plotPhasePlaneSEIRD <- function() {
-  ggplot2::ggplot(solveSEIRD(), aes(x = S)) +
+  ggplot2::ggplot(solveSEIRD(), ggplot2::aes(x = S)) +
     ggplot2::geom_line(aes(y = I, color = "Blue"), linewidth = 1.5) +
     ggplot2::theme(
       axis.line = ggplot2::element_line(color = "black"),
