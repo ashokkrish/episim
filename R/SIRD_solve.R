@@ -49,7 +49,7 @@ solveSIRD <- function(
 }
 
 plotSIRD <- function() {
-  ggplot2::ggplot(solveSIRD(), aes(x = time)) +
+  ggplot2::ggplot(solveSIRD(), ggplot2::aes(x = time)) +
     ggplot2::theme(
       axis.line = ggplot2::element_line(color = "black"),
       axis.text = ggplot2::element_text(size = 14),
@@ -74,7 +74,7 @@ plotSIRD <- function() {
 }
 
 plotPhasePlaneSIRD <- function() {
-  ggplot2::ggplot(solveSIRD(), aes(x = S)) +
+  ggplot2::ggplot(solveSIRD(), ggplot2::aes(x = S)) +
     ggplot2::geom_line(aes(y = I, color = "Blue"), linewidth = 1.5) +
     ggplot2::theme(
       axis.line = ggplot2::element_line(color = "black"),
