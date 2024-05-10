@@ -193,15 +193,12 @@ episimModelAuthorshipTab <- function() {
     bold("Bryce Carson, B.Sc."),
     p("Lead Developer"),
     GitHub("bryce-carson"),
+    br(),
 
     ## TODO: Khanh's information.
-    bold("Khanh Le"),
-    p("Developer"),
-    ## GitHub(),
-
-    ## TODO: Tobias' information
-    bold("Tobias Wondwossen"),
-    p("Developer"),
+    bold("Khanh Le, Tobias Wondwossen"),
+    p("Developer - Undergraduate Student, Mount Royal University, Calgary, AB, CANADA"),
+    br(),
     ## GitHub(),
 
     ## TODO: Reformat Ashok's information so it reads like a physical mailing
