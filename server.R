@@ -272,7 +272,7 @@ server <- function(input, output, session) {
         withMathJax(
           switch(input$modelSelect,
                  SIR = SIR_LaTeX(input$muValue),
-                 SIRS = SIRS_LaTeX(),
+                 SIRS = SIRS_LaTeX(input$muValue),
                  SIRD = SIRD_LaTeX(input$muValue),
                  SEIR = SEIR_LaTeX(input$muValue),
                  SEIRD = SEIRD_LaTeX(input$muValue)))))

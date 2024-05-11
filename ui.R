@@ -195,7 +195,7 @@ episimModelAuthorshipTab <- function() {
     GitHub("bryce-carson"),
     br(),
 
-    ## TODO: Khanh's information.
+    #D evelopers' Information 
     bold("Khanh Le, Tobias Wondwossen"),
     p("Developer - Undergraduate Student, Mount Royal University, Calgary, AB, CANADA"),
     br(),
