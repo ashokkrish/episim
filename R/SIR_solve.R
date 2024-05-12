@@ -48,7 +48,7 @@ plotSIR <- function()
 {
   ggplot2::ggplot(solveSIR(), ggplot2::aes(x = time)) +
     plotTheme +
-    ggplot2::labs(title = "SIRD Epidemic Model", y = "Number of People",
+    ggplot2::labs(title = "SIRS Epidemic Model", y = "Number of People",
                   x = "Time") +
     ggplot2::scale_x_continuous(expand = c(0, 0)) +
     ggplot2::scale_y_continuous(expand = c(0, 0)) +
@@ -60,16 +60,6 @@ plotSIR <- function()
       labels = c("Susceptible", "Infected", "Recovered"), guide = "legend"
     )
 }
-
-# Function to calculate R0
-#calculate_R0 <- function(beta, gamma) {
-#  R0 <- beta / gamma
-#  return(R0)
-#}
-
-# Calculate and print R0
-#R0 <- calculate_R0(beta, gamma)
-#cat("Basic Reproduction Number (R0):", R0, "\n")
 
 # plot phase plane
 plotPhasePlaneSIR <- function()
