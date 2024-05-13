@@ -21,12 +21,14 @@ server <- function(input, output, session) {
 
   ## TODO: The value needs to depend on the model selection.
   addThenEnableValidatorRules <- function(validator, inputIdRulePairs) {
-    mapply(\(rules, inputId) {
-      lapply(rules, validator$add_rule, inputId = inputId)
-      validator$add_rule(rule = sv_required(), inputId = inputId)
-    },
-    inputIdRulePairs,
-    names(inputIdRulePairs))
+    mapply(
+      \(rules, inputId) {
+        lapply(rules, validator$add_rule, inputId = inputId)
+        validator$add_rule(rule = sv_required(), inputId = inputId)
+      },
+      inputIdRulePairs,
+      names(inputIdRulePairs)
+    )
 
     validator$enable()
     invisible(validator)
