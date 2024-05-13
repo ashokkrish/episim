@@ -7,7 +7,7 @@ maxPopulation <- 900000000
 
 modelOptions <- function() {
   div(id = "modelOptions",
-    radioButtons("qValue", "Model Formulation",
+    radioButtons("massActionSelect", "Model Formulation",
       choices = list("Pseudo-Mass Action" = 0, "True-Mass Action" = 1),
       ## FIXME: again, is this having any effect?
       inline = TRUE,

@@ -115,12 +115,12 @@ server <- function(input, output, session) {
   ## same parameter values). I undid that change because I was unsure of
   ## it once I noticed that some of these do have different parameters
   ## (like delta).
-  observeEvent(input$qValue, {
+  observeEvent(input$massActionSelect, {
     ## In all cases the following input must be reset to FALSE.
     updateCheckboxInput(session, "muValue", value = FALSE)
 
     ## SIR - TMA
-    if ((input$qValue == "1") && (input$modelSelect == "SIR")) {
+    if ((input$massActionSelect == "1") && (input$modelSelect == "SIR")) {
       updateNumericInputsByNameAndValue(list(
         beta = 0.4,
         gamma = 0.04,
@@ -133,7 +133,7 @@ server <- function(input, output, session) {
     }
 
     ## SIR - PMA
-    if ((input$qValue == "0") && (input$modelSelect == "SIR")) {
+    if ((input$massActionSelect == "0") && (input$modelSelect == "SIR")) {
       updateNumericInputsByNameAndValue(list(
         beta = 0.001,
         gamma = 0.1,
@@ -146,7 +146,7 @@ server <- function(input, output, session) {
     }
 
     ## SIRD - TMA
-    if ((input$qValue == "1") && (input$modelSelect == "SIRD")) {
+    if ((input$massActionSelect == "1") && (input$modelSelect == "SIRD")) {
       updateNumericInputsByNameAndValue(list(
         beta = 0.4,
         gamma = 0.04,
@@ -160,7 +160,7 @@ server <- function(input, output, session) {
     }
 
     ## SIRD - PMA
-    if ((input$qValue == "0") && (input$modelSelect == "SIRD")) {
+    if ((input$massActionSelect == "0") && (input$modelSelect == "SIRD")) {
       updateNumericInputsByNameAndValue(list(
         beta = 0.001,
         gamma = 0.1,
@@ -174,7 +174,7 @@ server <- function(input, output, session) {
     }
 
     ## SEIR - TMA
-    if ((input$qValue == "1") && (input$modelSelect == "SEIR")) {
+    if ((input$massActionSelect == "1") && (input$modelSelect == "SEIR")) {
       updateNumericInputsByNameAndValue(list(
         beta = 0.35,
         gamma = 0.1429,
@@ -189,7 +189,7 @@ server <- function(input, output, session) {
     }
 
     ## SEIR - PMA
-    if ((input$qValue == "0") && (input$modelSelect == "SEIR")) {
+    if ((input$massActionSelect == "0") && (input$modelSelect == "SEIR")) {
       updateNumericInputsByNameAndValue(list(
         beta = 0.5,
         gamma = 0.5,
@@ -204,7 +204,7 @@ server <- function(input, output, session) {
     }
 
     ## SEIRD - TMA
-    if ((input$qValue == "1") && (input$modelSelect == "SEIRD")) {
+    if ((input$massActionSelect == "1") && (input$modelSelect == "SEIRD")) {
       updateNumericInputsByNameAndValue(list(
         beta = 0.35,
         gamma = 0.1429,
@@ -220,7 +220,7 @@ server <- function(input, output, session) {
     }
 
     ## SEIRD - PMA
-    if (input$qValue == "0" && input$modelSelect == "SEIRD") {
+    if (input$massActionSelect == "0" && input$modelSelect == "SEIRD") {
       updateNumericInputsByNameAndValue(list(
         beta = 0.5,
         gamma = 0.5,
@@ -385,7 +385,7 @@ server <- function(input, output, session) {
     )
 
     ## Total mass action or pseudo mass action
-    updateRadioButtons(session, "qValue", selected = "0")
+    updateRadioButtons(session, "massActionSelect", selected = "0")
 
     updateRadioButtons(session, "stochasticSelect", selected = "Deterministic")
     updateCheckboxInput(session, "muValue", value = FALSE) # Vital Dynamics
@@ -400,7 +400,7 @@ server <- function(input, output, session) {
     hide("outputPanel")
 
     ## Total mass action or pseudo mass action
-    updateRadioButtons(session, "qValue", selected = "0")
+    updateRadioButtons(session, "massActionSelect", selected = "0")
 
     updateRadioButtons(session, "stochasticSelect", selected = "Deterministic")
 
