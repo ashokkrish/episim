@@ -41,6 +41,7 @@ vitalDynamicsParameters <-
 
 modelConfigurationPanel <- function() {
   sidebarPanel(id = "inputPanel",
+    style = "margin-bottom: 0;",
     pickerInput("modelSelect", "Epidemic Model",
                 list("Please choose a model" = "",
                      SIR = "SIR",
