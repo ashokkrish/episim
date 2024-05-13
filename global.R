@@ -1,23 +1,11 @@
-# NOTE: don't install packages within an application, and don't comment code
-# related to package installation; such lines are only relevant to interactive,
-# exploratory data analysis scripts shared directly between users. Packages and
-# Shiny applications should never contain such code. Package dependencies should
-# be satisfied using package metadata.
-packagesloaded <-
-  c("tidyverse",
-    "here",
-    "deSolve",
-    "shiny",
-    "shinyhelper",
-    "shinyjs",
-    "shinyvalidate",
-    "shinyWidgets") |>
-  lapply(FUN = require, character.only = TRUE) |>
-  as.logical() |>
-  all()
-
-## "Five is alive!," but our application must die.
-if (!packagesloaded) quit(5)
+library(tidyverse)
+library(here)
+library(deSolve)
+library(shiny)
+library(shinyhelper)
+library(shinyjs)
+library(shinyvalidate)
+library(shinyWidgets)
 
 ## NEXT: switch to using the rpojroot package when preparing this Shiny
 ## application for deployment, because the here package is a lightweight wrapper
