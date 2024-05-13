@@ -18,17 +18,25 @@ equationsSIRS <- function(time, variables, parameters)
   list(c(dS, dI, dR, dN))
 }
 
-solveSIRS() <- function(beta = 0.001, gamma = 0.1, xi = 0.1, muB = 0, muD = 0, population = 500,
-                        susceptible = 499, infected = 1, recovered = 0,timesteps = 50)
-{
-  variables <- c(susceptible, infected, recovered, population,q)
-  names(variables) <- c("S", "I", "R", "N")
-  parameters <- c(beta, gamma, xi, muB, muD)
-  names(parameters) <- c("beta", "gamma", "xi", "muB", "muD")
-  
-  deSolve::lsoda(variables, seq(0, timesteps, by = 1),
-                 equationsSIR, parameters) |> as.data.frame()
-}
+solveSIRS <-
+  function(beta = 0.001, gamma = 0.1, muB = 0, muD = 0, xi = 0.05,
+           population = 500, susceptible = 498, infected = 1,
+           recovered = 0, timesteps = 50, q = 0, exposed = 1, ...) {
+    
+    ## Assign the variables and parameters to vectors then name them, makign the
+    ## function readable.
+    variables <- c(susceptible,infected, recovered, population)
+    names(variables) <- c("S","I", "R", "N")
+    parameters <- c(beta, gamma, muB, muD, xi)
+    names(parameters) <- c("beta", "gamma", "muB", "muD", "xi")
+    
+    deSolve::lsoda(variables,
+                   seq(0, timesteps, by = 1),
+                   equationsSIRS,
+                   q = q,
+                   parameters, ...) |>
+      as.data.frame()
+  }
 
 plotTheme <- ggplot2::theme(
   axis.line = ggplot2::element_line(color = "black"),
@@ -48,9 +56,9 @@ plotSIRS <- function()
                   x = "Time") +
     ggplot2::scale_x_continuous(expand = c(0, 0)) +
     ggplot2::scale_y_continuous(expand = c(0, 0)) +
-    ggplot2::geom_line(aes(y = S, color = "Blue"), linewidth = 1.5) +
-    ggplot2::geom_line(aes(y = I, color = "Red"), linewidth = 1.5) +
-    ggplot2::geom_line(aes(y = R, color = "Green"), linewidth = 1.5) +
+    ggplot2::geom_line(ggplot2::aes(y = S, color = "Blue"), linewidth = 1.5) +
+    ggplot2::geom_line(ggplot2::aes(y = I, color = "Red"), linewidth = 1.5) +
+    ggplot2::geom_line(ggplot2::aes(y = R, color = "Green"), linewidth = 1.5) +
     ggplot2::scale_color_identity(
       name = "SIRS", breaks = c("Blue", "Red", "Green"),
       labels = c("Susceptible", "Infected", "Recovered"), guide = "legend"
@@ -63,7 +71,7 @@ plotPhasePlaneSIRS <- function()
     ggplot2::geom_line(aes(y = I, color = "Blue"), linewidth = 1.5) +
     plotTheme +
     ggplot2::ggtitle("SI Phase Plane") + 
-    ggplot2::theme(plot.title = element_text(size = 22, face = "bold")) +
+    ggplot2::theme(plot.title = ggplot2::element_text(size = 22, face = "bold")) +
     ggplot2::ylab("Infected (I)") +
     ggplot2::scale_x_continuous(expand = c(0, 0)) +
     ggplot2::scale_y_continuous(expand = c(0, 0)) +
