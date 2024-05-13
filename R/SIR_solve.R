@@ -52,9 +52,9 @@ plotSIR <- function()
                   x = "Time") +
     ggplot2::scale_x_continuous(expand = c(0, 0)) +
     ggplot2::scale_y_continuous(expand = c(0, 0)) +
-    ggplot2::geom_line(aes(y = S, color = "Blue"), linewidth = 1.5) +
-    ggplot2::geom_line(aes(y = I, color = "Red"), linewidth = 1.5) +
-    ggplot2::geom_line(aes(y = R, color = "Green"), linewidth = 1.5) +
+    ggplot2::geom_line(ggplot2::aes(y = S, color = "Blue"), linewidth = 1.5) +
+    ggplot2::geom_line(ggplot2::aes(y = I, color = "Red"), linewidth = 1.5) +
+    ggplot2::geom_line(ggplot2::aes(y = R, color = "Green"), linewidth = 1.5) +
     ggplot2::scale_color_identity(
       name = "SIR", breaks = c("Blue", "Red", "Green"),
       labels = c("Susceptible", "Infected", "Recovered"), guide = "legend"
@@ -65,10 +65,10 @@ plotSIR <- function()
 plotPhasePlaneSIR <- function()
 {
   ggplot2::ggplot(solveSIR(), ggplot2::aes(x = S))+
-    ggplot2::geom_line(aes(y = I, color = "Blue"), linewidth = 1.5) +
+    ggplot2::geom_line(ggplot2::aes(y = I, color = "Blue"), linewidth = 1.5) +
     plotTheme +
     ggplot2::ggtitle("SI Phase Plane") + 
-    ggplot2::theme(plot.title = element_text(size = 22, face = "bold")) +
+    ggplot2::theme(plot.title = ggplot2::element_text(size = 22, face = "bold")) +
     ggplot2::ylab("Infected (I)") +
     ggplot2::scale_x_continuous(expand = c(0, 0)) +
     ggplot2::scale_y_continuous(expand = c(0, 0)) +
