@@ -56,11 +56,11 @@ server <- function(input, output, session) {
     susceptibleSIR = c(sv_gt(0)),
     infectedSIR    = c(sv_gte(0)),
     recoveredSIR   = c(sv_gte(0)),
-    
+
     ## SIRS
     betaSIRS        = c(sv_between(0, 1)),
     gammaSIRS       = c(sv_between(0, 5)),
-    xiSIRS       = c(sv_between(0, 5)),
+    xiSIRS          = c(sv_between(0, 5)),
     populationSIRS  = c(sv_gt(0)),
     susceptibleSIRS = c(sv_gt(0)),
     infectedSIRS    = c(sv_gte(0)),
@@ -281,7 +281,7 @@ server <- function(input, output, session) {
         withMathJax(
           switch(input$modelSelect,
                  SIR = SIR_LaTeX(input$muValue),
-                 SIRS = SIRS_LaTeX(),
+                 SIRS = SIRS_LaTeX(input$muValue),
                  SIRD = SIRD_LaTeX(input$muValue),
                  SEIR = SEIR_LaTeX(input$muValue),
                  SEIRD = SEIRD_LaTeX(input$muValue)))))
@@ -352,14 +352,14 @@ server <- function(input, output, session) {
             infectedSIR = 1,
             recoveredSIR = 0
           ),
-        # Need to verify the value of each 
-        # I temporarily leaves the value of each similar to SIR but
-        # I will change after having vertification
+        ## FIXME Khanh: Need to verify the value of each 
+        ## I temporarily leaves the value of each similar to SIR but
+        ## I will change after having vertification
         SIRS =
           list(
             betaSIRS = 0.001,
             gammaSIRS = 0.1,
-            xiSIRS = 0.1, #Value of xi needed here
+            xiSIRS = 0.1, # Value of xi needed here
             populationSIRS = 500,
             susceptibleSIRS = 499,
             infectedSIRS = 1,
