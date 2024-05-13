@@ -1,18 +1,18 @@
 SIR_LaTeX <- function(mu) {
-  switch(mu + 1, # See the function help for why this addition is used.
+  switch(mu + 1, 
     helpText(
       r"(Susceptible $$\frac{dS}{dt} = - \beta \frac{ S I}{N^q}$$)",
       r"(Infectious $$\frac{dI}{dt} = \frac{\beta S I}{N^q} - \gamma {I} $$)",
       r"(Recovered $$\frac{dR}{dt} = \gamma {I} $$)",
       r"(Reproductive ratio $$R_0 =  \frac{\beta}{\gamma} S(0)^q$$)",
-      "q-Value $$\\begin{equation} x = \\begin{cases} 1 & \\text{, } frequency − dependent \\\\ 0 & \\text{, } density − dependent \\end{cases}\\end{equation} $$"
+      r"(q-Value $$\begin{equation} x = \begin{cases} 1 & \text{, } frequency − dependent \\\\ 0 & \text{, } density − dependent \end{cases}\end{equation} $$)"
     ),
     helpText(
       r"(Susceptible $$\frac{dS}{dt} =\mu_B N - \mu_D S - \beta \frac{ S I}{N^q}$$)",
       r"(Infectious $$\frac{dI}{dt} = \frac{\beta S I}{N^q} - \gamma {I} - \mu_D I$$)",
       r"(Recovered $$\frac{dR}{dt} = \gamma {I} - \mu_D R $$)",
       r"(Reproductive ratio $$R_0 =  \frac{\beta}{\gamma} S(0)^q$$)",
-      "q-Value $$\\begin{equation} x = \\begin{cases} 1 & \\text{, } frequency − dependent \\\\ 0 & \\text{, } density − dependent \\end{cases}\\end{equation} $$"
+      r"(q-Value $$\begin{equation} x = \begin{cases} 1 & \text{, } frequency − dependent \\\\ 0 & \text{, } density − dependent \end{cases}\end{equation} $$)"
     )
   )
 }
@@ -29,7 +29,7 @@ SIRS_LaTeX <- function(mu) {
            r"(Infectious $$\frac{dI}{dt} = \frac{\beta S I}{N} - \gamma {I}$$)",
            r"(Recovered $$\frac{dR}{dt} = \gamma {I} - \xi{R} $$)",
            r"(Reproductive ratio $$R_0 =  \frac{\beta}{\gamma} S(0)^q$$)", #need to double check 
-           "q-Value $$\\begin{equation} x = \\begin{cases} 1 & \\text{, } frequency − dependent \\\\ 0 & \\text{, } density − dependent \\end{cases}\\end{equation} $$"
+           r"(q-Value $$\begin{equation} x = \begin{cases} 1 & \text{, } frequency − dependent \\\\ 0 & \text{, } density − dependent \end{cases}\end{equation} $$)"
            ),
          helpText(
            # want to make sure it is \nu{S}
@@ -37,7 +37,7 @@ SIRS_LaTeX <- function(mu) {
            r"(Infectious $$\frac{dI}{dt} = \frac{\beta S I}{N} - \gamma {I} - \nu{I}$$)",
            r"(Recovered $$\frac{dR}{dt} = \gamma {I} - \xi{R} - \nu{R}$$)",
            r"(Reproductive ratio $$R_0 =  \frac{\beta}{\gamma} S(0)^q$$)", #need to double check 
-           "q-Value $$\\begin{equation} x = \\begin{cases} 1 & \\text{, } frequency − dependent \\\\ 0 & \\text{, } density − dependent \\end{cases}\\end{equation} $$"
+           r"(q-Value $$\begin{equation} x = \begin{cases} 1 & \text{, } frequency − dependent \\\\ 0 & \text{, } density − dependent \end{cases}\end{equation} $$)"
            )
          )
 }
@@ -50,7 +50,7 @@ SIRD_LaTeX <- function(mu) {
       r"(Recovered $$\frac{dR}{dt} = \gamma {I} $$)",
       r"(Dead $$\frac{dD}{dt} = \delta {I} $$)",
       r"(Reproductive ratio $$R_0 =  \frac{\beta}{\gamma + \delta} S(0)^q$$)",
-      "q-Value $$\\begin{equation} x = \\begin{cases} 1 & \\text{, } frequency − dependent \\\\ 0 & \\text{, } density − dependent \\end{cases}\\end{equation} $$"
+      r"(q-Value $$\begin{equation} x = \begin{cases} 1 & \text{, } frequency − dependent \\\\ 0 & \text{, } density − dependent \end{cases}\end{equation} $$)"
     ),
     helpText(
       r"(Susceptible $$\frac{dS}{dt} =\mu_B N - \mu_D S - \beta \frac{ S I}{N^q}$$)",
@@ -58,7 +58,7 @@ SIRD_LaTeX <- function(mu) {
       r"(Recovered $$\frac{dR}{dt} = \gamma {I} - \mu_D R $$)",
       r"(Dead $$\frac{dD}{dt} = \delta {I} $$)",
       r"(Reproductive ratio $$R_0 =  \frac{\beta}{\gamma + \delta} S(0)^q$$)",
-      "q-Value $$\\begin{equation} x = \\begin{cases} 1 & \\text{, } frequency − dependent \\\\ 0 & \\text{, } density − dependent \\end{cases}\\end{equation} $$"
+      r"(q-Value $$\begin{equation} x = \begin{cases} 1 & \text{, } frequency − dependent \\\\ 0 & \text{, } density − dependent \end{cases}\end{equation} $$)"
     )
   )
 }
@@ -71,7 +71,7 @@ SEIR_LaTeX <- function(mu) {
       r"(Infectious $$\frac{dI}{dt} = \gamma {E} - \sigma {I} $$)",
       r"(Recovered $$\frac{dR}{dt} = \sigma {I} $$)",
       r"(Reproductive ratio $$R_0 =  \frac{\beta}{\gamma}$$)",
-      "q-Value $$\\begin{equation} x = \\begin{cases} 1 & \\text{, } frequency − dependent \\\\ 0 & \\text{, } density − dependent \\end{cases}\\end{equation} $$"
+      r"(q-Value $$\begin{equation} x = \begin{cases} 1 & \text{, } frequency − dependent \\\\ 0 & \text{, } density − dependent \end{cases}\end{equation} $$)"
     ),
     helpText(
       r"(Susceptible $$\frac{dS}{dt} =\mu_B N - \mu_D S - \beta \frac{ S I}{N^q}$$)",
@@ -79,7 +79,7 @@ SEIR_LaTeX <- function(mu) {
       r"(Infectious $$\frac{dI}{dt} = \gamma E - \sigma I - \mu_D I $$)",
       r"(Recovered $$\frac{dR}{dt} = \sigma I - \mu_D R $$)",
       r"(Reproductive ratio $$R_0 =  \frac{\beta}{\gamma}$$)",
-      "q-Value $$\\begin{equation} x = \\begin{cases} 1 & \\text{, } frequency − dependent \\\\ 0 & \\text{, } density − dependent \\end{cases}\\end{equation} $$"
+     r"(q-Value $$\begin{equation} x = \begin{cases} 1 & \text{, } frequency − dependent \\\\ 0 & \text{, } density − dependent \end{cases}\end{equation} $$)"
     )
   )
 }
@@ -93,7 +93,7 @@ SEIRD_LaTeX <- function(mu) {
       r"(Recovered $$\frac{dR}{dt} = \sigma I $$)",
       r"(Dead $$ \frac{dD}{dt} = \delta I $$)",
       r"(Reproductive ratio $$R_0 =  \frac{\beta}{\gamma}$$)",
-      "q-Value $$\\begin{equation} x = \\begin{cases} 1 & \\text{, } frequency − dependent \\\\ 0 & \\text{, } density − dependent \\end{cases}\\end{equation} $$"
+      r"(q-Value $$\begin{equation} x = \begin{cases} 1 & \text{, } frequency − dependent \\\\ 0 & \text{, } density − dependent \end{cases}\end{equation} $$)"
     ),
     helpText(
       r"(Susceptible $$\frac{dS}{dt} =\mu_B N - \mu_D S - \beta \frac{ S I}{N^q}$$)",
@@ -102,7 +102,7 @@ SEIRD_LaTeX <- function(mu) {
       r"(Recovered $$\frac{dR}{dt} = \sigma I - \mu_D R $$)",
       r"(Dead $$ \frac{dD}{dt} = \delta I $$)",
       r"(Reproductive ratio $$R_0 =  \frac{\beta}{\gamma}$$)",
-      "q-Value $$\\begin{equation} x = \\begin{cases} 1 & \\text{, } frequency − dependent \\\\ 0 & \\text{, } density − dependent \\end{cases}\\end{equation} $$"
+      r"(q-Value $$\begin{equation} x = \begin{cases} 1 & \text{, } frequency − dependent \\\\ 0 & \text{, } density − dependent \end{cases}\end{equation} $$)"
     )
   )
 }
