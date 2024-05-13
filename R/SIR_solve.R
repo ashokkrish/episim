@@ -48,6 +48,7 @@ plotSIR <- function()
 {
   ggplot2::ggplot(solveSIR(), ggplot2::aes(x = time)) +
     plotTheme +
+
     ggplot2::labs(title = "SIRS Epidemic Model", y = "Number of People",
                   x = "Time") +
     ggplot2::scale_x_continuous(expand = c(0, 0)) +
@@ -55,6 +56,7 @@ plotSIR <- function()
     ggplot2::geom_line(ggplot2::aes(y = S, color = "Blue"), linewidth = 1.5) +
     ggplot2::geom_line(ggplot2::aes(y = I, color = "Red"), linewidth = 1.5) +
     ggplot2::geom_line(ggplot2::aes(y = R, color = "Green"), linewidth = 1.5) +
+
     ggplot2::scale_color_identity(
       name = "SIR", breaks = c("Blue", "Red", "Green"),
       labels = c("Susceptible", "Infected", "Recovered"), guide = "legend"
@@ -65,6 +67,7 @@ plotSIR <- function()
 plotPhasePlaneSIR <- function()
 {
   ggplot2::ggplot(solveSIR(), ggplot2::aes(x = S))+
+
     ggplot2::geom_line(ggplot2::aes(y = I, color = "Blue"), linewidth = 1.5) +
     plotTheme +
     ggplot2::ggtitle("SI Phase Plane") + 
