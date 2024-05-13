@@ -57,6 +57,15 @@ server <- function(input, output, session) {
     infectedSIR    = c(sv_gte(0)),
     recoveredSIR   = c(sv_gte(0)),
 
+    ## SIRS
+    betaSIRS        = c(sv_between(0, 1)),
+    gammaSIRS       = c(sv_between(0, 5)),
+    xiSIRS          = c(sv_between(0, 5)),
+    populationSIRS  = c(sv_gt(0)),
+    susceptibleSIRS = c(sv_gt(0)),
+    infectedSIRS    = c(sv_gte(0)),
+    recoveredSIRS   = c(sv_gte(0)),
+
     ## SIRD
     betaSIRD        = c(sv_between(0, 0.5)),
     gammaSIRD       = c(sv_between(0, 0.5)),
@@ -342,6 +351,19 @@ server <- function(input, output, session) {
             susceptibleSIR = 499,
             infectedSIR = 1,
             recoveredSIR = 0
+          ),
+        ## FIXME Khanh: Need to verify the value of each 
+        ## I temporarily leaves the value of each similar to SIR but
+        ## I will change after having vertification
+        SIRS =
+          list(
+            betaSIRS = 0.001,
+            gammaSIRS = 0.1,
+            xiSIRS = 0.1, # Value of xi needed here
+            populationSIRS = 500,
+            susceptibleSIRS = 499,
+            infectedSIRS = 1,
+            recoveredSIRS = 0
           ),
         SIRD =
           list(
