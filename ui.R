@@ -47,6 +47,7 @@ modelConfigurationPanel <- function() {
                      SIRS = "SIRS",
                      SIRD = "SIRD",
                      SEIR = "SEIR",
+                     SEIRS = "SEIRS",
                      SEIRD = "SEIRD"),
                 ## FIXME: is this having any effect, given width is not "fit"?
                 inline = TRUE,
@@ -233,6 +234,7 @@ of this usage.)"))
   )
 }
 
+## APPLICATION UI ROOT -----------------------------------------------------
 fluidPage(useShinyjs(),
           div(titlePanel("Compartmental Models of Epidemiology")),
           withMathJax(navbarPage(title = "",

@@ -14,14 +14,12 @@ server <- function(input, output, session) {
   }
 
   updateNumericInputsByNameAndValue <- function(params) {
-    ## I wish this was less than eighty characters so it could be on one line.
-    invisible(lapply(params,
-      updateNumericInput,
-      session = session,
-      inputId = names(params)
-    ))
+    lapply(params, updateNumericInput,
+           session = session,
+           inputId = names(params))
   }
 
+  ## TODO: The value needs to depend on the model selection.
   addThenEnableValidatorRules <- function(validator, inputIdRulePairs) {
     mapply(\(rules, inputId) {
       lapply(rules, validator$add_rule, inputId = inputId)
@@ -40,63 +38,59 @@ server <- function(input, output, session) {
     muBirth = c(sv_between(0, 0.1)),
     muDeath = c(sv_between(0, 0.1)),
 
-    ## SIR_Stochastic
-    stochasticSIR = c(sv_integer(), sv_between(0, 100, c(FALSE, TRUE))),
-    betaSIR_Stoc        = c(sv_between(0, 1)),
-    gammaSIR_Stoc       = c(sv_between(0, 5)),
-    populationSIR_Stoc  = c(sv_gt(0)),
-    susceptibleSIR_Stoc = c(sv_gt(0)),
-    infectedSIR_Stoc    = c(sv_gte(0)),
-    recoveredSIR_Stoc   = c(sv_gte(0)),
+    `SIR-Stochastic` = list(
+      stochasticModelVariableNumberOfReplicates = c(sv_integer(), sv_between(0, 100, c(FALSE, TRUE))),
+      beta        = c(sv_between(0, 1)),
+      gamma       = c(sv_between(0, 5)),
+      population  = c(sv_gt(0)),
+      susceptible = c(sv_gt(0)),
+      infected    = c(sv_gte(0)),
+      recovered   = c(sv_gte(0))
+    ),
 
-    ## SIR
-    betaSIR        = c(sv_between(0, 1)),
-    gammaSIR       = c(sv_between(0, 5)),
-    populationSIR  = c(sv_gt(0)),
-    susceptibleSIR = c(sv_gt(0)),
-    infectedSIR    = c(sv_gte(0)),
-    recoveredSIR   = c(sv_gte(0)),
+    SIR = list(
+      beta        = c(sv_between(0, 1)),
+      gamma       = c(sv_between(0, 5)),
+      population  = c(sv_gt(0)),
+      susceptible = c(sv_gt(0)),
+      infected    = c(sv_gte(0)),
+      recovered   = c(sv_gte(0))
+    ),
 
-    ## SIRS
-    betaSIRS        = c(sv_between(0, 1)),
-    gammaSIRS       = c(sv_between(0, 5)),
-    xiSIRS          = c(sv_between(0, 5)),
-    populationSIRS  = c(sv_gt(0)),
-    susceptibleSIRS = c(sv_gt(0)),
-    infectedSIRS    = c(sv_gte(0)),
-    recoveredSIRS   = c(sv_gte(0)),
+    SIRD = list(
+      beta        = c(sv_between(0, 0.5)),
+      gamma       = c(sv_between(0, 0.5)),
+      delta       = c(sv_between(0, 0.5)),
+      population  = c(sv_gt(0)),
+      susceptible = c(sv_gt(0)),
+      infected    = c(sv_gte(0)),
+      recovered   = c(sv_gte(0)),
+      dead        = c(sv_gte(0))
+    ),
 
-    ## SIRD
-    betaSIRD        = c(sv_between(0, 0.5)),
-    gammaSIRD       = c(sv_between(0, 0.5)),
-    deltaSIRD       = c(sv_between(0, 0.5)),
-    populationSIRD  = c(sv_gt(0)),
-    susceptibleSIRD = c(sv_gt(0)),
-    infectedSIRD    = c(sv_gte(0)),
-    recoveredSIRD   = c(sv_gte(0)),
-    deadSIRD        = c(sv_gte(0)),
+    SEIR = list(
+      beta        = c(sv_between(0, 1)),
+      gamma       = c(sv_between(0, 3)),
+      sigma       = c(sv_between(0, 0.5)),
+      population  = c(sv_gt(0)),
+      susceptible = c(sv_gt(0)),
+      exposed     = c(sv_gte(0)),
+      infected    = c(sv_gte(0)),
+      recovered   = c(sv_gte(0))
+    ),
 
-    ## SEIR,
-    beta        = c(sv_between(0, 1)),
-    gamma       = c(sv_between(0, 3)),
-    sigma       = c(sv_between(0, 0.5)),
-    population  = c(sv_gt(0)),
-    susceptible = c(sv_gt(0)),
-    exposed     = c(sv_gte(0)),
-    infected    = c(sv_gte(0)),
-    recovered   = c(sv_gte(0)),
-
-    ## SEIRD
-    betaSEIRD        = c(sv_between(0, 1)),
-    gammaSEIRD       = c(sv_between(0, 3)),
-    sigmaSEIRD       = c(sv_between(0, 0.5)),
-    deltaSEIRD       = c(sv_between(0, 0.5)),
-    populationSEIRD  = c(sv_gt(0)),
-    susceptibleSEIRD = c(sv_gt(0)),
-    exposedSEIRD     = c(sv_gte(0)),
-    infectedSEIRD    = c(sv_gte(0)),
-    recoveredSEIRD   = c(sv_gte(0)),
-    deadSEIRD        = c(sv_gte(0)),
+    SEIRD = list(
+      beta        = c(sv_between(0, 1)),
+      gamma       = c(sv_between(0, 3)),
+      sigma       = c(sv_between(0, 0.5)),
+      delta       = c(sv_between(0, 0.5)),
+      population  = c(sv_gt(0)),
+      susceptible = c(sv_gt(0)),
+      exposed     = c(sv_gte(0)),
+      infected    = c(sv_gte(0)),
+      recovered   = c(sv_gte(0)),
+      dead        = c(sv_gte(0))
+    ),
 
     timesteps = c(sv_integer(), sv_gt(0)))
 
@@ -287,6 +281,8 @@ server <- function(input, output, session) {
                  SEIRD = SEIRD_LaTeX(input$muValue)))))
   })
 
+  ## TODO: resetting the application should set the widget values to those which
+  ## are defined for the model in the spreadsheet (hosted on Google Sheets).
   observeEvent(input$resetAll, {
     hide("outputPanel")
 
@@ -300,25 +296,34 @@ server <- function(input, output, session) {
     # the model.
     lapply(
       list(
-        `SIR-Stochastic` =
+        SIR =
           list(
-            stochasticSIR = 50,
-            betaSIR_Stoc = 0.00178,
-            gammaSIR_Stoc = 2.73,
-            populationSIR_Stoc = 1000,
-            susceptibleSIR_Stoc = 990,
-            infectedSIR_Stoc = 10,
-            recoveredSIR_Stoc = 0
+            beta = 0.001,
+            gamma = 0.1,
+            population = 500,
+            susceptible = 499,
+            infected = 1,
+            recovered = 0
+          ),
+        `SIR-Stochastic` = # Parameter and variable values when stochastic.
+          list(
+            stochasticModelVariableNumberOfReplicates = 50, # No. replicates
+            beta = 0.00178,
+            gamma = 2.73,
+            population = 1000,
+            susceptible = 990,
+            infected = 10,
+            recovered = 0
           ),
         SIRD =
           list(
-            betaSIRD = 0.001,
-            gammaSIRD = 0.1,
-            deltaSIRD = 0.05,
-            populationSIRD = 500,
-            susceptibleSIRD = 499,
-            infectedSIRD = 1,
-            recoveredSIRD = 0
+            beta = 0.001,
+            gamma = 0.1,
+            delta = 0.05,
+            population = 500,
+            susceptible = 499,
+            infected = 1,
+            recovered = 0
           ),
         SEIR =
           list(
@@ -352,7 +357,7 @@ server <- function(input, output, session) {
             infectedSIR = 1,
             recoveredSIR = 0
           ),
-        ## FIXME Khanh: Need to verify the value of each 
+        ## FIXME Khanh: Need to verify the value of each
         ## I temporarily leaves the value of each similar to SIR but
         ## I will change after having vertification
         SIRS =
@@ -387,8 +392,9 @@ server <- function(input, output, session) {
     updateNumericInput(session, "timesteps", value = 100)
   })
 
-  ## Whenever the model selection changes the widgets throughout the application
-  ## are reset to their default values.
+  ## Whenever the model selection changes (whether the parameters and variables
+  ## are set manually or taken from pre-defined models), the widget values
+  ## throughout the application are updated as appropriate.
   observeEvent(input$modelSelect, {
     # Hide output tabs when the model changes.
     hide("outputPanel")
@@ -397,30 +403,46 @@ server <- function(input, output, session) {
     updateRadioButtons(session, "qValue", selected = "0")
 
     updateRadioButtons(session, "stochasticSelect", selected = "Deterministic")
+
+    ## TODO: refactor the application to use a more descriptive variable name:
+    ## `vitalDynamicsSelect', perhaps.
     updateCheckboxInput(session, "muValue", value = FALSE) # Vital Dynamics
 
+    ## TODO: Obtain the parameters that should be used based off of the current
+    ## model selection. When a pre-defined model is selected, resetting the
+    ## application state should reset the widget values to those defined by the
+    ## model (which allows users to modify the parameters of a pre-defined model
+    ## from some alternate starting point than our own pre-defined widget value
+    ## defaults for manual input).
+    ###
+    ## parameters <- spreadsheet |>
+    ##   filter(model == input$modelSelect) |>
+    ##   select(parameters)
+    ## updateNumericInputsByNameAndValue(as.list(parameters))
 
+    ## TODO: these should be extracted into a data.frame which can be updated
+    ## using any spreadsheet application.
     "SIR-Stochastic" %ifModelSelectionUpdateInputs%
       list(
-        stochasticSIR = 50,
-        betaSIR_Stoc = 0.00178,
-        gammaSIR_Stoc = 2.73,
-        populationSIR_Stoc = 1000,
-        susceptibleSIR_Stoc = 990,
-        infectedSIR_Stoc = 10,
-        recoveredSIR_Stoc = 0,
+        stochasticModelVariableNumberOfReplicates = 50,
+        beta = 0.00178,
+        gamma = 2.73,
+        population = 1000,
+        susceptible = 990,
+        infected = 10,
+        recovered = 0,
         timesteps = 10
       )
 
     "SIRD" %ifModelSelectionUpdateInputs%
       list(
-        betaSIRD = 0.001,
-        gammaSIRD = 0.1,
-        deltaSIRD = 0.05,
-        populationSIRD = 500,
-        susceptibleSIRD = 499,
-        infectedSIRD = 1,
-        recoveredSIRD = 0,
+        beta = 0.001,
+        gamma = 0.1,
+        delta = 0.05,
+        population = 500,
+        susceptible = 499,
+        infected = 1,
+        recovered = 0,
         timesteps = 50
       )
 
@@ -439,15 +461,15 @@ server <- function(input, output, session) {
 
     "SEIRD" %ifModelSelectionUpdateInputs%
       list(
-        betaSEIRD = 0.5,
-        gammaSEIRD = 0.5,
-        sigmaSEIRD = 0.1,
-        deltaSEIRD = 0.05,
-        populationSEIRD = 53,
-        susceptibleSEIRD = 50,
-        exposedSEIRD = 3,
-        infectedSEIRD = 0,
-        recoveredSEIRD = 0,
+        beta = 0.5,
+        gamma = 0.5,
+        sigma = 0.1,
+        delta = 0.05,
+        population = 53,
+        susceptible = 50,
+        exposed = 3,
+        infected = 0,
+        recovered = 0,
         timesteps = 50
       )
   })
