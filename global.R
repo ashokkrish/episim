@@ -6,6 +6,9 @@ library(shinyhelper)
 library(shinyjs)
 library(shinyvalidate)
 library(shinyWidgets)
+library(xlsx)
+
+defaultParameterValues <- read.xlsx(here("data/defaultParameterValues.xlsx"), sheetIndex = 1)
 
 ## NEXT: switch to using the rpojroot package when preparing this Shiny
 ## application for deployment, because the here package is a lightweight wrapper

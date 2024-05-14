@@ -106,3 +106,8 @@ SEIRD_LaTeX <- function(mu) {
     )
   )
 }
+
+## FIXME: is this working or not?
+renderModelLaTeX <- function(model, vitalStatistics) {
+  tagList(withMathJax(call(paste0(model, "_LaTeX"), vitalStatistics)))
+}
