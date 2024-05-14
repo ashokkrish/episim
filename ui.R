@@ -88,56 +88,61 @@ modelResultsPanel <- function() {
 
 ## NOTE: https://englishlessonsbrighton.co.uk/names-letters-english-alphabet/
 ### Parameters
-beta <- function() {
-  numericInput("beta", r"(Exposure Rate ($\beta$))", 0.5,
+beta <- numericInput("beta", "ERROR", 0.5,
+  min = 0, max = 1, # TODO: Adjust minimum and maximum
+  step = 0.01,
+  width = "300px"
+)
+
+gamma <- numericInput("gamma", "ERROR", 0.5,
+  min = 0, max = 3, # TODO: Adjust minimum and maximum
+  step = 0.01, # TODO: Adjust the stepping constant.
+  width = "300px"
+)
+delta <- numericInput("delta", r"(Fatality rate ($\delta$))", 0.5,
+  min = 0, max = 1, # TODO: Adjust minimum and maximum
+  step = 0.01,
+  width = "300px"
+)
+
+sigma <- numericInput("sigma", r"(Rate of recovery ($\sigma$))", 0.5,
+  min = 0, max = 1, # TODO: Adjust minimum and maximum
+  step = 0.01,
+  width = "300px"
+)
+
+xi <- conditionalPanel(
+  r"{['SIRS', 'SEIRS'].includes(input.modelSelect)}",
+  numericInput("xi", r"(Rate of loss of immunity ($\xi$))", 0.5,
     min = 0, max = 1, # TODO: Adjust minimum and maximum
     step = 0.01,
     width = "300px"
   )
-}
-
-gamma <- function() {
-  numericInput("gamma", r"(Exposure Rate ($\gamma$))", 0.5,
-    min = 0, max = 3, # TODO: Adjust minimum and maximum
-    step = 0.01, # TODO: Adjust the stepping constant.
-    width = "300px")
-}
-
-delta <- function() {
-  numericInput("delta", r"(Exposure Rate ($\delta$))", 0.5,
-    min = 0, max = 1, # TODO: Adjust minimum and maximum
-    step = 0.01,
-    width = "300px")
-}
-
-omega <- function() {
-  numericInput("omega", r"(Exposure Rate ($\omega$))", 0.5,
-    min = 0, max = 1, # TODO: Adjust minimum and maximum
-    step = 0.01,
-    width = "300px")
-}
+)
 
 ## Vital Dynamics
-bee <- function() {}
-mu <- function() {}
+## bee <- {}
+## mu <- {}
 
 ## Death due to disease
-alpha <- function() {}
+## alpha <- {}
 
 ## Migraiton and emigration
-AY <- function() {}
-BEE <- function() {}
+## AY <- {}
+## BEE <- {}
 
 modelParameters <- function() {
   div(id = "parameters",
-    div(id = "commonParameters", beta(), gamma()),
+    div(id = "commonParameters", beta, gamma),
     div(id = "optionalParameters", vitalDynamicsParameters),
     div(id = "additionalParameters",
-      delta(),
-      omega(),
-      bee(), mu(), # Vital statistics
-      alpha(), # Mortality rate
-      AY(), BEE() # Immigration and emigration
+      delta,
+      sigma,
+      xi
+      ## TODO
+      ## bee, mu, # Vital statistics
+      ## alpha, # Mortality rate
+      ## AY, BEE # Immigration and emigration
     )
   )
 }
