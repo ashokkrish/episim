@@ -1,287 +1,67 @@
+# Define the CSS styles once
+css_styles <- HTML(paste0(
+  '<style>',
+  '  .equation-container {',
+  '    display: flex;',
+  '    justify-content: flex-start;',
+  '  }',
+  '  .equation-block {',
+  '    margin: 0;',
+  '    padding: 0;',
+  '  }',
+  '</style>'
+))
+
+# Helper function to generate the LaTeX content
+generate_latex <- function(equations) {
+  HTML(paste0(
+    css_styles,
+    '<div class="equation-container">',
+    '<blockquote class="equation-block">',
+    '\\begin{align*}',
+    paste(equations, collapse = '\\\\'),
+    '\\end{align*}',
+    '</blockquote>',
+    '</div>'
+  ))
+}
+
 SIR_LaTeX <- function(mu) {
   switch(mu + 1, 
-    helpText(
-      HTML(paste0(
-        '<style>',
-        '  .equation-container {',
-        '    display: flex;',
-        '    justify-content: flex-start;',
-        '  }',
-        '  .equation-block {',
-        '    margin: 0;',
-        '    padding: 0;',
-        '  }',
-        '</style>',
-        '<div class="equation-container">',
-        '<blockquote class="equation-block">',
-        '\\begin{align*}',
-        '    &', r"(\frac{dS}{dt} = - \beta \frac{ S I}{N^q}\\)", 
-        '    &', r"(\frac{dI}{dt} = \frac{\beta S I}{N^q} - \gamma {I})", ' \\\\',
-        '    &', r"(\frac{dR}{dt} = \gamma {I})", ' \\\\',
-        '    &', r"(R_0 =  \frac{\beta}{\gamma} S(0)^q)", ' \\\\',
-        '    &', r"(\begin{cases} 1 & \text{, frequency-dependent} \\\\ 0 & \text{, density-dependent} \end{cases})", ' \\\\',
-        '\\end{align*}',
-        '</blockquote>',
-        '</div>'
-      ))
-    ),
-    helpText(
-      HTML(paste0(
-        '<style>',
-        '  .equation-container {',
-        '    display: flex;',
-        '    justify-content: flex-start;',
-        '  }',
-        '  .equation-block {',
-        '    margin: 0;',
-        '    padding: 0;',
-        '  }',
-        '</style>',
-        '<div class="equation-container">',
-        '<blockquote class="equation-block">',
-        '\\begin{align*}',
-        '    &', r"(\frac{dS}{dt} = \mu_B N - \mu_D S - \beta \frac{ S I}{N^q})", ' \\\\',
-        '    &', r"(\frac{dI}{dt} = \frac{\beta S I}{N^q} - \gamma I - \mu_D {I})", ' \\\\',
-        '    &', r"(\frac{dR}{dt} = \gamma I - \mu_D {R})", ' \\\\',
-        '    &', r"(R_0 =  \frac{\beta}{\gamma} S(0)^q)", ' \\\\',
-        '    &', r"(\begin{cases} 1 & \text{, frequency-dependent} \\\\ 0 & \text{, density-dependent} \end{cases})", ' \\\\',
-        '\\end{align*}',
-        '</blockquote>',
-        '</div>'
-      ))
-    )
+         helpText(generate_latex(c(SIR_nonVD_equation))),
+         helpText(generate_latex(c(SIR_VD_equation)))
   )
 }
 
 SIRS_LaTeX <- function(mu) {
   switch(mu + 1, 
-         helpText(
-           HTML(paste0(
-             '<style>',
-             '  .equation-container {',
-             '    display: flex;',
-             '    justify-content: flex-start;',
-             '  }',
-             '  .equation-block {',
-             '    margin: 0;',
-             '    padding: 0;',
-             '  }',
-             '</style>',
-             '<div class="equation-container">',
-             '<blockquote class="equation-block">',
-             '\\begin{align*}',
-             '    &', r"(\frac{dS}{dt} = - \beta \frac{ S I}{N} + \xi{R})", ' \\\\',
-             '    &', r"(\frac{dI}{dt} = \frac{\beta S I}{N} - \gamma {I})", ' \\\\',
-             '    &', r"(\frac{dR}{dt} = \gamma {I} - \xi{R})", ' \\\\',
-             '    &', r"(R_0 =  \frac{\beta}{\gamma} S(0)^q)", ' \\\\',
-             '    &', r"(\begin{cases} 1 & \text{, frequency-dependent} \\\\ 0 & \text{, density-dependent} \end{cases})", ' \\\\',
-             '\\end{align*}',
-             '</blockquote>',
-             '</div>'
-           ))
-         ),
-         helpText(
-           HTML(paste0(
-             '<style>',
-             '  .equation-container {',
-             '    display: flex;',
-             '    justify-content: flex-start;',
-             '  }',
-             '  .equation-block {',
-             '    margin: 0;',
-             '    padding: 0;',
-             '  }',
-             '</style>',
-             '<div class="equation-container">',
-             '<blockquote class="equation-block">',
-             '\\begin{align*}',
-             '    &', r"(\frac{dS}{dt} = \mu{N}- \beta \frac{ S I}{N} + \xi{R} - \nu{S})", ' \\\\',
-             '    &', r"(\frac{dI}{dt} = \frac{\beta S I}{N} - \gamma {I} - \nu{I})", ' \\\\',
-             '    &', r"(\frac{dR}{dt} = \gamma {I} - \xi{R} - \nu{R})", ' \\\\',
-             '    &', r"(R_0 =  \frac{\beta}{\gamma} S(0)^q)", ' \\\\',
-             '    &', r"(\begin{cases} 1 & \text{, frequency-dependent} \\\\ 0 & \text{, density-dependent} \end{cases})", ' \\\\',
-             '\\end{align*}',
-             '</blockquote>',
-             '</div>'
-           ))
-         )
+         helpText(generate_latex(c(SIRS_nonVD_equation))),
+         helpText(generate_latex(c(SIRS_VD_equation )))
   )
 }
 
 SIRD_LaTeX <- function(mu) {
   switch(mu + 1,
-    helpText(
-      HTML(paste0(
-        '<style>',
-        '  .equation-container {',
-        '    display: flex;',
-        '    justify-content: flex-start;',
-        '  }',
-        '  .equation-block {',
-        '    margin: 0;',
-        '    padding: 0;',
-        '  }',
-        '</style>',
-        '<div class="equation-container">',
-        '<blockquote class="equation-block">',
-        '\\begin{align*}',
-        '    &', r"(\frac{dS}{dt} = - \beta \frac{ S I}{N^q})", ' \\\\',
-        '    &', r"(\frac{dI}{dt} = \frac{\beta S I}{N^q} - \gamma {I} - \delta {I} )", ' \\\\',
-        '    &', r"(\frac{dR}{dt} = \gamma {I} )", ' \\\\',
-        '    &', r"(\frac{dD}{dt} = \delta {I})", ' \\\\',
-        '    &', r"(R_0 =  \frac{\beta}{\gamma} S(0)^q)", ' \\\\',
-        '    &', r"(\begin{cases} 1 & \text{, frequency-dependent} \\\\ 0 & \text{, density-dependent} \end{cases})", ' \\\\',
-        '\\end{align*}',
-        '</blockquote>',
-        '</div>'
-      ))
-    ),
-    helpText(
-      HTML(paste0(
-        '<style>',
-        '  .equation-container {',
-        '    display: flex;',
-        '    justify-content: flex-start;',
-        '  }',
-        '  .equation-block {',
-        '    margin: 0;',
-        '    padding: 0;',
-        '  }',
-        '</style>',
-        '<div class="equation-container">',
-        '<blockquote class="equation-block">',
-        '\\begin{align*}',
-        '    &', r"(\frac{dS}{dt} =\mu_B {N} - \mu_D {S} - \beta \frac{ S I}{N^q})", ' \\\\',
-        '    &', r"(\frac{dI}{dt} = \frac{\beta S I}{N^q} - \gamma {I} - \delta {I} - \mu_D {I})", ' \\\\',
-        '    &', r"(\frac{dR}{dt} = \gamma {I} - \mu_D {R} )", ' \\\\',
-        '    &', r"(\frac{dD}{dt} = \delta {I})", ' \\\\',
-        '    &', r"(R_0 =  \frac{\beta}{\gamma} S(0)^q)", ' \\\\',
-        '    &', r"(\begin{cases} 1 & \text{, frequency-dependent} \\\\ 0 & \text{, density-dependent} \end{cases})", ' \\\\',
-        '\\end{align*}',
-        '</blockquote>',
-        '</div>'
-      ))
-    )
+         helpText(generate_latex(c(SIRD_nonVD_equation))),
+        helpText(generate_latex(c(SIRD_VD_equation)))
   )
 }
 
 SEIR_LaTeX <- function(mu) {
   switch(mu + 1,
-    helpText(
-      HTML(paste0(
-        '<style>',
-        '  .equation-container {',
-        '    display: flex;',
-        '    justify-content: flex-start;',
-        '  }',
-        '  .equation-block {',
-        '    margin: 0;',
-        '    padding: 0;',
-        '  }',
-        '</style>',
-        '<div class="equation-container">',
-        '<blockquote class="equation-block">',
-        '\\begin{align*}',
-        '    &', r"(\frac{dS}{dt} = - \beta \frac{ S I}{N^q})", ' \\\\',
-        '    &', r"(\frac{dE}{dt} = \beta \frac{ S I}{N^q} - \gamma {E})", ' \\\\',
-        '    &', r"(\frac{dI}{dt} = \gamma {E} - \sigma {I})", ' \\\\',
-        '    &', r"(\frac{dR}{dt} = \sigma {I})", ' \\\\',
-        '    &', r"(R_0 =  \frac{\beta}{\gamma} S(0)^q)", ' \\\\',
-        '    &', r"(\begin{cases} 1 & \text{, frequency-dependent} \\\\ 0 & \text{, density-dependent} \end{cases})", ' \\\\',
-        '\\end{align*}',
-        '</blockquote>',
-        '</div>'
-      ))
-    ),
-    helpText(
-      HTML(paste0(
-        '<style>',
-        '  .equation-container {',
-        '    display: flex;',
-        '    justify-content: flex-start;',
-        '  }',
-        '  .equation-block {',
-        '    margin: 0;',
-        '    padding: 0;',
-        '  }',
-        '</style>',
-        '<div class="equation-container">',
-        '<blockquote class="equation-block">',
-        '\\begin{align*}',
-        '    &', r"(\frac{dS}{dt} = \mu_B {N} - \mu_D {S} - \beta \frac{ S I}{N^q})", ' \\\\',
-        '    &', r"(\frac{dE}{dt} = \beta \frac{ S I}{N^q} - \gamma {E} - - \mu_D {E})", ' \\\\',
-        '    &', r"(\frac{dI}{dt} = \gamma {E} - \sigma {I} - \mu_D {I})", ' \\\\',
-        '    &', r"(\frac{dR}{dt} = \sigma {I}) - \mu_D {R} )", ' \\\\',
-        '    &', r"(R_0 =  \frac{\beta}{\gamma} S(0)^q)", ' \\\\',
-        '    &', r"(\begin{cases} 1 & \text{, frequency-dependent} \\\\ 0 & \text{, density-dependent} \end{cases})", ' \\\\',
-        '\\end{align*}',
-        '</blockquote>',
-        '</div>'
-      ))
-    )
+         helpText(generate_latex(c(SEIR_nonVD_equation))),
+         helpText(generate_latex(c(SEIR_VD_equation)))
   )
 }
 
 SEIRD_LaTeX <- function(mu) {
   switch(mu + 1,
-    helpText(
-      HTML(paste0(
-        '<style>',
-        '  .equation-container {',
-        '    display: flex;',
-        '    justify-content: flex-start;',
-        '  }',
-        '  .equation-block {',
-        '    margin: 0;',
-        '    padding: 0;',
-        '  }',
-        '</style>',
-        '<div class="equation-container">',
-        '<blockquote class="equation-block">',
-        '\\begin{align*}',
-        '    &', r"(\frac{dS}{dt} = - \beta \frac{ S I}{N^q})", ' \\\\',
-        '    &', r"(\frac{dE}{dt} = \beta \frac{ S I}{N^q} - \gamma {E})", ' \\\\',
-        '    &', r"(\frac{dI}{dt} = \gamma {E} - \sigma {I} - \delta {I} )", ' \\\\',
-        '    &', r"(\frac{dR}{dt} = \sigma {I})", ' \\\\',
-        '    &', r"(\frac{dD}{dt} = \delta {I})", ' \\\\',
-        '    &', r"(R_0 =  \frac{\beta}{\gamma} S(0)^q)", ' \\\\',
-        '    &', r"(\begin{cases} 1 & \text{, frequency-dependent} \\\\ 0 & \text{, density-dependent} \end{cases})", ' \\\\',
-        '\\end{align*}',
-        '</blockquote>',
-        '</div>'
-      ))
-    ),
-    helpText(
-      HTML(paste0(
-        '<style>',
-        '  .equation-container {',
-        '    display: flex;',
-        '    justify-content: flex-start;',
-        '  }',
-        '  .equation-block {',
-        '    margin: 0;',
-        '    padding: 0;',
-        '  }',
-        '</style>',
-        '<div class="equation-container">',
-        '<blockquote class="equation-block">',
-        '\\begin{align*}',
-        '    &', r"(\frac{dS}{dt} = \mu_B {N} - \mu_D {S} - \beta \frac{ S I}{N^q})", ' \\\\',
-        '    &', r"(\frac{dE}{dt} = \beta \frac{ S I}{N^q} - \gamma {E} - - \mu_D {E})", ' \\\\',
-        '    &', r"(\frac{dI}{dt} = \gamma {E} - \sigma {I} -  \delta {I} - \mu_D {I})", ' \\\\',
-        '    &', r"(\frac{dR}{dt} = \sigma {I}) - \mu_D {R} )", ' \\\\',
-        '    &', r"(\frac{dD}{dt} = \delta {I})", ' \\\\',
-        '    &', r"(R_0 =  \frac{\beta}{\gamma} S(0)^q)", ' \\\\',
-        '    &', r"(\begin{cases} 1 & \text{, frequency-dependent} \\\\ 0 & \text{, density-dependent} \end{cases})", ' \\\\',
-        '\\end{align*}',
-        '</blockquote>',
-        '</div>'
-      ))
-    )
+         helpText(generate_latex(c(SEIRD_nonVD_equation))),
+         helpText(generate_latex(c(SEIRD_VD_equation)))
   )
 }
 
 ## FIXME: is this working or not?
 renderModelLaTeX <- function(model, vitalStatistics) {
-  tagList(withMathJax(call(paste0(model, "_LaTeX"), vitalStatistics)))
+  tagList(withMathJax(eval(call(paste0(model, "_LaTeX"), vitalStatistics))))
 }
