@@ -82,13 +82,13 @@ plotPhasePlaneSIR <- function()
     )
 }
 
-solveAndRenderSIR <- function()
-{
+solveAndRenderSIR <- function(beta, gamma, muB, muD, population, susceptible, infected, recovered, timesteps, q) {
   expr <- quote({
-    output$modelPlot <- renderPlot(plotSIR())
-    output$modelPhasePlane <- renderPlot(plotPhasePlaneSIR())
-    output$modelSummaryTable <- renderTable((solveSIR())[-c(6)])
+    model <- solveSIR(beta, gamma, muB, muD, population, susceptible, infected, recovered, timesteps, q)
+    output$modelPlot <- renderPlot(plotSIR(model))
+    output$modelPhasePlane <- renderPlot(plotPhasePlaneSIR(model))
+    output$modelSummaryTable <- renderTable(model[, 1:6])
   })
-  
+
   eval.parent(expr)
 }
