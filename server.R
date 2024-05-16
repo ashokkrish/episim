@@ -63,8 +63,10 @@ server <- function(input, output, session) {
       infected = c(sv_gte(0)),
       recovered = c(sv_gte(0)),
       dead = c(sv_gte(0)),
-      replicates = c(sv_integer(), sv_between(0, 100, c(FALSE, TRUE))),
-      timesteps = c(sv_integer(), sv_gt(0))
+      ## NOTE: the limit might need to change.
+      ## replicates = c(sv_integer(), sv_between(0, 100, c(FALSE, TRUE))),
+      replicates = c(sv_integer(), sv_gt(0)),
+      timesteps = c(sv_numeric(), sv_gt(0))
     )
   )
 
@@ -262,16 +264,36 @@ server <- function(input, output, session) {
   ## with the "go" actionButton.
   observeEvent(input$go, {
     show("outputPanel")
+    ## TODO: ignore any warnings about unused arguments; they're irrelevant.
+    ## We simply provide all possible input widgets and the function consumes
+    ## whatever it actually uses.
+    R.utils::doCall.default(.ignoreUnusedArguments = TRUE,
+      ## The solve and render functions are defined in files named like
+      ## `input$modelSelect_solve.R' in the R subfolder.
+      paste0("solveAndRender", input$modelSelect),
+      args = list(
+        beta = input$beta, gamma = input$gamma,
+        delta = input$delta, xi = input$xi, sigma = input$sigma,
+        ## TODO: these need to be defined in the UI and their appearance
+        ## conditioned upon the models.
+        ##
+        ## alpha = input$alpha,
+        ## ay = input$ay, bee = input$bee,
+        ## AY = input$AY, BEE = input$BEE
 
-    ## The solve and render functions are defined in files named like
-    ## `input$modelSelect_solve.R' in the R subfolder.
-    ## FIXME: this is not sufficient, they need arguments. This needs a
-    ## dispatching function which will pass the arguments.
-    call(paste0("solveAndRender", input$modelSelect))
+        ## Variables
+        ## vaccinated = input$vaccinated,
+        susceptible = input$susceptible,
+        infected = input$infected,
+        recovered = input$recovered,
+        dead = input$dead,
+        exposed = input$exposed,
+        population = input$population))
 
     ## The LaTeX is rendered dynamically based upon the selected model.
     ## Rendering occurs every time the GO action button is pressed. This will
     ## allow more flexibility later on, if needed.
+
     output$modelLaTeX <- renderUI(renderModelLaTeX(input$modelSelect, input$muValue, input$massActionSelect))
   })
 

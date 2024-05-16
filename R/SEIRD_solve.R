@@ -106,11 +106,12 @@ plotPhasePlaneSEIRD <- function() {
     )
 }
 
-solveAndRenderSEIRD <- function() {
+solveAndRenderSEIRD <- function(beta, gamma, sigma, delta, muB, muD, population, susceptible, exposed, infected, recovered, dead, timesteps, q) {
   expr <- quote({
-    output$modelPlot <- renderPlot(plotSEIRD())
-    output$modelPhasePlane <- renderPlot(plotPhasePlaneSEIRD())
-    output$modelSummaryTable <- renderTable((solveSEIRD())[-c(6)])
+    model <- solveSEIRD(beta, gamma, sigma, delta, muB, muD, population, susceptible, exposed, infected, recovered, dead, timesteps, q)
+    output$modelPlot <- renderPlot(plotSEIRD(model))
+    output$modelPhasePlane <- renderPlot(plotPhasePlaneSEIRD(model))
+    output$modelSummaryTable <- renderTable(model[, 1:6])
   })
 
   eval.parent(expr)

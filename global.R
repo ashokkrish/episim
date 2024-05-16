@@ -7,6 +7,7 @@ library(shinyjs)
 library(shinyvalidate)
 library(shinyWidgets)
 library(xlsx)
+library(R.utils)
 
 ## NEXT: switch to using the rpojroot package when preparing this Shiny
 ## application for deployment, because the here package is a lightweight wrapper

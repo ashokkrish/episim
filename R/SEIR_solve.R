@@ -99,9 +99,13 @@ plotPhasePlaneSEIR <- function(model) {
     )
 }
 
-solveAndRenderSEIR <- function() {
+solveAndRenderSEIR <- function(beta, gamma, muB, muD, xi,
+                               population, susceptible, infected, sigma,
+                               recovered, timesteps, q, exposed) {
   expr <- quote({
-    model <- solveSEIR()
+    model <- solveSEIR(beta, gamma, muB, muD, xi,
+                       population, susceptible, infected, sigma,
+                       recovered, timesteps, q, exposed)
     output$modelPlot <- renderPlot(plotSEIR(model))
     output$modelPhasePlane <- renderPlot(plotPhasePlaneSEIR(model))
     output$modelSummaryTable <- renderTable(model[, 1:6])
@@ -109,3 +113,5 @@ solveAndRenderSEIR <- function() {
 
   eval.parent(expr)
 }
+
+solveAndRenderSEIRS <- solveAndRenderSEIR
