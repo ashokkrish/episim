@@ -20,7 +20,7 @@ equationsSEIR <- function(time, variables, parameters, q = 0, ...) {
 solveSEIR <-
   function(beta = 0.001, gamma = 0.1, muB = 0, muD = 0, xi = 0.05,
            population = 500, susceptible = 498, infected = 1, sigma = 0.01,
-           recovered = 0, timesteps = 50, q = 0, exposed = 1, ...) {
+           recovered = 0, timesteps = 50, q = 0, exposed = 1) {
 
     ## Assign the variables and parameters to vectors then name them, makign the
     ## function readable.
@@ -32,10 +32,13 @@ solveSEIR <-
     deSolve::lsoda(variables,
                    seq(0, timesteps, by = 1),
                    equationsSEIR,
-                   q = q,
-                   parameters, ...) |>
+                   parameters,
+                   q) |>
       as.data.frame()
   }
+
+# alias SEIRS to SEIR -----------------------------------------------------
+solveSEIRS <- solveSEIR
 
 plotTheme <- ggplot2::theme(
   axis.line = ggplot2::element_line(color = "black"),
@@ -98,20 +101,3 @@ plotPhasePlaneSEIR <- function(model) {
       guide = "legend"
     )
 }
-
-solveAndRenderSEIR <- function(beta, gamma, muB, muD, xi,
-                               population, susceptible, infected, sigma,
-                               recovered, timesteps, q, exposed) {
-  expr <- quote({
-    model <- solveSEIR(beta, gamma, muB, muD, xi,
-                       population, susceptible, infected, sigma,
-                       recovered, timesteps, q, exposed)
-    output$modelPlot <- renderPlot(plotSEIR(model))
-    output$modelPhasePlane <- renderPlot(plotPhasePlaneSEIR(model))
-    output$modelSummaryTable <- renderTable(model[, 1:6])
-  })
-
-  eval.parent(expr)
-}
-
-solveAndRenderSEIRS <- solveAndRenderSEIR
