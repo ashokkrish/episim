@@ -272,7 +272,7 @@ server <- function(input, output, session) {
     ## The LaTeX is rendered dynamically based upon the selected model.
     ## Rendering occurs every time the GO action button is pressed. This will
     ## allow more flexibility later on, if needed.
-    output$modelLaTeX <- renderUI(renderModelLaTeX(input$modelSelect, input$muValue))
+    output$modelLaTeX <- renderUI(renderModelLaTeX(input$modelSelect, input$muValue, input$massActionSelect))
   })
 
   ## TODO: resetting the application should set the widget values to those which
