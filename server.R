@@ -254,11 +254,11 @@ server <- function(input, output, session) {
 
   ## FIXME: the input is not being validated properly, because the global
   ## validator is returning the incorrect value and "go" is never being enabled.
-  observeEvent(input, {
-    if(globalValidator$is_valid()) {
-      enable("go")
-    } else {
-      disable("go")
-    }
-  })
+  ## observeEvent(input, {
+  ##   if(globalValidator$is_valid()) {
+  ##     enable("go")
+  ##   } else {
+  ##     disable("go")
+  ##   }
+  ## })
 }
