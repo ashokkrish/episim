@@ -119,9 +119,9 @@ SEIRS <- function(mu,forceOfInfection)
   } else 
   {
     S <- paste0(Susceptible, r"(\mu_B {N} -)", forceOfInfection,  r"(+ \xi{R} - \mu_D {S}\\)")
-    E <- paste0(Exposure, forceOfInfection, r"(- \sigma {E} - \mu_D {E}\\)")
-    I <- paste0(Infection, r"(\sigma {E} - \gamma {I} - \mu_D {I}\\)")
-    R <- paste0(Recover, r"(\gamma {I} - \xi{R} - \mu_D {R}\\)")
+    E <- paste0(Exposure, forceOfInfection, r"(- \gamma {E} - \mu_D {E}\\)")
+    I <- paste0(Infection, r"(\gamma {E} - \sigma {I} - \mu_D {I}\\)")
+    R <- paste0(Recover, r"(\sigma {I} - \xi{R} - \mu_D {R}\\)")
   }
   equation <- c(S,E,I,R)
   return(equation)

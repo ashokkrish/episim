@@ -18,45 +18,16 @@ generate_latex <- function(equations) {
     css_styles,
     '<div class="equation-container">',
     '<blockquote class="equation-block">',
-    '\\begin{align*}',
-    paste(equations, collapse = '\\\\'),
-    '\\end{align*}',
+    r"(\begin{align*})",
+    paste(equations, collapse = r"(\\)"),
+    r"(\end{align*})",
     '</blockquote>',
     '</div>'
   ))
 }
 
-SIR_LaTeX <- function(mu,qValue) {
-  forceOfInfection <- getForceOfInfection(qValue)
-  helpText(generate_latex(SIR(mu,forceOfInfection)))
-}
-
-SIRS_LaTeX <- function(mu,qValue) {
-  forceOfInfection <- getForceOfInfection(qValue)
-  helpText(generate_latex(SIRS(mu,forceOfInfection)))
-}
-
-SIRD_LaTeX <- function(mu,qValue) {
-  forceOfInfection <- getForceOfInfection(qValue)
-  helpText(generate_latex(SIRD(mu,forceOfInfection)))
-}
-
-SEIR_LaTeX <- function(mu,qValue) {
-  forceOfInfection <- getForceOfInfection(qValue)
-  helpText(generate_latex(SEIR(mu,forceOfInfection)))
-}
-
-SEIRS_LaTeX <- function(mu,qValue) {
-  forceOfInfection <- getForceOfInfection(qValue)
-  helpText(generate_latex(SEIRS(mu,forceOfInfection)))
-}
-
-SEIRD_LaTeX <- function(mu,qValue) {
-  forceOfInfection <- getForceOfInfection(qValue)
-  helpText(generate_latex(SEIRD(mu,forceOfInfection)))
-}
-
 ## FIXME: is this working or not?
-renderModelLaTeX <- function(model, vitalStatistics,massAction) {
-  tagList(withMathJax(eval(call(paste0(model, "_LaTeX"), vitalStatistics, massAction))))
-}
+renderModelLaTeX <- function(model, vitalStatistics, massAction) {
+  eval(call(model, vitalStatistics, getForceOfInfection(massAction))) |>
+    generate_latex() |>
+    helpText()}
