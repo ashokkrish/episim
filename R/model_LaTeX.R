@@ -18,50 +18,16 @@ generate_latex <- function(equations) {
     css_styles,
     '<div class="equation-container">',
     '<blockquote class="equation-block">',
-    '\\begin{align*}',
-    paste(equations, collapse = '\\\\'),
-    '\\end{align*}',
+    r"(\begin{align*})",
+    paste(equations, collapse = r"(\\)"),
+    r"(\end{align*})",
     '</blockquote>',
     '</div>'
   ))
 }
 
-SIR_LaTeX <- function(mu) {
-  switch(mu + 1, 
-         helpText(generate_latex(c(SIR_nonVD_equation))),
-         helpText(generate_latex(c(SIR_VD_equation)))
-  )
-}
-
-SIRS_LaTeX <- function(mu) {
-  switch(mu + 1, 
-         helpText(generate_latex(c(SIRS_nonVD_equation))),
-         helpText(generate_latex(c(SIRS_VD_equation )))
-  )
-}
-
-SIRD_LaTeX <- function(mu) {
-  switch(mu + 1,
-         helpText(generate_latex(c(SIRD_nonVD_equation))),
-        helpText(generate_latex(c(SIRD_VD_equation)))
-  )
-}
-
-SEIR_LaTeX <- function(mu) {
-  switch(mu + 1,
-         helpText(generate_latex(c(SEIR_nonVD_equation))),
-         helpText(generate_latex(c(SEIR_VD_equation)))
-  )
-}
-
-SEIRD_LaTeX <- function(mu) {
-  switch(mu + 1,
-         helpText(generate_latex(c(SEIRD_nonVD_equation))),
-         helpText(generate_latex(c(SEIRD_VD_equation)))
-  )
-}
-
 ## FIXME: is this working or not?
-renderModelLaTeX <- function(model, vitalStatistics) {
-  tagList(withMathJax(eval(call(paste0(model, "_LaTeX"), vitalStatistics))))
-}
+renderModelLaTeX <- function(model, vitalStatistics, massAction) {
+  eval(call(model, vitalStatistics, getForceOfInfection(massAction))) |>
+    generate_latex() |>
+    helpText()}

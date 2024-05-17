@@ -172,9 +172,11 @@ server <- function(input, output, session) {
   ## with the "go" actionButton.
   observeEvent(input$go, {
     show("outputPanel")
+
     solveAndRender(input$modelSelect, reactiveValuesToList(input))
     output$modelLaTeX <- renderUI(renderModelLaTeX(input$modelSelect,
-                                                   input$muValue))
+                                                   input$muValue, input$massActionSelect))
+
   })
 
 
