@@ -50,7 +50,7 @@ plotTheme <- ggplot2::theme(
 # Plot
 plotSIRS <- function()
 {
-  ggplot2::ggplot(solveSISR(), ggplot2::aes(x = time)) +
+  ggplot2::ggplot(solveSIRS(), ggplot2::aes(x = time)) +
     plotTheme +
     ggplot2::labs(title = "SIRS Epidemic Model", y = "Number of People",
                   x = "Time") +
@@ -85,10 +85,22 @@ plotPhasePlaneSIRS <- function()
 solveAndRenderSIRS <- function()
 {
   expr <- quote({
+    model <- solveSIRS()
     output$modelPlot <- renderPlot(plotSIRS())
     output$modelPhasePlane <- renderPlot(plotPhasePlaneSIRS())
-    output$modelSummaryTable <- renderTable((solveSIRS())[-c(6)])
+    output$modelSummaryTable <- renderTable(model[, 1:6])
   })
   
+  eval.parent(expr)
+}
+
+solveAndRenderSIRS <- function(beta = 0.001, gamma = 0.1, muB = 0, muD = 0, xi = 0.05, population = 500, susceptible = 498, infected = 1, recovered = 0, timesteps = 50, q = 0, exposed = 1) {
+  expr <- quote({
+    model <- solveSIRS(beta = 0.001, gamma = 0.1, muB = 0, muD = 0, xi = 0.05, population = 500, susceptible = 498, infected = 1, recovered = 0, timesteps = 50, q = 0, exposed = 1)
+    output$modelPlot <- renderPlot(plotSIRS(model))
+    output$modelPhasePlane <- renderPlot(plotPhasePlaneSIRS(model))
+    output$modelSummaryTable <- renderTable(model[, 1:6])
+  })
+
   eval.parent(expr)
 }

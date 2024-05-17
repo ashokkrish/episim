@@ -95,11 +95,12 @@ plotPhasePlaneSIRD <- function() {
     )
 }
 
-solveAndRenderSIRD <- function() {
+solveAndRenderSIRD <- function(beta, gamma, delta, muB, muD, population, susceptible, infected, recovered, dead, timesteps, q) {
   expr <- quote({
-    output$modelPlot <- renderPlot(plotSIRD())
-    output$modelPhasePlane <- renderPlot(plotPhasePlaneSIRD())
-    output$modelSummaryTable <- renderTable((solveSIRD())[-c(6)])
+    model <- solveSIRD(beta, gamma, delta, muB, muD, population, susceptible, infected, recovered, dead, timesteps, q)
+    output$modelPlot <- renderPlot(plotSIRD(model))
+    output$modelPhasePlane <- renderPlot(plotPhasePlaneSIRD(model))
+    output$modelSummaryTable <- renderTable(model[, 1:6])
   })
 
   eval.parent(expr)
