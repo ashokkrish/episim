@@ -1,4 +1,31 @@
 server <- function(input, output, session) {
+  # Initialize simple-caching and global variables.
+  # cachedBirthRate <- 0
+  # cachedDeathRate <- 0
+
+
+# Functions, such as the solveAndRender dispatcher -----------------------------
+  solveAndRender <- function(model, modelArguments) {
+    modellingFunctions <- mget(paste0(c("solve", "plot", "plotPhasePlane"), model),
+         envir = environment(solveSIR),
+         mode = "function")
+
+    modelSolver <- modellingFunctions[[1]]
+    modelPlotter <- modellingFunctions[[2]]
+    modelPhasePlanePlotter <- modellingFunctions[[3]]
+
+    expr <- substitute({
+      modelResults <- doCall.default(.fcn = modelSolver,
+                                     args = modelArguments,
+                                     .ignoreUnusedArguments = TRUE)
+      output$modelPlot <- renderPlot(modelPlotter(modelResults))
+      output$modelPhasePlane <- renderPlot(modelPhasePlanePlotter(modelResults))
+      output$modelSummaryTable <- renderTable(modelResults[, 1:6])
+    })
+
+    eval.parent(expr)
+  }
+
   ## NOTE: params is checked for being NA to protect against the default
   ## case_when in an observe. It does nothing otherwise.
   updateNumericInputs <- function(params, session = getDefaultReactiveDomain()) {
@@ -41,6 +68,7 @@ server <- function(input, output, session) {
         ## inputId is intentionally recycled while adding the rules in
         ## ruleVector.
         mapply(validator$add_rule, inputId, ruleVector)
+        validator$add_rule(inputId, sv_required())
       },
       names(ruleList),
       ruleList
@@ -51,252 +79,108 @@ server <- function(input, output, session) {
     invisible(validator)
   }
 
+  ## NOTE: all inputs have the required rule automatically added.
   globalValidator <- addRuleListToValidator(
     InputValidator$new(),
     list(
       ## Vital statistics
       muBirth = c(sv_between(0, 0.1)),
       muDeath = c(sv_between(0, 0.1)),
-      population = c(sv_gt(0)),
-      susceptible = c(sv_gt(0)),
-      exposed = c(sv_gte(0)),
-      infected = c(sv_gte(0)),
-      recovered = c(sv_gte(0)),
-      dead = c(sv_gte(0)),
-      ## NOTE: the limit might need to change.
+
+      population = c(sv_integer(), sv_gt(0)), # GT, not GTE
+      susceptible = c(sv_integer(), sv_gt(0)), # GT, not GTE
+      ## NOTE: unused at the moment. There are no models with a vaccinated compartment.
+      vaccinated = c(sv_integer(), sv_gte(0)), # These are all GTE
+      exposed = c(sv_integer(), sv_gte(0)),
+      infected = c(sv_integer(), sv_gte(0)), # FIXME: this might need GT
+      recovered = c(sv_integer(), sv_gte(0)),
+      dead = c(sv_integer(), sv_gte(0)),
+
+      ## NOTE: the number of replicates might need to be limited.
       ## replicates = c(sv_integer(), sv_between(0, 100, c(FALSE, TRUE))),
       replicates = c(sv_integer(), sv_gt(0)),
-      timesteps = c(sv_numeric(), sv_gt(0))
+      timesteps = c(sv_numeric(), sv_gt(0)),
+
+      ## Global rules for parameters
+      beta = c(sv_gt(0)),
+      gamma = c(sv_gt(0))
     )
   )
 
+  ## NOTE: all inputs have the required rule automatically added.
   reactive({
     list(
       beta = c(sv_between(0, 1)),
-      gamma = c(sv_between(0, 5))
+      gamma = c(sv_between(0, 1))
     ) %conditionWidgetRulesOnModel% "SIR" |>
       globalValidator$add_validator()
 
     list(
       beta = c(sv_between(0, 1)),
-      gamma = c(sv_between(0, 5))
+      gamma = c(sv_between(0, 1)),
+      xi = c(sv_between(0, 1))
     ) %conditionWidgetRulesOnModel% "SIRS" |>
       globalValidator$add_validator()
 
 
     list(
-      beta = c(sv_between(0, 0.5)),
-      gamma = c(sv_between(0, 0.5)),
-      delta = c(sv_between(0, 0.5))
+      beta = c(sv_between(0, 1)),
+      gamma = c(sv_between(0, 1)),
+      delta = c(sv_between(0, 1))
     ) %conditionWidgetRulesOnModel% "SIRD" |>
       globalValidator$add_validator()
 
 
     list(
       beta = c(sv_between(0, 1)),
-      gamma = c(sv_between(0, 3)),
-      sigma = c(sv_between(0, 0.5))
+      gamma = c(sv_between(0, 1)),
+      sigma = c(sv_between(0, 1))
     ) %conditionWidgetRulesOnModel% "SEIR" |>
       globalValidator$add_validator()
 
 
     list(
       beta = c(sv_between(0, 1)),
-      gamma = c(sv_between(0, 3)),
-      sigma = c(sv_between(0, 0.5)),
-      xi = c(sv_between(0, 0.5))
+      gamma = c(sv_between(0, 1)),
+      sigma = c(sv_between(0, 1)),
+      xi = c(sv_between(0, 1))
     ) %conditionWidgetRulesOnModel% "SEIRS" |>
       globalValidator$add_validator()
 
 
     list(
       beta = c(sv_between(0, 1)),
-      gamma = c(sv_between(0, 3)),
-      sigma = c(sv_between(0, 0.5)),
-      delta = c(sv_between(0, 0.5))
+      gamma = c(sv_between(0, 1)),
+      sigma = c(sv_between(0, 1)),
+      delta = c(sv_between(0, 1))
     ) %conditionWidgetRulesOnModel% "SEIRD" |>
       globalValidator$add_validator()
   })
 
-  ## FIXME: when a value is set by the user, and then Vital Dynamics is
-  ## disabled, the effective value should be zero to control how the models
-  ## operate. If Vital Dynamics is re-enabled the previous value should be
-  ## restored unless the user has reset all values using the reset action
-  ## button. NOTE: use a simple variable to store the previous value; that
-  ## variable must also be reset to zero when the entire application is reset so
-  ## that the "historical" value the user entered is forgotten.
+  ## FIXME: this is a naive way of disabling vital dynamics. A preferable
+  ## alternative is to add the term to or remove it from the equations, rather
+  ## than making the term equal to zero.
   observeEvent(input$muValue, {
-    with(list(session = getDefaultReactiveDomain()), {
+    if (input$muValue == FALSE) {
       updateNumericInput(session, "muBirth", value = 0)
       updateNumericInput(session, "muDeath", value = 0)
-    })
+    }
   })
 
-  ## NOTE: when the user changes between total and pseudo mass action, vital
-  ## dynamics are disabled and various widget values are reset. ## MAYBE:
-  ## discuss whether this is intuitive to the user; will they expect certain
-  ## changes, as a consequence of theory, or are we being intrusive and changing
-  ## values on them. They may have spent quite a bit of time setting parameters
-  ## and variables before selecting the mass action formulation they wanted.
-  observeEvent(input$massActionSelect, {
-    ## Disable vital dynamics whenever the mass action type changes.
-    updateCheckboxInput(getDefaultReactiveDomain(), "muValue", value = FALSE)
-
-    with(list(
-      model = input$modelSelect,
-      massAction = input$massActionSelect,
-      stochastic = input$stochasticSelect
-    ), {
-      ## TODO: filter a dataframe on the values above and then update numeric
-      ## inputs.
-      updateNumericInputs(
-        if (massAction == 1 && model == "SIR") {
-          list(
-            beta = 0.4,
-            gamma = 0.04,
-            population = 1000,
-            susceptible = 997,
-            infected = 3,
-            recovered = 0,
-            timesteps = 25
-          )
-        } else if (massAction == 0 && model == "SIR") {
-          list(
-            beta = 0.001,
-            gamma = 0.1,
-            population = 500,
-            susceptible = 499,
-            infected = 1,
-            recovered = 0,
-            timesteps = 50
-          )
-        } else if (massAction == 1 && model == "SIRD") {
-          list(
-            beta = 0.4,
-            gamma = 0.04,
-            delta = 0.05,
-            population = 1000,
-            susceptible = 997,
-            infected = 3,
-            recovered = 0,
-            timesteps = 25
-          )
-        } else if (massAction == 0 && model == "SIRD") {
-          list(
-            beta = 0.001,
-            gamma = 0.1,
-            delta = 0.05,
-            population = 500,
-            susceptible = 499,
-            infected = 1,
-            recovered = 0,
-            timesteps = 50
-          )
-        } else if (massAction == 1 && model == "SEIRD") {
-          list(
-            beta = 0.35,
-            gamma = 0.1429,
-            sigma = 0.0476,
-            population = 500,
-            susceptible = 499,
-            exposed = 0,
-            infected = 1,
-            recovered = 0,
-            timesteps = 20
-          )
-        } else if (massAction == 0 && model == "SEIR") {
-          list(
-            beta = 0.5,
-            gamma = 0.5,
-            sigma = 0.1,
-            population = 53,
-            susceptible = 50,
-            exposed = 3,
-            infected = 0,
-            recovered = 0,
-            timesteps = 25
-          )
-        } else if (massAction == 1 && model == "SEIRD") {
-          list(
-            beta = 0.35,
-            gamma = 0.1429,
-            sigma = 0.0476,
-            delta = 0.05,
-            population = 500,
-            susceptible = 499,
-            exposed = 0,
-            infected = 1,
-            recovered = 0,
-            timesteps = 20
-          )
-        } else if (massAction == 0 && model == "SEIRD") {
-          list(
-            beta = 0.5,
-            gamma = 0.5,
-            sigma = 0.1,
-            delta = 0.05,
-            population = 53,
-            susceptible = 50,
-            exposed = 3,
-            infected = 0,
-            recovered = 0,
-            timesteps = 50
-          )
-        } else if (stochastic == 1 && model == "SIR") {
-          list(
-            stochasticModelVariableNumberOfReplicates = 50,
-            ## FIXME: these values are being set as the label for the widget
-            ## somehow.
-            beta = 0.00178,
-            gamma = 2.73,
-            population = 1000,
-            susceptible = 990,
-            infected = 10,
-            recovered = 0,
-            timesteps = 10
-          )
-        }
-      )
-    })
-  })
-
+# GO: show outputPanel; call modelling function; render LaTeX. ------------
   ## Toggle the visibility of the outputPanel based on the user's interactions
   ## with the "go" actionButton.
   observeEvent(input$go, {
     show("outputPanel")
-    ## TODO: ignore any warnings about unused arguments; they're irrelevant.
-    ## We simply provide all possible input widgets and the function consumes
-    ## whatever it actually uses.
-    R.utils::doCall.default(.ignoreUnusedArguments = TRUE,
-      ## The solve and render functions are defined in files named like
-      ## `input$modelSelect_solve.R' in the R subfolder.
-      paste0("solveAndRender", input$modelSelect),
-      args = list(
-        beta = input$beta, gamma = input$gamma,
-        delta = input$delta, xi = input$xi, sigma = input$sigma,
-        ## TODO: these need to be defined in the UI and their appearance
-        ## conditioned upon the models.
-        ##
-        ## alpha = input$alpha,
-        ## ay = input$ay, bee = input$bee,
-        ## AY = input$AY, BEE = input$BEE
 
-        ## Variables
-        ## vaccinated = input$vaccinated,
-        susceptible = input$susceptible,
-        infected = input$infected,
-        recovered = input$recovered,
-        dead = input$dead,
-        exposed = input$exposed,
-        population = input$population))
+    solveAndRender(input$modelSelect, reactiveValuesToList(input))
+    output$modelLaTeX <- renderUI(renderModelLaTeX(input$modelSelect,
+                                                   input$muValue, input$massActionSelect))
 
-    ## The LaTeX is rendered dynamically based upon the selected model.
-    ## Rendering occurs every time the GO action button is pressed. This will
-    ## allow more flexibility later on, if needed.
-
-    output$modelLaTeX <- renderUI(renderModelLaTeX(input$modelSelect, input$muValue, input$massActionSelect))
   })
 
+
+# RESET: hide outputPanel; modelConfiguration; actionButtons; rese --------
   ## TODO: resetting the application should set the widget values to those which
   ## are defined for the model in the spreadsheet.
   observeEvent(input$resetAll, {
@@ -307,11 +191,20 @@ server <- function(input, output, session) {
       updatePickerInput(session, "modelSelect", selected = "")
       updateRadioButtons(session, "massActionSelect", selected = 0)
       updateRadioButtons(session, "stochasticSelect", selected = 0)
-      updateCheckboxInput(session, "muValue", value = FALSE) # Vital Dynamics
+
+      ## Disable vital dynamics and cause the cached birth and death rates to be
+      ## forgotten through dependency invalidation.
+      updateCheckboxInput(session, "muValue", value = FALSE)
+      ## FIXME: see the related fixme in the observable for muValue's change
+      updateNumericInput(session, "muBirth", value = 0)
+      updateNumericInput(session, "muDeath", value = 0)
+
       updateNumericInput(session, "timesteps", value = 100)
     })
   })
 
+
+# MODEL SELECT: update numeric inputs to model defaults on change. --------
   ## Whenever the model selection changes (whether the parameters and variables
   ## are set manually or taken from pre-defined models), the widget values
   ## throughout the application are updated as appropriate.
@@ -346,13 +239,26 @@ server <- function(input, output, session) {
                                          modelType == model,
                                          stochastic == stochastic)))
 
+      ## NOTE: this triggers the anonymous function in
+      ## www/whenModelSelectChangesTypesetLaTeX.js to be called, typesetting the
+      ## updated labels.
       if(grepl("SI", model, ignore.case = TRUE)) {
-        updateNumericInput(session, "beta", r"[$Rate of infection (\beta)$]")
-        updateNumericInput(session, "gamma", r"[$Rate of recovery (\gamma)$]")
+        updateNumericInput(session, "beta", r"[Rate of infection ($ \beta $)]")
+        updateNumericInput(session, "gamma", r"[Rate of recovery ($ \gamma $)]")
       } else if(grepl("SEI", model, ignore.case = TRUE)) {
-        updateNumericInput(session, "beta", r"[$Rate of exposure (\beta)$]")
-        updateNumericInput(session, "gamma", r"[$Rate of infection (\gamma)$]")
+        updateNumericInput(session, "beta", r"[Rate of exposure ($ \beta $)]")
+        updateNumericInput(session, "gamma", r"[Rate of infection ($ \gamma $)]")
       }
     })
+  })
+
+  ## FIXME: the input is not being validated properly, because the global
+  ## validator is returning the incorrect value and "go" is never being enabled.
+  observeEvent(input, {
+    if(globalValidator$is_valid()) {
+      enable("go")
+    } else {
+      disable("go")
+    }
   })
 }

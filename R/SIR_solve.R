@@ -16,22 +16,25 @@ equationsSIR <- function(time, variables, parameters)
   dI <- (parameters["beta"] * ((S * I) / (N^q))) - (parameters["gamma"] * I) - (parameters["muD"] * I)
   # dR <- (input$gammaSIR * I) - (input$muDeath * R)
   dR <- (parameters["gamma"] * I) - (parameters["muD"] * R)
-  
+
   dN <- dS + dI + dR
-  list(c(dS, dI, dR, dN, q))
+  list(c(dS, dI, dR, dN))
 }
 
 solveSIR <- function(beta = 0.001, gamma = 0.1, muB = 0, muD = 0, population = 500,
                       susceptible = 499, infected = 1, recovered = 0,timesteps = 50,
                       q = 0)
 {
-  variables <- c(susceptible, infected, recovered, population,q)
-  names(variables) <- c("S", "I", "R", "N","q")
+  variables <- c(susceptible, infected, recovered, population)
+  names(variables) <- c("S", "I", "R", "N")
   parameters <- c(beta, gamma, muB, muD)
   names(parameters) <- c("beta", "gamma", "muB", "muD")
-  
-  deSolve::lsoda(variables, seq(0, timesteps, by = 1),
-                 equationsSIR, parameters) |> as.data.frame()
+
+  deSolve::lsoda(
+    variables, seq(0, timesteps, by = 1),
+    equationsSIR, parameters, q
+  ) |>
+    as.data.frame()
 }
 
 plotTheme <- ggplot2::theme(
@@ -44,9 +47,9 @@ plotTheme <- ggplot2::theme(
 )
 
 # Plot
-plotSIR <- function()
+plotSIR <- function(model)
 {
-  ggplot2::ggplot(solveSIR(), ggplot2::aes(x = time)) +
+  ggplot2::ggplot(model, ggplot2::aes(x = time)) +
     plotTheme +
 
     ggplot2::labs(title = "SIRS Epidemic Model", y = "Number of People",
@@ -64,13 +67,13 @@ plotSIR <- function()
 }
 
 # plot phase plane
-plotPhasePlaneSIR <- function()
+plotPhasePlaneSIR <- function(model)
 {
-  ggplot2::ggplot(solveSIR(), ggplot2::aes(x = S))+
+  ggplot2::ggplot(model, ggplot2::aes(x = S))+
 
     ggplot2::geom_line(ggplot2::aes(y = I, color = "Blue"), linewidth = 1.5) +
     plotTheme +
-    ggplot2::ggtitle("SI Phase Plane") + 
+    ggplot2::ggtitle("SI Phase Plane") +
     ggplot2::theme(plot.title = ggplot2::element_text(size = 22, face = "bold")) +
     ggplot2::ylab("Infected (I)") +
     ggplot2::scale_x_continuous(expand = c(0, 0)) +
@@ -80,15 +83,4 @@ plotPhasePlaneSIR <- function()
       name = "SIR", breaks = c("Blue", "Red", "Green"),
       labels = c("Susceptible", "Infected", "Recovered"), guide = "legend"
     )
-}
-
-solveAndRenderSIR <- function(beta, gamma, muB, muD, population, susceptible, infected, recovered, timesteps, q) {
-  expr <- quote({
-    model <- solveSIR(beta, gamma, muB, muD, population, susceptible, infected, recovered, timesteps, q)
-    output$modelPlot <- renderPlot(plotSIR(model))
-    output$modelPhasePlane <- renderPlot(plotPhasePlaneSIR(model))
-    output$modelSummaryTable <- renderTable(model[, 1:6])
-  })
-
-  eval.parent(expr)
 }

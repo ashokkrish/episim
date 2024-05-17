@@ -12,7 +12,7 @@ equationsSEIRD <- function(time, variables, parameters) {
   dR <- (parameters["sigma"] * I) - (parameters["muD"] * R)
   dD <- (parameters["delta"] * I)
   dN <- dS + dE + dI + dR
-  list(c(dS, dE, dI, dR, dD, dN, q))
+  list(c(dS, dE, dI, dR, dD, dN))
 }
 
 solveSEIRD <- function(
@@ -37,8 +37,7 @@ solveSEIRD <- function(
       I = infected,
       R = recovered,
       D = dead,
-      N = population,
-      q = q
+      N = population
     ),
     seq(0, timesteps, by = 1),
     equationsSEIRD,
@@ -49,13 +48,14 @@ solveSEIRD <- function(
       delta = delta,
       muB = muB,
       muD = muD
-    )
+    ),
+    q
   ) |>
     as.data.frame()
 }
 
-plotSEIRD <- function() {
-  ggplot2::ggplot(solveSEIRD(), ggplot2::aes(x = time)) +
+plotSEIRD <- function(model) {
+  ggplot2::ggplot(model, ggplot2::aes(x = time)) +
     ggplot2::theme(
       axis.line = ggplot2::element_line(color = "black"),
       axis.text = ggplot2::element_text(size = 14),
@@ -82,8 +82,8 @@ plotSEIRD <- function() {
     )
 }
 
-plotPhasePlaneSEIRD <- function() {
-  ggplot2::ggplot(solveSEIRD(), ggplot2::aes(x = S)) +
+plotPhasePlaneSEIRD <- function(model) {
+  ggplot2::ggplot(model, ggplot2::aes(x = S)) +
     ggplot2::geom_line(ggplot2::aes(y = I, color = "Blue"), linewidth = 1.5) +
     ggplot2::theme(
       axis.line = ggplot2::element_line(color = "black"),
@@ -104,15 +104,4 @@ plotPhasePlaneSEIRD <- function() {
       labels = c("Susceptible", "Exposed", "Infected", "Recovered", "Dead"),
       guide = "legend"
     )
-}
-
-solveAndRenderSEIRD <- function(beta, gamma, sigma, delta, muB, muD, population, susceptible, exposed, infected, recovered, dead, timesteps, q) {
-  expr <- quote({
-    model <- solveSEIRD(beta, gamma, sigma, delta, muB, muD, population, susceptible, exposed, infected, recovered, dead, timesteps, q)
-    output$modelPlot <- renderPlot(plotSEIRD(model))
-    output$modelPhasePlane <- renderPlot(plotPhasePlaneSEIRD(model))
-    output$modelSummaryTable <- renderTable(model[, 1:6])
-  })
-
-  eval.parent(expr)
 }
