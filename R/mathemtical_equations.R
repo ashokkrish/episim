@@ -43,9 +43,9 @@ SIRS <- function(mu,forceOfInfection)
     R = paste0(Recover, r"(\gamma {I} - \xi{R}\\)" )
   } else 
   {
-    S = paste0(Susceptible, r"( \mu{N} -)", forceOfInfection, r"(+ \xi{R} - \nu{S}\\)")
-    I = paste0(Infection, forceOfInfection, r"(- \gamma {I} - \nu{I}\\)" )
-    R = paste0(Recover, r"(\gamma {I} - \xi{R} - \nu{R}\\)")
+    S = paste0(Susceptible, r"( \mu_B {N} -)", forceOfInfection, r"(+ \xi{R} - \mu_D {S}\\)")
+    I = paste0(Infection, forceOfInfection, r"(- \gamma {I} - \mu_D {I}\\)" )
+    R = paste0(Recover, r"(\gamma {I} - \xi{R} - \mu_D {R}\\)")
   }
   equation <- c(S,I,R)
   return(equation)
@@ -118,10 +118,10 @@ SEIRS <- function(mu,forceOfInfection)
     R <- paste0(Recover, r"(\sigma {I} - \xi{R}\\)")
   } else 
   {
-    S <- paste0(Susceptible, r"(\mu_B {N} - \mu_D {S} -)", forceOfInfection)
-    E <- paste0(Exposure, forceOfInfection, r"(- \gamma {E} - \mu_D {E}\\)")
-    I <- paste0(Infection, r"(\gamma {E} - \sigma {I} -  \delta {I} - \mu_D {I}\\)")
-    R <- paste0(Recover, r"(\sigma {I} - \mu_D {R}\\)")
+    S <- paste0(Susceptible, r"(\mu_B {N} -)", forceOfInfection,  r"(+ \xi{R} - \mu_D {S}\\)")
+    E <- paste0(Exposure, forceOfInfection, r"(- \sigma {E} - \mu_D {E}\\)")
+    I <- paste0(Infection, r"(\sigma {E} - \gamma {I} - \mu_D {I}\\)")
+    R <- paste0(Recover, r"(\gamma {I} - \xi{R} - \mu_D {R}\\)")
   }
   equation <- c(S,E,I,R)
   return(equation)
