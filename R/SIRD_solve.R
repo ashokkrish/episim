@@ -48,8 +48,8 @@ solveSIRD <- function(
     as.data.frame()
 }
 
-plotSIRD <- function() {
-  ggplot2::ggplot(solveSIRD(), ggplot2::aes(x = time)) +
+plotSIRD <- function(model) {
+  ggplot2::ggplot(model, ggplot2::aes(x = time)) +
     ggplot2::theme(
       axis.line = ggplot2::element_line(color = "black"),
       axis.text = ggplot2::element_text(size = 14),
@@ -73,8 +73,8 @@ plotSIRD <- function() {
     )
 }
 
-plotPhasePlaneSIRD <- function() {
-  ggplot2::ggplot(solveSIRD(), ggplot2::aes(x = S)) +
+plotPhasePlaneSIRD <- function(model) {
+  ggplot2::ggplot(model, ggplot2::aes(x = S)) +
     ggplot2::geom_line(ggplot2::aes(y = I, color = "Blue"), linewidth = 1.5) +
     ggplot2::theme(
       axis.line = ggplot2::element_line(color = "black"),
@@ -93,15 +93,4 @@ plotPhasePlaneSIRD <- function() {
       name = "SIRD", breaks = c("Blue", "Red", "Green", "Orange"),
       labels = c("Susceptible", "Infected", "Recovered", "Dead"), guide = "legend"
     )
-}
-
-solveAndRenderSIRD <- function(beta, gamma, delta, muB, muD, population, susceptible, infected, recovered, dead, timesteps, q) {
-  expr <- quote({
-    model <- solveSIRD(beta, gamma, delta, muB, muD, population, susceptible, infected, recovered, dead, timesteps, q)
-    output$modelPlot <- renderPlot(plotSIRD(model))
-    output$modelPhasePlane <- renderPlot(plotPhasePlaneSIRD(model))
-    output$modelSummaryTable <- renderTable(model[, 1:6])
-  })
-
-  eval.parent(expr)
 }

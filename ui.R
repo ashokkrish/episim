@@ -50,21 +50,29 @@ gamma <- numericInput("gamma", "ERROR", 0.5,
   width = "300px"
 )
 
-delta <- numericInput("delta", r"(Fatality rate ($\delta$))", 0.5,
-  min = 0, max = 1, # TODO: Adjust minimum and maximum
-  step = 0.01,
-  width = "300px"
+delta <- conditionalPanel(
+  r"{['SIRD', 'SEIRD'].includes(input.modelSelect)}",
+  numericInput("delta", r"(Fatality rate ($ \delta $))", 0.5,
+    min = 0, max = 1, # TODO: Adjust minimum and maximum
+    step = 0.01,
+    width = "300px"
+  )
 )
 
-sigma <- numericInput("sigma", r"(Rate of recovery ($\sigma$))", 0.5,
-  min = 0, max = 1, # TODO: Adjust minimum and maximum
-  step = 0.01,
-  width = "300px"
-)
+
+sigma <-
+  conditionalPanel(
+    r"{['SIRD', 'SEIRD'].includes(input.modelSelect)}",
+    numericInput("sigma", r"(Rate of recovery ($ \sigma $))", 0.5,
+      min = 0, max = 1, # TODO: Adjust minimum and maximum
+      step = 0.01,
+      width = "300px"
+    )
+  )
 
 xi <- conditionalPanel(
   r"{['SIRS', 'SEIRS'].includes(input.modelSelect)}",
-  numericInput("xi", r"(Rate of loss of immunity ($\xi$))", 0.5,
+  numericInput("xi", r"(Rate of loss of immunity ($ \xi $))", 0.5,
     min = 0, max = 1, # TODO: Adjust minimum and maximum
     step = 0.01,
     width = "300px"
@@ -75,8 +83,14 @@ xi <- conditionalPanel(
 ## bee <- {}
 ## mu <- {}
 
-## Death due to disease
-## alpha <- {}
+## Vaccination
+## alpha <- numericInput("alpha", r"(Rate of vaccination ($ \alpha $))", 0.0,
+##   min = 0.0, max = 1.0,
+##   step = 0.01,
+##   width = "300px"
+##   ) |>
+##   ## TODO: write which models have vaccination when they're implemented.
+##   conditionalPanel(r"{[].includes(input.modelSelect)}")
 
 ## Migraiton and emigration
 ## AY <- {}
@@ -90,9 +104,21 @@ S <- numericInput("susceptible", r"(Susceptible)", 1, min = 1, step = 1, width =
 
 ## Given the modelSelection string is available in the calling environment
 ## of these functions, display (or don't) the appropriate input.
-D <- numericInput("dead", r"(Dead)", 0, min = 0, step = 1, width = "300px")
-E <- numericInput("exposed", r"(Exposed)", 0, min = 0, step = 1, width = "300px")
-V <- numericInput("vaccinated", r"(Vaccinated)", 0, min = 0, step = 1, width = "300px")
+D <- conditionalPanel(
+  r"{['SIRD', 'SEIRD'].includes(input.modelSelect)}",
+  numericInput("dead", r"(Dead)", 0, min = 0, step = 1, width = "300px")
+)
+
+E <- conditionalPanel(
+  r"{['SEIR', 'SEIRS', 'SEIRD'].includes(input.modelSelect)}",
+  numericInput("exposed", r"(Exposed)", 0, min = 0, step = 1, width = "300px")
+)
+
+V <- conditionalPanel(
+  ## TODO: write which modoels have vaccination when they're implemented.
+  r"{[].includes(input.modelSelect)}",
+  numericInput("vaccinated", r"(Vaccinated)", 0, min = 0, step = 1, width = "300px")
+)
 
 bold <- function(...) p(..., style = "font-weight: bold")
 ## TODO: include FontAwesome GitHub logo
@@ -263,6 +289,7 @@ episimModelTab <-
 
 ## APPLICATION UI ROOT -----------------------------------------------------
 fluidPage(
+  tags$script(src = "whenModelSelectChangesTypesetLaTeX.js"),
   useShinyjs(),
   div(titlePanel("Compartmental Models of Epidemiology")),
   withMathJax(navbarPage(title = "", episimModelTab, episimModelAuthorshipTab))
