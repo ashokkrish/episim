@@ -127,8 +127,7 @@ GitHub <- function(username, ...) {
 }
 
 episimModelAuthorshipTab <-
-  tabPanel(
-    "Authors",
+  nav_panel(title = "Authors",
     h3("Development Team", style = "font-weight:bold"), br(),
 
     ## TODO: Bryce's information
@@ -163,20 +162,6 @@ episimModelAuthorshipTab <-
       "https://github.com/ashokkrish/episim",
       target = "_blank"
     )), br(), br(),
-    h3("Disclaimer", style = "font-weight:bold"), br(),
-
-    ## Substitute the line breaks in the source for null-strins to join them. A
-    ## poor man's here-doc.
-    p(gsub(
-      "\n", " ",
-      r"(This tool uses a mathematical model to simulate epidemic model
-outcomes based on user-defined parameters. The output of the model depends on
-model assumptions, parameter choices. It is not a medical predictor, and
-should be used for informational and research purposes only. Please carefully
-consider the parameters you choose. Interpret and use the simulated results
-responsibly. Authors are not liable for any direct or indirect consequences
-of this usage.)"
-    ))
   )
 
 modelSelect <- pickerInput("modelSelect", "Epidemic Model",
@@ -281,16 +266,79 @@ modelConfigurationPanel <-
     runSimulationOrResetButtons
   )
 
+
+disclaimer <-
+  p(gsub(
+    r"[\n]", " ",
+    r"(This tool uses a mathematical model to simulate epidemic model
+outcomes based on user-defined parameters. The output of the model depends on
+model assumptions, parameter choices. It is not a medical predictor, and
+should be used for informational and research purposes only. Please carefully
+consider the parameters you choose. Interpret and use the simulated results
+responsibly. Authors are not liable for any direct or indirect consequences
+of this usage.)"
+  ))
+
 episimModelTab <-
-  tabPanel(
-    "Model",
+  nav_panel(title = "Model",
     sidebarLayout(withMathJax(modelConfigurationPanel), modelResultsPanel)
   )
 
+nonspatial <- navset_card_pill(
+  title = "Non-spatial Compartmental Models of Epidemiology",
+  placement = "above",
+  episimModelTab,
+  episimModelAuthorshipTab,
+  nav_spacer(),
+  nav_menu(
+    title = "Links",
+    nav_item(a("Mount Royal University", href = "https://mtroyal.ca")),
+    )
+)
+
+## TODO: make this selectable
+nonspatialModelValueBox <-
+  value_box(
+    title = "Compartmental",
+    value = "Non-spatial",
+    showcase = bs_icon("box-arrow-down-right"),
+    p("Non-spatial compartmental models... are what we have in ye olde episim currently.")
+  )
+
+## TODO: integrate spatial modelling into this application
+spatialModelValueBox <-
+  value_box(
+    title = "Compartmental",
+    value = "Spatial",
+    showcase = bs_icon("rocket-takeoff-fill"),
+    p("Some really cool stuff")
+  )
+
+## TODO: integrate agent-based modelling into this application
+agentBasedModelValueBox <-
+  value_box(
+    title = "Agent-based",
+    value = "Non-spatial, Agent-based model?",
+    showcase = bs_icon("virus2"),
+    p("Some really cool stuff")
+  )
+
+mainSidebar <- sidebar(
+  id = "mainSidebar",
+  open = FALSE,
+  title = "Epidemic modelling type",
+  nonspatialModelValueBox,
+  spatialModelValueBox,
+  agentBasedModelValueBox
+)
+
 ## APPLICATION UI ROOT -----------------------------------------------------
-fluidPage(
+page_sidebar(
   tags$script(src = "whenModelSelectChangesTypesetLaTeX.js"),
   useShinyjs(),
-  div(titlePanel("Compartmental Models of Epidemiology")),
-  withMathJax(navbarPage(title = "", episimModelTab, episimModelAuthorshipTab))
+  theme = bs_theme(version = "5"),
+  window_title = "Krishnamurthy Episim",
+  title = "The Krishnamurthy Lab Epidemic Modelling app",
+  sidebar = mainSidebar,
+  nonspatial
 )
