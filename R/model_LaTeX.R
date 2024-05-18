@@ -26,8 +26,10 @@ generate_latex <- function(equations) {
   ))
 }
 
-## FIXME: is this working or not?
-renderModelLaTeX <- function(model, vitalStatistics, massAction) {
-  eval(call(model, vitalStatistics, getForceOfInfection(massAction))) |>
+renderModelLaTeX <- function() {
+  eval(call(input$modelSelect,
+            input$muValue,
+            getForceOfInfection(input$massActionSelect))) |>
     generate_latex() |>
-    helpText()}
+    helpText()
+}

@@ -1,43 +1,15 @@
 server <- function(input, output, session) {
-  # Initialize simple-caching and global variables.
-  # cachedBirthRate <- 0
-  # cachedDeathRate <- 0
-
-
 # Functions, such as the solveAndRender dispatcher -----------------------------
-  solveAndRender <- function(model, modelArguments) {
-    modellingFunctions <- mget(paste0(c("solve", "plot", "plotPhasePlane"), model),
-         envir = environment(solveSIR),
-         mode = "function")
-
-    modelSolver <- modellingFunctions[[1]]
-    modelPlotter <- modellingFunctions[[2]]
-    modelPhasePlanePlotter <- modellingFunctions[[3]]
-
-    expr <- substitute({
-      modelResults <- doCall.default(.fcn = modelSolver,
-                                     args = modelArguments,
-                                     .ignoreUnusedArguments = TRUE)
-      output$modelPlot <- renderPlot(modelPlotter(modelResults))
-      output$modelPhasePlane <- renderPlot(modelPhasePlanePlotter(modelResults))
-      output$modelSummaryTable <- renderTable(modelResults[, 1:6])
-    })
-
-    eval.parent(expr)
-  }
-
   ## NOTE: params is checked for being NA to protect against the default
   ## case_when in an observe. It does nothing otherwise.
   updateNumericInputs <- function(params, session = getDefaultReactiveDomain()) {
-    if (!all(is.na(params))) {
-      mapply(
+    mapply(
         function(inputId, value) {
-          updateNumericInput(session, inputId, value = value)
+          updateNumericInput(session, inputId = inputId, value = value)
         },
-        value = params,
-        inputId = names(params)
+        inputId = names(params),
+        value = params
       )
-    }
   }
 
   ## Predicate certain input validation rules on a model being active.
@@ -79,6 +51,8 @@ server <- function(input, output, session) {
     invisible(validator)
   }
 
+
+# Validation --------------------------------------------------------------
   ## NOTE: all inputs have the required rule automatically added.
   globalValidator <- addRuleListToValidator(
     InputValidator$new(),
@@ -99,7 +73,7 @@ server <- function(input, output, session) {
       ## NOTE: the number of replicates might need to be limited.
       ## replicates = c(sv_integer(), sv_between(0, 100, c(FALSE, TRUE))),
       replicates = c(sv_integer(), sv_gt(0)),
-      timesteps = c(sv_numeric(), sv_gt(0)),
+      timesteps = c(sv_gt(0)),
 
       ## Global rules for parameters
       beta = c(sv_gt(0)),
@@ -157,6 +131,8 @@ server <- function(input, output, session) {
       globalValidator$add_validator()
   })
 
+
+# Observables -------------------------------------------------------------
   ## FIXME: this is a naive way of disabling vital dynamics. A preferable
   ## alternative is to add the term to or remove it from the equations, rather
   ## than making the term equal to zero.
@@ -172,21 +148,35 @@ server <- function(input, output, session) {
   ## with the "go" actionButton.
   observeEvent(input$go, {
     show("outputPanel")
+    modellingFunctions <- mget(paste0(c("solve", "plot", "plotPhasePlane"),
+                                      input$modelSelect),
+                               envir = environment(solveSIR),
+                               mode = "function")
 
-    solveAndRender(input$modelSelect, reactiveValuesToList(input))
-    output$modelLaTeX <- renderUI(renderModelLaTeX(input$modelSelect,
-                                                   input$muValue, input$massActionSelect))
+    modelSolver <- modellingFunctions[[1]]
+    modelPlotter <- modellingFunctions[[2]]
+    modelPhasePlanePlotter <- modellingFunctions[[3]]
 
+    eval(substitute({
+      modelResults <- doCall.default(.fcn = modelSolver,
+                                     args = reactiveValuesToList(input),
+                                     .ignoreUnusedArguments = TRUE)
+      output$modelPlot <- renderPlot(modelPlotter(modelResults))
+      output$modelPhasePlane <- renderPlot(modelPhasePlanePlotter(modelResults))
+      output$modelSummaryTable <- renderTable(modelResults[, 1:6])
+
+      output$modelLaTeX <- renderUI(renderModelLaTeX())
+    }))
   })
-
 
 # RESET: hide outputPanel; modelConfiguration; actionButtons; rese --------
   ## TODO: resetting the application should set the widget values to those which
   ## are defined for the model in the spreadsheet.
   observeEvent(input$resetAll, {
     hide("outputPanel")
-    hide("modelConfiguration")
     hide("actionButtons")
+    hide("modelConfiguration")
+
     with(list(session = getDefaultReactiveDomain()), {
       updatePickerInput(session, "modelSelect", selected = "")
       updateRadioButtons(session, "massActionSelect", selected = 0)
@@ -209,47 +199,65 @@ server <- function(input, output, session) {
   ## are set manually or taken from pre-defined models), the widget values
   ## throughout the application are updated as appropriate.
   observeEvent(input$modelSelect, {
-    with(list(
-      model = input$modelSelect,
-      stochastic = input$stochasticSelect,
-      vital = input$muValue,
-      session = getDefaultReactiveDomain()
-    ), {
-      ## If no model is selected, hide the model configuration and action buttons.
-      if (input$modelSelect %in% "") {
-        hide("modelConfiguration")
-        hide("actionButtons")
-      } else {
-        show("modelConfiguration")
-        show("actionButtons")
-      }
+    ## If no model is selected, hide the model configuration and action buttons.
+    if (input$modelSelect %in% "") {
+      hide("actionButtons")
+      hide("modelConfiguration")
+    } else {
+      show("modelConfiguration")
+      show("actionButtons")
+      reactive({
+        with(list(
+          model = input$modelSelect,
+          stochastic = input$stochasticSelect,
+          vital = input$muValue,
+          formulation = input$massActionSelect,
+          session = getDefaultReactiveDomain()
+        ), {
+          ## If no model is selected, hide the model configuration and action buttons.
+          if (input$modelSelect %in% "") {
+            hide("modelConfiguration")
+            hide("actionButtons")
+          } else {
+            show("modelConfiguration")
+            show("actionButtons")
+          }
 
-      hide("outputPanel")
+          hide("outputPanel")
 
-      updateRadioButtons(session, "massActionSelect", selected = 0)
-      updateRadioButtons(session, "stochasticSelect", selected = 0)
+          updateRadioButtons(session, "massActionSelect", selected = 0)
+          updateRadioButtons(session, "stochasticSelect", selected = 0)
 
-      ## TODO: refactor the application to use a more descriptive variable name:
-      ## `vitalDynamicsSelect', perhaps.
-      updateCheckboxInput(session, "muValue", value = FALSE) # Vital Dynamics
+          ## TODO: refactor the application to use a more descriptive variable name:
+          ## `vitalDynamicsSelect', perhaps.
+          updateCheckboxInput(session, "muValue", value = FALSE) # Vital Dynamics
 
-      ## TODO: the function must handle NAs appropriately, such that a widget
-      ## is hidden when the value is NA rather than set to an invalid state.
-      updateNumericInputs(as.list(filter(defaultParameterValues,
-                                         modelType == model,
-                                         stochastic == stochastic)))
+          ## TODO: the function must handle NAs appropriately, such that a widget
+          ## is hidden when the value is NA rather than set to an invalid state.
+          filter(defaultInputValues,
+                 modelType == model,
+                 stochastic == stochastic,
+                 vitalStatistics == vital,
+                 massAction == formulation) |>
+            select(beta:replicates) |>
+            select(where(\(x) all(!is.na(x)))) |>
+            as.list() |>
+            updateNumericInputs()
 
-      ## NOTE: this triggers the anonymous function in
-      ## www/whenModelSelectChangesTypesetLaTeX.js to be called, typesetting the
-      ## updated labels.
-      if(grepl("SI", model, ignore.case = TRUE)) {
-        updateNumericInput(session, "beta", r"[Rate of infection ($ \beta $)]")
-        updateNumericInput(session, "gamma", r"[Rate of recovery ($ \gamma $)]")
-      } else if(grepl("SEI", model, ignore.case = TRUE)) {
-        updateNumericInput(session, "beta", r"[Rate of exposure ($ \beta $)]")
-        updateNumericInput(session, "gamma", r"[Rate of infection ($ \gamma $)]")
-      }
-    })
+          ## NOTE: this triggers the anonymous function in
+          ## www/whenModelSelectChangesTypesetLaTeX.js to be called, typesetting the
+          ## updated labels.
+          if(grepl("SI", model, ignore.case = TRUE)) {
+            updateNumericInput(session, "beta", r"[Rate of infection ($ \beta $)]")
+            updateNumericInput(session, "gamma", r"[Rate of recovery ($ \gamma $)]")
+          } else if(grepl("SEI", model, ignore.case = TRUE)) {
+            updateNumericInput(session, "beta", r"[Rate of exposure ($ \beta $)]")
+            updateNumericInput(session, "gamma", r"[Rate of infection ($ \gamma $)]")
+          }
+        })
+      })
+    }
+
   })
 
   ## FIXME: the input is not being validated properly, because the global

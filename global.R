@@ -18,5 +18,9 @@ library(R.utils)
 ## prepared by T.W. will determine what we finally use. For now, during
 ## interactive development of the application, here is a perfect solution.
 here::i_am("global.R")
-defaultParameterValues <- read.xlsx(here("data/defaultParameterValues.xlsx"), sheetIndex = 1)
+defaultInputValues <- read.xlsx(here("data/defaultInputValues.xlsx"),
+                                sheetIndex = 1) |>
+  mutate(stochastic = as.logical(stochastic),
+         vitalStatistics = as.logical(vitalStatistics),
+         massAction = as.logical(vitalStatistics))
 shinyAppDir(here::here()) # and hurrah!
