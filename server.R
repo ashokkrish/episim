@@ -36,7 +36,7 @@ server <- function(input, output, session) {
   ## NOTE: all inputs have the required rule automatically added.
   globalValidator <-
     addRuleListToValidator(InputValidator$new(),
-                           filter(rules, is.na(model))[, 2][[1]])
+                           filter(rules, is.na(model))[, 2][[1]][[1]])
 
   filter(rules, !is.na(model)) |>
     apply(
