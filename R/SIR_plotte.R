@@ -2,31 +2,36 @@
 # Deterministic SIR epidemic model in a closed population #
 #---------------------------------------------------------#
 
-equationsSIR <- function(time, variables, parameters)
-{
-  S <- variables[1]
-  I <- variables[2]
-  R <- variables[3]
-  N <- variables[4]
-  q <- variables[5]
+equationsSIR <- function(time, variables, parameters, ...) {
+  with(append(as.list(variables, parameters)), {
+    betaSINq <- beta * ((S * I) / N^q)
 
-  #  dS <- (input$muBirth * N) - (input$muDeath * S) - (input$betaSIR * ((S * I) / (N^q)))
-  dS <- (parameters["muB"] * N) - (parameters["muD"] * S) - (parameters["beta"] * ((S * I) / (N^q)))
-  #  dI <- (input$betaSIR * ((S * I) / (N^q))) - (input$gammaSIR * I) - (input$muDeath * I)
-  dI <- (parameters["beta"] * ((S * I) / (N^q))) - (parameters["gamma"] * I) - (parameters["muD"] * I)
-  # dR <- (input$gammaSIR * I) - (input$muDeath * R)
-  dR <- (parameters["gamma"] * I) - (parameters["muD"] * R)
+    dS <- muB * N
+    - muB * S
+    - betaSINq
 
-  dN <- dS + dI + dR
-  list(c(dS, dI, dR, dN))
+    dI <- betaSINq
+    - gamma * I
+    - muD * I
+
+    dR <- gamma * I
+    - muD * R
+
+    dN <- dS + dI + dR
+    list(c(dS, dI, dR, dN), q)
+  })
 }
 
 solveSIR <- function(beta = 0.001, gamma = 0.1, muB = 0, muD = 0, population = 500,
                       susceptible = 499, infected = 1, recovered = 0,timesteps = 50,
-                      q = 0)
+                      q = 0, vitalStatisticsSelect = FALSE)
 {
   variables <- c(susceptible, infected, recovered, population)
   names(variables) <- c("S", "I", "R", "N")
+  if(!vitalStatisticsSelect) {
+    muB <- 0
+    muD <- 0
+  }
   parameters <- c(beta, gamma, muB, muD)
   names(parameters) <- c("beta", "gamma", "muB", "muD")
 

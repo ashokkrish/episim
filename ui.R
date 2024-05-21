@@ -3,10 +3,7 @@
 ## ignored. There is no reason to evaluate these function definitions in the
 ## global environment manually, because that is going to happen regardless.
 
-maxPopulation <- 900000000
-
 ### Model options
-
 timesteps <- numericInput("timesteps", "Number of Timesteps (m)",
   100, 1,
   step = 1,
@@ -59,16 +56,14 @@ delta <- conditionalPanel(
   )
 )
 
-
-sigma <-
-  conditionalPanel(
-    r"{['SIRD', 'SEIRD'].includes(input.modelSelect)}",
-    numericInput("sigma", r"(Rate of recovery ($ \sigma $))", 0.5,
-      min = 0, max = 1, # TODO: Adjust minimum and maximum
-      step = 0.01,
-      width = "300px"
-    )
+sigma <- conditionalPanel(
+  r"{['SIRD', 'SEIRD'].includes(input.modelSelect)}",
+  numericInput("sigma", r"(Rate of recovery ($ \sigma $))", 0.5,
+    min = 0, max = 1, # TODO: Adjust minimum and maximum
+    step = 0.01,
+    width = "300px"
   )
+)
 
 xi <- conditionalPanel(
   r"{['SIRS', 'SEIRS'].includes(input.modelSelect)}",
@@ -78,23 +73,6 @@ xi <- conditionalPanel(
     width = "300px"
   )
 )
-
-## Vital Dynamics
-## bee <- {}
-## mu <- {}
-
-## Vaccination
-## alpha <- numericInput("alpha", r"(Rate of vaccination ($ \alpha $))", 0.0,
-##   min = 0.0, max = 1.0,
-##   step = 0.01,
-##   width = "300px"
-##   ) |>
-##   ## TODO: write which models have vaccination when they're implemented.
-##   conditionalPanel(r"{[].includes(input.modelSelect)}")
-
-## Migraiton and emigration
-## AY <- {}
-## BEE <- {}
 
 ## 🥌 Rinks dev The emoji is a landmark in this file.
 R <- numericInput("recovered", r"(Recovered)", 0, min = 0, step = 1, width = "300px")
@@ -164,23 +142,16 @@ episimModelAuthorshipTab <-
     )), br(), br(),
   )
 
-modelSelect <- pickerInput("modelSelect", "Epidemic Model",
-  list(
-    "Please choose a model" = "",
-    SIR = "SIR",
-    SIRS = "SIRS",
-    SIRD = "SIRD",
-    SEIR = "SEIR",
-    SEIRS = "SEIRS",
-    SEIRD = "SEIRD"
-  ),
-  ## FIXME: is this having any effect, given width is not "fit"?
-  inline = TRUE,
-  width = "300px"
-)
+models <- list("SIR", "SIRS", "SIRD", "SEIR", "SEIRS", "SEIRD")
+names(models) <- models
+models <- append(models, list("Please choose a model" = ""), after = 0)
+modelSelect <- pickerInput("modelSelect",
+                           "Epidemic Model", models,
+                           width = "fit")
 
 massAction <- radioButtons("massActionSelect", "Model Formulation",
   choices = list("Pseudo-Mass Action" = 0, "True-Mass Action" = 1),
+  selected = 0,
   ## FIXME: again, is this having any effect?
   inline = TRUE,
   "300px"
@@ -189,12 +160,22 @@ massAction <- radioButtons("massActionSelect", "Model Formulation",
 deterministic <- radioButtons("stochasticSelect",
   strong("Model Stochasticity"),
   choices = list("Deterministic" = 0, "Stochastic" = 1),
+  selected = 0,
   ## FIXME: again, is this having any effect?
   inline = TRUE,
   "300px"
 )
 
-vitalDynamics <- checkboxInput("muValue", "Vital Dynamics", FALSE, "300px")
+## Vaccination
+## alpha <- numericInput("alpha", r"(Rate of vaccination ($ \alpha $))", 0.0,
+##   min = 0.0, max = 1.0,
+##   step = 0.01,
+##   width = "300px"
+##   ) |>
+##   ## TODO: write which models have vaccination when they're implemented.
+##   conditionalPanel(r"{[].includes(input.modelSelect)}")
+
+vitalDynamics <- checkboxInput("vitalStatistics", "Vital Dynamics", FALSE, "300px")
 
 modelOptions <- div(id = "modelOptions", massAction, deterministic, vitalDynamics)
 
@@ -211,14 +192,14 @@ stochasticVariables <-
 
 vitalDynamicsParameters <-
   conditionalPanel(
-    r"[input.muValue == '1']",
+    r"[input.vitalStatistics == '1']",
     numericInput(
-      "muBirth", r"[Birth Rate ($mu_B$)]",
+      "muBirth", r"[Rate of births ($\mu_B$)]",
       0, 0, 0.1, 0.0001,
       "300px"
     ),
     numericInput(
-      "muDeath", r"[Death Rate due to Natural Causes ($\mu_D$)]",
+      "muDeath", r"[Rate of naturally caused death ($\mu_D$)]",
       0, 0, 0.1, 0.0001,
       "300px"
     )
@@ -228,27 +209,17 @@ modelParameters <-
   div(
     id = "parameters",
     div(id = "commonParameters", beta, gamma),
-    div(id = "optionalParameters", vitalDynamicsParameters),
-    div(
-      id = "additionalParameters",
-      delta,
-      sigma,
-      xi
-      ## TODO
-      ## bee, mu, # Vital statistics
-      ## alpha, # Mortality rate
-      ## AY, BEE # Immigration and emigration
-    )
+    div(id = "additionalParameters", delta, sigma, xi),
+
+    ## TODO: include the following objects if these model options are implemented.
+    ## vaccinationParameters
+    ## immigrationParameters
+    div(id = "optionalParameters", vitalDynamicsParameters)
   )
 
-### Variables; TODO: based upon the value of modelSelection string in this
-### calling environment, the common, optional, and additional variable functions
-### need to display or not display. This should be controlled within the
-### function bodies so that this function remains simple.
 modelVariables <- div(id = "variables",
-  div(id = "commonVariables", S, I, R, N),
+  div(id = "commonVariables", N, S, E, I, R, D),
   div(id = "optionalVariables", stochasticVariables),
-  div(id = "additionalVariables", D, E, V)
 )
 
 ### Design
