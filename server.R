@@ -42,10 +42,11 @@ server <- function(input, output, session) {
     apply(
       MARGIN = 1,
       FUN = function(model) {
-        modelValidator <- c(model$name, "Validator")
-        assign(modelValidator, InputValidator$new(), envir = .GlobalEnv)
-        addRuleListToValidator(get(modelValidator, envir = .GlobalEnv),
-                               model$rules)
+        assign(
+          paste0(model$name, "Validator"),
+          addRuleListToValidator(InputValidator$new(), model$rules),
+          envir = .GlobalEnv
+        )
       }
     )
 
@@ -110,7 +111,7 @@ server <- function(input, output, session) {
       ##   object 'SIRSValidator' not found
       for(model in c("SIR", "SIRS", "SIRD", "SEIR", "SEIRS", "SEIRD")) {
         modelValidator <- get(paste0(model, "Validator"), envir = .GlobalEnv)
-        modelValidator$condition(input$modelSelect == model)
+        modelValidator$condition(\() input$modelSelect == model)
         ## NOTE: while this is re-run every time the model is changed, it will
         ## only have an effect a single time, and there will neither be multiple
         ## references to the child validator in the list of children of this
