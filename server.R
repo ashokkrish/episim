@@ -29,22 +29,23 @@ server <- function(input, output, session) {
 
 
 # Validation --------------------------------------------------------------
-  # ## NOTE: all inputs have the required rule automatically added.
-  globalValidator <-
-    addRuleListToValidator(InputValidator$new(),
-                           filter(rules, is.na(model))[, 2][[1]][[1]])
 
-  filter(rules, !is.na(model)) |>
-    apply(
-      MARGIN = 1,
-      FUN = function(model) {
-        assign(
-          paste0(model$name, "Validator"),
-          addRuleListToValidator(InputValidator$new(), model$rules),
-          envir = .GlobalEnv
-        )
-      }
+  ## NOTE: all inputs have the required rule automatically added.
+  globalValidator <- addRuleListToValidator(
+    InputValidator$new(),
+    filter(rules, is.na(model))[, 2][[1]][[1]])
+  
+  model_rules <- filter(rules, !is.na(model))
+  
+  lapply(1:nrow(model_rules), function(i) {
+    model_name <- model_rules$model[i]
+    rule_list <- model_rules$ruleList[[i]]
+    assign(
+      paste0(model_name, "Validator"),
+      addRuleListToValidator(InputValidator$new(), rule_list),
+      envir = .GlobalEnv
     )
+  })
 
 # Reactives ---------------------------------------------------------------
   defaults <- reactive({
@@ -106,13 +107,6 @@ server <- function(input, output, session) {
       ## NOTE: when the selected model is changed the condition for that validator
       ## object (for the selected model) is set to TRUE, and all other
       ## model-specific validators' condition is set to FALSE.
-### FIXME:
-      ## Warning: Error in get: object 'SIRSValidator' not found
-      ## 44: get
-      ## 38: server [/home/bryce/Documents/src/r/episim/server.R#80]
-      ##  1: runApp
-      ## Error in get(paste0(model, "Validator"), envir = .GlobalEnv) :
-      ##   object 'SIRSValidator' not found
       for(model in c("SIR", "SIRS", "SIRD", "SEIR", "SEIRS", "SEIRD")) {
         modelValidator <- get(paste0(model, "Validator"), envir = .GlobalEnv)
         modelValidator$condition(\() input$modelSelect == model)
@@ -120,6 +114,7 @@ server <- function(input, output, session) {
         ## only have an effect a single time, and there will neither be multiple
         ## references to the child validator in the list of children of this
         ## validator (the global one), nor will there be any side-effects.
+        #globalValidator$add_validator(modelValidator)
         globalValidator$add_validator(modelValidator)
       }
 
@@ -193,11 +188,11 @@ server <- function(input, output, session) {
 
   ## FIXME: the input is not being validated properly, because the global
   ## validator is returning the incorrect value and "go" is never being enabled.
-  ## observeEvent(input, {
-  ##   if(globalValidator$is_valid()) {
-  ##     enable("go")
-  ##   } else {
-  ##     disable("go")
-  ##   }
-  ## })
+  observeEvent(input, {
+  if(globalValidator$is_valid()) {
+       enable("go")
+     } else {
+       disable("go")
+     }
+   })
 }
