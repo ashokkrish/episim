@@ -28,8 +28,20 @@ modelResultsPanel <-
       id = "tabSet",
       tabPanel("Plot", plotOutput("modelPlot"), imageOutput("modelDiagram")),
       tabPanel("Phase Plane", plotOutput("modelPhasePlane")),
-      tabPanel("Output Summary", tableOutput("modelSummaryTable")),
-      tabPanel("Mathematical Model", uiOutput("modelLaTeX"))
+      tabPanel(
+        "Output Summary",
+        # FIXME: previously, only the button had to be added to the tabpanel 
+        # but now doing so places the button behind the datatable. I have 
+        # added some custom CSS to fix this for now.
+        div(
+          style = "display: flex; flex-direction: column;",
+          DT::dataTableOutput("modelSummaryTable"),
+          downloadButton(
+            "downloadData", "Download as Excel",
+            style = "align-self: flex-start; margin-top: 1vh;"
+          )
+        )
+      ), tabPanel("Mathematical Model", uiOutput("modelLaTeX"))
     )
   )
 
@@ -105,7 +117,8 @@ GitHub <- function(username, ...) {
 }
 
 episimModelAuthorshipTab <-
-  nav_panel(title = "Authors",
+  nav_panel(
+    title = "Authors",
     h3("Development Team", style = "font-weight:bold"), br(),
 
     ## TODO: Bryce's information
@@ -146,10 +159,11 @@ models <- list("SIR", "SIRS", "SIRD", "SEIR", "SEIRS", "SEIRD")
 names(models) <- models
 models <- append(models, list("Please choose a model" = ""), after = 0)
 modelSelect <- pickerInput("modelSelect",
-                           "Epidemic Model", models,
-                           width = "fit")
+  "Epidemic Model", models,
+  width = "fit"
+)
 
-massAction <- radioButtons("trueMassAction", "Model Formulation",
+massAction <- radioButtons("massActionSelect", "Model Formulation",
   choices = list("Pseudo-Mass Action" = 0, "True-Mass Action" = 1),
   selected = 0,
   ## FIXME: again, is this having any effect?
@@ -217,7 +231,8 @@ modelParameters <-
     div(id = "optionalParameters", vitalDynamicsParameters)
   )
 
-modelVariables <- div(id = "variables",
+modelVariables <- div(
+  id = "variables",
   div(id = "commonVariables", N, S, E, I, R, D),
   div(id = "optionalVariables", stochasticVariables),
 )
@@ -251,7 +266,8 @@ of this usage.)"
   ))
 
 episimModelTab <-
-  nav_panel(title = "Model",
+  nav_panel(
+    title = "Model",
     sidebarLayout(withMathJax(modelConfigurationPanel), modelResultsPanel)
   )
 
@@ -264,7 +280,7 @@ nonspatial <- navset_card_pill(
   nav_menu(
     title = "Links",
     nav_item(a("Mount Royal University", href = "https://mtroyal.ca")),
-    )
+  )
 )
 
 ## TODO: make this selectable

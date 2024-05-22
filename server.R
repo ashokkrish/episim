@@ -1,5 +1,5 @@
 server <- function(input, output, session) {
-# Functions, such as the solveAndRender dispatcher -----------------------------
+  # Functions, such as the solveAndRender dispatcher -----------------------------
   ## NOTE: params is checked for being NA to protect against the default
   ## case_when in an observe. It does nothing otherwise.
   updateNumericInputs <- function(params, session) {
@@ -28,15 +28,16 @@ server <- function(input, output, session) {
   }
 
 
-# Validation --------------------------------------------------------------
+  # Validation --------------------------------------------------------------
 
   ## NOTE: all inputs have the required rule automatically added.
   globalValidator <- addRuleListToValidator(
     InputValidator$new(),
-    filter(rules, is.na(model))[, 2][[1]][[1]])
-  
+    filter(rules, is.na(model))[, 2][[1]][[1]]
+  )
+
   model_rules <- filter(rules, !is.na(model))
-  
+
   lapply(1:nrow(model_rules), function(i) {
     model_name <- model_rules$model[i]
     rule_list <- model_rules$ruleList[[i]]
@@ -47,7 +48,7 @@ server <- function(input, output, session) {
     )
   })
 
-# Reactives ---------------------------------------------------------------
+  # Reactives ---------------------------------------------------------------
   defaults <- reactive({
     if (!(input$modelSelect %in% "")) {
       with(reactiveValuesToList(reactiveValues(
@@ -75,7 +76,7 @@ server <- function(input, output, session) {
           select(beta:replicates) |>
           select(where(\(x) all(!is.na(x))))
 
-        if(any(is.null(dim(defaults)), dim(defaults)[1] != 1)) {
+        if (any(is.null(dim(defaults)), dim(defaults)[1] != 1)) {
           warning("The `defaults` dataframe is not a single row!")
         }
 
@@ -86,14 +87,18 @@ server <- function(input, output, session) {
 
   modellingFunctions <-
     reactive({
-      mget(paste0(c("solve", "plot", "plotPhasePlane"),
-                  input$modelSelect),
-           envir = environment(solveSusceptibleInfected),
-           mode = "function")
+      mget(
+        paste0(
+          c("solve", "plot", "plotPhasePlane"),
+          input$modelSelect
+        ),
+        envir = environment(solveSusceptibleInfected),
+        mode = "function"
+      )
     })
 
-# Observables -------------------------------------------------------------
-# MODEL SELECT: update numeric inputs to model defaults on change. --------
+  # Observables -------------------------------------------------------------
+  # MODEL SELECT: update numeric inputs to model defaults on change. --------
   ## Whenever the model selection changes (whether the parameters and variables
   ## are set manually or taken from pre-defined models), the widget values
   ## throughout the application are updated as appropriate.
@@ -107,14 +112,14 @@ server <- function(input, output, session) {
       ## NOTE: when the selected model is changed the condition for that validator
       ## object (for the selected model) is set to TRUE, and all other
       ## model-specific validators' condition is set to FALSE.
-      for(model in c("SIR", "SIRS", "SIRD", "SEIR", "SEIRS", "SEIRD")) {
+      for (model in c("SIR", "SIRS", "SIRD", "SEIR", "SEIRS", "SEIRD")) {
         modelValidator <- get(paste0(model, "Validator"), envir = .GlobalEnv)
         modelValidator$condition(\() input$modelSelect == model)
         ## NOTE: while this is re-run every time the model is changed, it will
         ## only have an effect a single time, and there will neither be multiple
         ## references to the child validator in the list of children of this
         ## validator (the global one), nor will there be any side-effects.
-        #globalValidator$add_validator(modelValidator)
+        # globalValidator$add_validator(modelValidator)
         globalValidator$add_validator(modelValidator)
       }
 
@@ -124,10 +129,10 @@ server <- function(input, output, session) {
       ## NOTE: this triggers the anonymous function in
       ## www/whenModelSelectChangesTypesetLaTeX.js to be called, typesetting the
       ## updated labels.
-      if(grepl("SI", input$modelSelect, ignore.case = TRUE)) {
+      if (grepl("SI", input$modelSelect, ignore.case = TRUE)) {
         updateNumericInput(session, "beta", r"[Rate of infection ($ \beta $)]")
         updateNumericInput(session, "gamma", r"[Rate of recovery ($ \gamma $)]")
-      } else if(grepl("SEI", input$modelSelect, ignore.case = TRUE)) {
+      } else if (grepl("SEI", input$modelSelect, ignore.case = TRUE)) {
         updateNumericInput(session, "beta", r"[Rate of exposure ($ \beta $)]")
         updateNumericInput(session, "gamma", r"[Rate of infection ($ \gamma $)]")
       }
@@ -136,7 +141,7 @@ server <- function(input, output, session) {
     }
   })
 
-# StochasticSelect --------------------------------------------------------
+  # StochasticSelect --------------------------------------------------------
   ## NOTE: hide the output panel and update the input widgets with defaults when
   ## the user changes to stochastic modelling.
   observeEvent(input$stochasticSelect, {
@@ -144,7 +149,7 @@ server <- function(input, output, session) {
     updateNumericInputs(defaults(), session)
   })
 
-# GO: show outputPanel; call modelling function; render LaTeX. ------------
+  # GO: show outputPanel; call modelling function; render LaTeX. ------------
   ## Toggle the visibility of the outputPanel based on the user's interactions
   ## with the "go" actionButton.
   observeEvent(input$go, {
@@ -156,18 +161,29 @@ server <- function(input, output, session) {
 
     eval(substitute({
       inputs <- reactiveValuesToList(input)
-      modelResults <- doCall.default(.fcn = modelSolver,
-                                     args = inputs,
-                                     .ignoreUnusedArguments = TRUE)
+      modelResults <- doCall.default(
+        .fcn = modelSolver,
+        args = inputs,
+        .ignoreUnusedArguments = TRUE
+      )
       output$modelPlot <- renderPlot(modelPlotter(modelResults))
       output$modelPhasePlane <- renderPlot(modelPhasePlanePlotter(modelResults))
-      output$modelSummaryTable <- renderTable(modelResults[, 1:6])
-
+      output$modelSummaryTable <- DT::renderDataTable(DT::datatable(modelResults[, 1:6]))
       output$modelLaTeX <- renderUI(renderModelLaTeX(inputs))
+
+      output$downloadData <- downloadHandler(
+        filename = function() {
+          paste(input$modelSelect, "_Model_Summary", Sys.Date(), ".xlsx", sep = "")
+        },
+        content = function(file) {
+          writexl::write_xlsx(modelResults[, 1:6], file)
+        }
+      )
     }))
   })
 
-# RESET: hide outputPanel; modelConfiguration; actionButtons; rese --------
+
+  # RESET: hide outputPanel; modelConfiguration; actionButtons; rese --------
   ## TODO: resetting the application should set the widget values to those which
   ## are defined for the model in the spreadsheet.
   observeEvent(input$resetAll, {
@@ -188,11 +204,11 @@ server <- function(input, output, session) {
 
   ## FIXME: the input is not being validated properly, because the global
   ## validator is returning the incorrect value and "go" is never being enabled.
-  observeEvent(input, {
-  if(globalValidator$is_valid()) {
-       enable("go")
-     } else {
-       disable("go")
-     }
-   })
+  # observeEvent(input, {
+  # if(globalValidator$is_valid()) {
+  #      enable("go")
+  #    } else {
+  #      disable("go")
+  #    }
+  #  })
 }
