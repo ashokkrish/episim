@@ -1,34 +1,35 @@
 ## FIXME: the differential equations don't use the time variable; this may be
 ## mathematically or scientifically inaccurate; assess this fact, then resolve
 ## this as needed.
-equationsSusceptibleExposed <- function(time, variables, parameters, q = 0, ...) {
+equationsSusceptibleExposed <- function(time, variables, parameters, trueMassAction = FALSE, ...) {
   with(append(as.list(variables),
               as.list(parameters)), {
-    betaSINq <- beta * ((S * I) / N^q)
+    massAction = as.numeric(trueMassAction)
+    betaSIN <- beta * ((S * I) / N^massAction)
 
-    dS <- sum((muB * N),   -(muD * S),   (xi * R), -(betaSINq))
-    dE <- sum(betaSINq,    -(gamma * E), -(muD * E))
+    dS <- sum((muB * N),   -(muD * S),   (xi * R), -(betaSIN))
+    dE <- sum(betaSIN,    -(gamma * E), -(muD * E))
     dI <- sum((gamma * E), -(sigma * I), -(muD * I))
     dR <- sum((sigma * I), -(xi * R),    -(muD * R))
     dN <- dS + dE + dI + dR
 
     dEqns <- c(dS, dE, dI, dR, dN)
-    if (delta != 0) assign(dEqns, append(dEqns, delta * I, length(dEqns) - 1))
+    if (delta != 0) assign("dEqns", append(dEqns, delta * I, length(dEqns) - 1))
 
-    return(list(dEqns, q))
+    return(list(dEqns, massAction))
   })
 }
 
 solveSusceptibleExposed <-
   function(## Variables
-           population, susceptible, exposed, infected, recovered, dead,
+           population, susceptible, exposed, infected, recovered, dead = 0,
 
            ## Parameters (not alphabetically sorted)
            beta, gamma, sigma, delta = 0, xi = 0,
 
            ## Simulation options
            muB = 0, muD = 0, vitalStatistics = FALSE,
-           massActionSelect = FALSE, # Formerly, the variable was named "q".
+           trueMassAction = FALSE, # Formerly, the variable was named "q".
 
            ## Simulation variables
            numIterations = 100,
@@ -50,6 +51,10 @@ solveSusceptibleExposed <-
       seq(0, length = numIterations, by = increment),
       equationsSusceptibleExposed,
       parameters,
-      q))
+      trueMassAction = as.numeric(trueMassAction)))
 
 }
+
+## alias model-specific symbols to the unified solver functions for each model
+## type (SE-type and SI-type).
+solveSEIR <- solveSEIRS <- solveSEIRD <- solveSusceptibleExposed

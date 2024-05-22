@@ -149,7 +149,7 @@ modelSelect <- pickerInput("modelSelect",
                            "Epidemic Model", models,
                            width = "fit")
 
-massAction <- radioButtons("massActionSelect", "Model Formulation",
+massAction <- radioButtons("trueMassAction", "Model Formulation",
   choices = list("Pseudo-Mass Action" = 0, "True-Mass Action" = 1),
   selected = 0,
   ## FIXME: again, is this having any effect?

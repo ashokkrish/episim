@@ -4,9 +4,6 @@ server <- function(input, output, session) {
   ## case_when in an observe. It does nothing otherwise.
   updateNumericInputs <- function(params, session) {
     iwalk(params, \(value, inputId) {
-      if(any(is.null(dim(params)), dim(params)[1] != 1)) {
-        warning("The parameters dataframe passed to iwalk is not a single row!")
-      }
       updateNumericInput(session, inputId, value = value)
     })
   }
@@ -51,43 +48,34 @@ server <- function(input, output, session) {
 
 # Reactives ---------------------------------------------------------------
   defaults <- reactive({
-    if (input$modelSelect %in% "") {
-      ## NOTE: Restore defaults() value to the full dataframe; this isn't
-      ## strictly necessary, it's just a sort ofo "reset". defaults() won't be
-      ## used when the model selection is "", but I think it may rule out some
-      ## very strange state issues if we just ensure that there are rows in the
-      ## dataframe rather than having a zero-length issue. Who knows. 🤷
-      # defaultInputValues
-      NULL
-    } else {
+    if (!(input$modelSelect %in% "")) {
       with(reactiveValuesToList(reactiveValues(
         stochastic = input$stochasticSelect,
-        massAction = input$massActionSelect,
+        massAction = input$trueMassAction,
         model = input$modelSelect,
         vitalStatistics = input$vitalStatistics
       )), {
+        warning(
+          "DEBUG ",
+          head(defaultInputValues, n = 3),
+          model,
+          stochastic,
+          vitalStatistics,
+          massAction
+        )
         defaults <-
           filter(
             defaultInputValues,
             modelType == model,
-            stochastic == stochastic,
+            stochastic == as.logical(stochastic),
             vitalStatistics == vitalStatistics,
-            massAction == massAction
+            massAction == as.logical(massAction)
           ) |>
           select(beta:replicates) |>
           select(where(\(x) all(!is.na(x))))
 
-        if (dim(defaults)[1] != 1) {
-          warning(
-            "Inside the `defaults()` reactive the df has ",
-            dim(defaults)[1],
-            " rows.",
-            r"(Filter args were:\n)",
-            "modelType == ", model, r"(\n)",
-            "stochastic == ", stochastic, r"(\n)",
-            "vitalStatistics == ", vitalStatistics, r"(\n)",
-            "massAction == ", massAction
-          )
+        if(any(is.null(dim(defaults)), dim(defaults)[1] != 1)) {
+          warning("The `defaults` dataframe is not a single row!")
         }
 
         defaults
@@ -95,15 +83,11 @@ server <- function(input, output, session) {
     }
   })
 
-  ## alias model-specific symbols to the unified solver functions for each model
-  ## type (SE-type and SI-type).
-  solveSEIR <- solveSEIRS <- solveSEIRD <- solveSusceptibleExposed
-  solveSIR <- solveSIRS <- solveSIRD <- solveSusceptibleInfected
   modellingFunctions <-
     reactive({
       mget(paste0(c("solve", "plot", "plotPhasePlane"),
                   input$modelSelect),
-           envir = environment(solveSIR),
+           envir = environment(solveSusceptibleInfected),
            mode = "function")
     })
 
@@ -176,14 +160,15 @@ server <- function(input, output, session) {
     modelPhasePlanePlotter <- modellingFunctions()[[3]]
 
     eval(substitute({
+      inputs <- reactiveValuesToList(input)
       modelResults <- doCall.default(.fcn = modelSolver,
-                                     args = reactiveValuesToList(input),
+                                     args = inputs,
                                      .ignoreUnusedArguments = TRUE)
       output$modelPlot <- renderPlot(modelPlotter(modelResults))
       output$modelPhasePlane <- renderPlot(modelPhasePlanePlotter(modelResults))
       output$modelSummaryTable <- renderTable(modelResults[, 1:6])
 
-      output$modelLaTeX <- renderUI(renderModelLaTeX())
+      output$modelLaTeX <- renderUI(renderModelLaTeX(inputs))
     }))
   })
 
@@ -198,7 +183,7 @@ server <- function(input, output, session) {
 
     ## Model options widget values
     updatePickerInput(session, "modelSelect", selected = "")
-    updateRadioButtons(session, "massActionSelect", selected = 0)
+    updateRadioButtons(session, "trueMassAction", selected = 0)
     updateRadioButtons(session, "stochasticSelect", selected = 0)
     updateCheckboxInput(session, "vitalStatistics", value = FALSE)
 
