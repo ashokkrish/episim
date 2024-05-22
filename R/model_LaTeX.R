@@ -26,10 +26,14 @@ generate_latex <- function(equations) {
   ))
 }
 
-renderModelLaTeX <- function() {
-  eval(call(input$modelSelect,
-            input$muValue,
-            getForceOfInfection(input$massActionSelect))) |>
-    generate_latex() |>
-    helpText()
+renderModelLaTeX <- function(reactiveValuesList) {
+  equations <- do.call(
+    reactiveValuesList$modelSelect,
+    list(
+      reactiveValuesList$vitalStatistics,
+      forceOfInfection(reactiveValuesList$trueMassAction)
+    )
+  )
+
+  generate_latex(equations) |> helpText()
 }
