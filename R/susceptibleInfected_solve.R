@@ -2,7 +2,8 @@
 ## mathematically or scientifically inaccurate; assess this fact, then resolve
 ## this as needed.
 equationsSusceptibleInfected <- function(time, variables, parameters, q = 0, ...) {
-  with(append(as.list(as.list(variables), as.list(parameters))), {
+  with(append(as.list(variables),
+              as.list(parameters)), {
     betaSINq <- beta * ((S * I) / N^q)
 
     dS <- sum((muB * N),   -(muD * S),   (xi * R), -(betaSINq))
