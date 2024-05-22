@@ -171,7 +171,7 @@ massAction <- radioButtons("massActionSelect", "Model Formulation",
   "300px"
 )
 
-deterministic <- radioButtons("stochasticSelect",
+deterministic <- radioButtons("stochastic",
   strong("Model Stochasticity"),
   choices = list("Deterministic" = 0, "Stochastic" = 1),
   selected = 0,
@@ -193,11 +193,11 @@ vitalDynamics <- checkboxInput("vitalStatistics", "Vital Dynamics", FALSE, "300p
 
 modelOptions <- div(id = "modelOptions", massAction, deterministic, vitalDynamics)
 
-stochasticVariables <-
+replicates <-
   conditionalPanel(
-    r"[input.stochasticSelect == '1']",
+    r"[input.stochastic == '1']",
     numericInput(
-      "stochasticModelVariableNumberOfReplicates",
+      "replicates",
       "Number of Replicates (simulations)",
       50, 0, 100, 1,
       "300px"
@@ -231,10 +231,8 @@ modelParameters <-
     div(id = "optionalParameters", vitalDynamicsParameters)
   )
 
-modelVariables <- div(
-  id = "variables",
-  div(id = "commonVariables", N, S, E, I, R, D),
-  div(id = "optionalVariables", stochasticVariables),
+modelVariables <- div(id = "variables",
+  div(id = "commonVariables", N, S, E, I, R, D)
 )
 
 ### Design
@@ -247,7 +245,8 @@ modelConfigurationPanel <-
       modelOptions,
       modelParameters,
       modelVariables,
-      timesteps
+      timesteps,
+      replicates
     ),
     runSimulationOrResetButtons
   )
@@ -321,7 +320,12 @@ mainSidebar <- sidebar(
 
 ## APPLICATION UI ROOT -----------------------------------------------------
 page_sidebar(
-  tags$script(src = "whenModelSelectChangesTypesetLaTeX.js"),
+  tags$script(
+    type = "text/javascript",
+    id = "MathJax-script",
+    async = NA, # A boolean, an attribute without a value.
+    src = "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.min.js"
+  ),
   useShinyjs(),
   theme = bs_theme(version = "5"),
   window_title = "Krishnamurthy Episim",

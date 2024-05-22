@@ -1,9 +1,11 @@
 server <- function(input, output, session) {
-  # Functions, such as the solveAndRender dispatcher -----------------------------
-  ## NOTE: params is checked for being NA to protect against the default
-  ## case_when in an observe. It does nothing otherwise.
-  updateNumericInputs <- function(params, session) {
-    iwalk(params, \(value, inputId) {
+# Functions, such as the solveAndRender dispatcher -----------------------------
+  updateNumericInputs <- function(defaults, session) {
+    if (any(is.null(dim(defaults)), dim(defaults)[1] != 1)) {
+      warning("The `defaults` dataframe is not a single row!")
+      print(defaults)
+    }
+    iwalk(defaults, \(value, inputId) {
       updateNumericInput(session, inputId, value = value)
     })
   }
@@ -51,37 +53,15 @@ server <- function(input, output, session) {
   # Reactives ---------------------------------------------------------------
   defaults <- reactive({
     if (!(input$modelSelect %in% "")) {
-      with(reactiveValuesToList(reactiveValues(
-        stochastic = input$stochasticSelect,
-        massAction = input$trueMassAction,
-        model = input$modelSelect,
-        vitalStatistics = input$vitalStatistics
-      )), {
-        warning(
-          "DEBUG ",
-          head(defaultInputValues, n = 3),
-          model,
-          stochastic,
-          vitalStatistics,
-          massAction
-        )
-        defaults <-
-          filter(
-            defaultInputValues,
-            modelType == model,
-            stochastic == as.logical(stochastic),
-            vitalStatistics == vitalStatistics,
-            massAction == as.logical(massAction)
-          ) |>
-          select(beta:replicates) |>
-          select(where(\(x) all(!is.na(x))))
-
-        if (any(is.null(dim(defaults)), dim(defaults)[1] != 1)) {
-          warning("The `defaults` dataframe is not a single row!")
-        }
-
-        defaults
-      })
+      filter(
+        defaultInputValues,
+        modelType == input$modelSelect,
+        stochastic == input$stochastic,
+        vitalStatistics == input$vitalStatistics,
+        massAction == input$trueMassAction
+      ) |>
+        select(beta:replicates) |>
+        select(where(\(x) all(!is.na(x))))
     }
   })
 
@@ -138,6 +118,9 @@ server <- function(input, output, session) {
       }
       show("modelConfiguration")
       show("actionButtons")
+
+      ## FIXME: RStudio's MathJax is broken, and calling it borks reactivity.
+      ## runjs(modelSelectJavaScript)
     }
   })
 
@@ -179,6 +162,9 @@ server <- function(input, output, session) {
           writexl::write_xlsx(modelResults[, 1:6], file)
         }
       )
+
+      ## FIXME: RStudio's MathJax is broken, and calling it borks reactivity.
+      ## runjs(modelSelectJavaScript)
     }))
   })
 
@@ -200,6 +186,9 @@ server <- function(input, output, session) {
 
     ## Simulation options widget values
     updateNumericInput(session, "timesteps", value = 100)
+
+    ## FIXME: RStudio's MathJax is broken, and calling it borks reactivity.
+    ## runjs(modelSelectJavaScript)
   })
 
   ## FIXME: the input is not being validated properly, because the global

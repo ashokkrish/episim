@@ -19,8 +19,7 @@ library(R.utils)
 ## interactive development of the application, here is a perfect solution.
 here::i_am("global.R")
 defaultInputValues <- read.xlsx(here("data/defaultInputValues.xlsx"),
-                                sheetIndex = 1) |>
-  mutate(stochastic = as.logical(stochastic),
-         vitalStatistics = as.logical(vitalStatistics),
-         massAction = as.logical(vitalStatistics))
+                                sheetIndex = 1)
+## Load the minified JavaScript to extend the modelSelect widget functionality.
+modelSelectJavaScript <- read_file(here("www/modelSelect.min.js"))
 shinyAppDir(here::here()) # and hurrah!
