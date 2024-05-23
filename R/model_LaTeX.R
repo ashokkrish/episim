@@ -30,7 +30,7 @@ renderModelLaTeX <- function(reactiveValuesList) {
   equations <- do.call(
     reactiveValuesList$modelSelect,
     list(
-      reactiveValuesList$vitalStatistics,
+      reactiveValuesList$vitalDynamics,
       forceOfInfection(reactiveValuesList$trueMassAction)
     )
   )

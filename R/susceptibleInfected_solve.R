@@ -27,7 +27,7 @@ solveSusceptibleInfected <-
            beta, gamma, delta = 0, xi = 0,
 
            ## Simulation options
-           muB = 0, muD = 0, vitalStatistics = FALSE,
+           muB = 0, muD = 0, vitalDynamics = FALSE,
            trueMassAction = FALSE, # Formerly, the variable was named "q".
 
            ## Simulation variables
@@ -40,8 +40,8 @@ solveSusceptibleInfected <-
   names(variables) <- c("N", "S", "I", "R", "D")
 
   parameters <- c(beta, gamma, delta, xi,
-                  muB * vitalStatistics,
-                  muD * vitalStatistics)
+                  muB * vitalDynamics,
+                  muD * vitalDynamics)
   names(parameters) <- c("beta", "gamma", "delta", "xi", "muB", "muD")
 
   as.data.frame(

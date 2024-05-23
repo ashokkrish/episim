@@ -39,7 +39,7 @@ rules <- tribble(
   # Global rules
   NA,
   list(
-    ## Vital statistics
+    ## Vital dynamics
     muBirth = c(sv_between(0, 0.1)),
     muDeath = c(sv_between(0, 0.1)),
 

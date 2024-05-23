@@ -57,7 +57,7 @@ server <- function(input, output, session) {
         defaultInputValues,
         modelType == input$modelSelect,
         stochastic == input$stochastic,
-        vitalStatistics == input$vitalStatistics,
+        vitalDynamics == input$vitalDynamics,
         massAction == input$trueMassAction
       ) |>
         select(beta:replicates) |>
@@ -206,7 +206,7 @@ server <- function(input, output, session) {
     updatePickerInput(session, "modelSelect", selected = "")
     updateRadioButtons(session, "trueMassAction", selected = 0)
     updateRadioButtons(session, "stochasticSelect", selected = 0)
-    updateCheckboxInput(session, "vitalStatistics", value = FALSE)
+    updateCheckboxInput(session, "vitalDynamics", value = FALSE)
 
     ## Simulation options widget values
     updateNumericInput(session, "timesteps", value = 100)

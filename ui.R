@@ -192,7 +192,7 @@ deterministic <- radioButtons("stochastic",
 ##   ## TODO: write which models have vaccination when they're implemented.
 ##   conditionalPanel(r"{[].includes(input.modelSelect)}")
 
-vitalDynamics <- checkboxInput("vitalStatistics", "Vital Dynamics", FALSE, "300px")
+vitalDynamics <- checkboxInput("vitalDynamics", "Vital Dynamics", FALSE, "300px")
 
 modelOptions <- div(id = "modelOptions", massAction, deterministic, vitalDynamics)
 
@@ -209,7 +209,7 @@ replicates <-
 
 vitalDynamicsParameters <-
   conditionalPanel(
-    r"[input.vitalStatistics == '1']",
+    r"[input.vitalDynamics == '1']",
     numericInput(
       "muBirth", r"[Rate of births ($\mu_B$)]",
       0, 0, 0.1, 0.0001,
