@@ -162,6 +162,9 @@ modelSelect <- pickerInput("modelSelect",
   "Epidemic Model", models,
   width = "fit"
 )
+modelDiagram <- uiOutput("modelDiagram")
+## FIXME: https://shiny.posit.co/r/articles/build/images/
+modelSelectAndDiagram <- div(modelSelect, modelDiagram)
 
 massAction <- radioButtons("trueMassAction", "Model Formulation",
   choices = list("Pseudo-Mass Action" = 0, "True-Mass Action" = 1),
@@ -239,7 +242,7 @@ modelVariables <- div(id = "variables",
 modelConfigurationPanel <-
   sidebarPanel(
     id = "inputPanel",
-    modelSelect,
+    modelSelectAndDiagram,
     div(
       id = "modelConfiguration", style = "display: none;",
       modelOptions,

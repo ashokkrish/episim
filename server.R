@@ -65,6 +65,30 @@ server <- function(input, output, session) {
     }
   })
 
+  ## FIXME: https://shiny.posit.co/r/articles/build/images/
+  output$modelDiagram <- renderUI({
+    req(input$modelSelect)
+    if (input$modelSelect %in% "") {
+      tagList(
+        img(
+          src = "",
+          alt = "No model selected; no image available.",
+          contentType = "image/png",
+          height = "40px"
+        )
+      )
+    } else {
+      tagList(
+        img(
+          src = here("www", "images", paste0(input$modelSelect, ".png")),
+          contentType = "image/png",
+          height = "40px",
+          alt = "The diagram of the model compartments failed to load, or the accessibility text is being read by a screen reader."
+        )
+      )
+    }
+  })
+
   modellingFunctions <-
     reactive({
       mget(
