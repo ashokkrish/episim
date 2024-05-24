@@ -14,7 +14,7 @@ actionButtonStyle <- "color: #fff; background-color: #337ab7; border-color: #2e6
 runSimulationOrResetButtons <-
   div(
     id = "actionButtons", style = "display: none;", # Hidden by default
-    actionButton("go", "Run Simulation", style = actionButtonStyle),
+    actionButton("go", "Run Simulation", style = actionButtonStyle, disabled = TRUE),
     actionButton("resetAll", "Reset Values", style = actionButtonStyle)
   )
 
