@@ -69,7 +69,7 @@ delta <- conditionalPanel(
 )
 
 sigma <- conditionalPanel(
-  r"{['SIRD', 'SEIRD'].includes(input.modelSelect)}",
+  r"{['SEIR', 'SEIRS', 'SEIRD'].includes(input.modelSelect)}",
   numericInput("sigma", r"(Rate of recovery ($ \sigma $))", 0.5,
     min = 0, max = 1, # TODO: Adjust minimum and maximum
     step = 0.01,
