@@ -26,7 +26,7 @@ modelResultsPanel <-
     id = "outputPanel", style = "display: none;", # Hidden by default
     tabsetPanel(
       id = "tabSet",
-      tabPanel("Plot", plotly::plotlyOutput("modelPlot"), plotly::plotlyOutput("modelSubPlots"), imageOutput("modelDiagram")),
+      tabPanel("Plot", plotly::plotlyOutput("modelPlot"), plotly::plotlyOutput("modelSubPlots")),
       tabPanel("Phase Plane", plotly::plotlyOutput("modelPhasePlane")),
       tabPanel(
         "Output Summary",
@@ -156,7 +156,6 @@ modelSelect <- pickerInput("modelSelect",
   width = "300px"
 )
 
-## FIXME: https://shiny.posit.co/r/articles/build/images/
 modelSelectAndDiagram <- div(modelSelect, uiOutput("modelDiagram"))
 
 massAction <- radioButtons("trueMassAction",
