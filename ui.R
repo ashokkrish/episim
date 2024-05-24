@@ -1,3 +1,6 @@
+tabPanel <- function(...) {
+  shiny::tabPanel(..., class = "p-3 border border-top-0 rounded-bottom")
+}
 ## NOTE: lintr [object_usage_linter] warnings about a lack of a visible global
 ## definition for some of the shiny elements here are erroneous and can be
 ## ignored. There is no reason to evaluate these function definitions in the
@@ -18,9 +21,6 @@ runSimulationOrResetButtons <-
     actionButton("resetAll", "Reset Values", style = actionButtonStyle)
   )
 
-## TODO: refactor this, making tabPanel functions for the plot, phase-plane,
-## table, and model equations; the arguments of the tabsetPanel function call
-## will be calls to these functions to construct the contents of each tab.
 modelResultsPanel <-
   mainPanel(
     id = "outputPanel", style = "display: none;", # Hidden by default
@@ -30,8 +30,8 @@ modelResultsPanel <-
       tabPanel("Phase Plane", plotOutput("modelPhasePlane")),
       tabPanel(
         "Output Summary",
-        # FIXME: previously, only the button had to be added to the tabpanel 
-        # but now doing so places the button behind the datatable. I have 
+        # FIXME: previously, only the button had to be added to the tabpanel
+        # but now doing so places the button behind the datatable. I have
         # added some custom CSS to fix this for now.
         div(
           style = "display: flex; flex-direction: column;",
@@ -41,7 +41,8 @@ modelResultsPanel <-
             style = "align-self: flex-start; margin-top: 1vh;"
           )
         )
-      ), tabPanel("Mathematical Model", uiOutput("modelLaTeX"))
+      ),
+      tabPanel("Mathematical Model", uiOutput("modelLaTeX"))
     )
   )
 
@@ -87,15 +88,15 @@ xi <- conditionalPanel(
 )
 
 ## 🥌 Rinks dev The emoji is a landmark in this file.
-R <- numericInput("recovered", r"(Recovered)", 0, min = 0, step = 1, width = "300px")
-I <- numericInput("infected", r"(Infected)", 1, min = 1, step = 1, width = "300px")
-N <- numericInput("population", r"(Population)", 2, min = 2, step = 1, width = "300px")
-S <- numericInput("susceptible", r"(Susceptible)", 1, min = 1, step = 1, width = "300px")
+N <- numericInput("population", r"(Population (N))", 2, min = 2, step = 1, width = "300px")
+S <- numericInput("susceptible", r"(Susceptible (S))", 1, min = 1, step = 1, width = "300px")
+I <- numericInput("infected", r"(Infected (I))", 1, min = 1, step = 1, width = "300px")
+R <- numericInput("recovered", r"(Recovered (R))", 0, min = 0, step = 1, width = "300px")
 
 ## Given the modelSelection string is available in the calling environment
 ## of these functions, display (or don't) the appropriate input.
 D <- conditionalPanel(
-  r"{['SIRD', 'SEIRD'].includes(input.modelSelect)}",
+  r"(['SIRD', 'SEIRD'].includes(input.modelSelect))",
   numericInput("dead", r"(Dead)", 0, min = 0, step = 1, width = "300px")
 )
 
@@ -159,28 +160,24 @@ models <- list("SIR", "SIRS", "SIRD", "SEIR", "SEIRS", "SEIRD")
 names(models) <- models
 models <- append(models, list("Please choose a model" = ""), after = 0)
 modelSelect <- pickerInput("modelSelect",
-  "Epidemic Model", models,
-  width = "fit"
+  strong("Epidemic Model"),
+  models,
+  width = "300px"
 )
 modelDiagram <- uiOutput("modelDiagram")
 ## FIXME: https://shiny.posit.co/r/articles/build/images/
 modelSelectAndDiagram <- div(modelSelect, modelDiagram)
 
-massAction <- radioButtons("trueMassAction", "Model Formulation",
+massAction <- radioButtons("trueMassAction",
+  strong("Model Formulation"),
   choices = list("Pseudo-Mass Action" = 0, "True-Mass Action" = 1),
-  selected = 0,
-  ## FIXME: again, is this having any effect?
-  inline = TRUE,
-  "300px"
+  inline = TRUE
 )
 
 deterministic <- radioButtons("stochastic",
   strong("Model Stochasticity"),
   choices = list("Deterministic" = 0, "Stochastic" = 1),
-  selected = 0,
-  ## FIXME: again, is this having any effect?
-  inline = TRUE,
-  "300px"
+  inline = TRUE
 )
 
 ## Vaccination
@@ -191,10 +188,24 @@ deterministic <- radioButtons("stochastic",
 ##   ) |>
 ##   ## TODO: write which models have vaccination when they're implemented.
 ##   conditionalPanel(r"{[].includes(input.modelSelect)}")
+vitalDynamics <-
+  div(checkboxInput("vitalDynamics", "Vital Dynamics", FALSE, "300px"),
+      conditionalPanel(
+        r"[input.vitalDynamics == '1']",
+        numericInput("muBirth",
+                     r"[Rate of births ($\mu_B$)]",
+                     0, 0, 0.1, 0.0001),
+        numericInput("muDeath",
+                     r"[Rate of naturally caused death ($\mu_D$)]",
+                     0, 0, 0.1, 0.0001)),
+      id = "vitalDynamics-card",
+      class = "card bslib-card",
+      style = "margin: 10px;")
 
-vitalDynamics <- checkboxInput("vitalDynamics", "Vital Dynamics", FALSE, "300px")
-
-modelOptions <- div(id = "modelOptions", massAction, deterministic, vitalDynamics)
+modelOptions <- div(id = "modelOptions",
+                    div(massAction, style = "margin: 10px;"),
+                    div(deterministic, style = "margin: 10px;"),
+                    vitalDynamics)
 
 replicates <-
   conditionalPanel(
@@ -203,21 +214,6 @@ replicates <-
       "replicates",
       "Number of Replicates (simulations)",
       50, 0, 100, 1,
-      "300px"
-    )
-  )
-
-vitalDynamicsParameters <-
-  conditionalPanel(
-    r"[input.vitalDynamics == '1']",
-    numericInput(
-      "muBirth", r"[Rate of births ($\mu_B$)]",
-      0, 0, 0.1, 0.0001,
-      "300px"
-    ),
-    numericInput(
-      "muDeath", r"[Rate of naturally caused death ($\mu_D$)]",
-      0, 0, 0.1, 0.0001,
       "300px"
     )
   )
@@ -231,7 +227,6 @@ modelParameters <-
     ## TODO: include the following objects if these model options are implemented.
     ## vaccinationParameters
     ## immigrationParameters
-    div(id = "optionalParameters", vitalDynamicsParameters)
   )
 
 modelVariables <- div(id = "variables",
