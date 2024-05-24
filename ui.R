@@ -26,9 +26,8 @@ modelResultsPanel <-
     id = "outputPanel", style = "display: none;", # Hidden by default
     tabsetPanel(
       id = "tabSet",
-      tabPanel("Plot", plotOutput("modelPlot"),
-               conditionalPanel(r"{!([''].includes(input.modelSelect))}")),
-      tabPanel("Phase Plane", plotOutput("modelPhasePlane")),
+      tabPanel("Plot", plotly::plotlyOutput("modelPlot"), plotly::plotlyOutput("modelSubPlots"), imageOutput("modelDiagram")),
+      tabPanel("Phase Plane", plotly::plotlyOutput("modelPhasePlane")),
       tabPanel(
         "Output Summary",
         # FIXME: previously, only the button had to be added to the tabpanel

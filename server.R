@@ -28,7 +28,7 @@ server <- function(input, output, session) {
     gsub(pattern = r"(\n\s*)", replacement = "") |>
     runjs()
 
-# Functions, such as the solveAndRender dispatcher -----------------------------
+  # Functions, such as the solveAndRender dispatcher -----------------------------
   updateNumericInputs <- function(defaults, session) {
     if (any(is.null(dim(defaults)), dim(defaults)[1] != 1)) {
       warning("The `defaults` dataframe is not a single row!")
@@ -123,7 +123,7 @@ server <- function(input, output, session) {
     reactive({
       mget(
         paste0(
-          c("solve", "plot", "plotPhasePlane"),
+          c("solve", "plot", "plotSubPlots", "plotPhasePlane"),
           input$modelSelect
         ),
         envir = environment(solveSusceptibleInfected),
@@ -208,7 +208,8 @@ server <- function(input, output, session) {
 
     modelSolver <- modellingFunctions()[[1]]
     modelPlotter <- modellingFunctions()[[2]]
-    modelPhasePlanePlotter <- modellingFunctions()[[3]]
+    modelSubPlotter <- modellingFunctions()[[3]]
+    modelPhasePlanePlotter <- modellingFunctions()[[4]]
 
     eval(substitute({
       inputs <- reactiveValuesToList(input)
@@ -217,9 +218,19 @@ server <- function(input, output, session) {
         args = inputs,
         .ignoreUnusedArguments = TRUE
       )
-      output$modelPlot <- renderPlot(modelPlotter(modelResults))
-      output$modelPhasePlane <- renderPlot(modelPhasePlanePlotter(modelResults))
-      output$modelSummaryTable <- DT::renderDataTable(DT::datatable(modelResults[, 1:6]))
+      output$modelPlot <- plotly::renderPlotly(plotly::ggplotly(modelPlotter(modelResults)))
+      output$modelSubPlots <- plotly::renderPlotly(modelSubPlotter(modelResults))
+      output$modelPhasePlane <- plotly::renderPlotly(plotly::ggplotly(modelPhasePlanePlotter(modelResults)))
+      output$modelSummaryTable <- DT::renderDataTable({
+        DT::datatable(
+          round(modelResults[, 1:6], 2),
+          options = list(
+            dom = "lprti",
+            pageLength = 50
+          ),
+          rownames = FALSE
+        )
+      })
       output$modelLaTeX <- renderUI(renderModelLaTeX(inputs))
 
       output$downloadData <- downloadHandler(
