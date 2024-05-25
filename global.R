@@ -33,6 +33,4 @@ defaultInputValues <- read_xlsx(here("data/defaultInputValues.xlsx"),
 ## meaningful to the application.
 ## publishedInputValues <- read_xlsx(here("data/defaultInputValues.xlsx"), 2)
 
-## Load the minified JavaScript to extend the modelSelect widget functionality.
-modelSelectJavaScript <- read_file(here("www/modelSelect.min.js"))
 shinyAppDir(here::here()) # and hurrah!

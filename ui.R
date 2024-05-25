@@ -7,7 +7,7 @@ tabPanel <- function(...) {
 ## global environment manually, because that is going to happen regardless.
 
 ### Model options
-timesteps <- numericInput("timesteps", "Number of Timesteps (m)",
+timesteps <- numericInput("timesteps", r"[Number of Timesteps (\(m\))]",
   100, 1,
   step = 1,
   width = "300px"
@@ -26,7 +26,8 @@ modelResultsPanel <-
     id = "outputPanel", style = "display: none;", # Hidden by default
     tabsetPanel(
       id = "tabSet",
-      tabPanel("Plot", plotOutput("modelPlot"), imageOutput("modelDiagram")),
+      tabPanel("Plot", plotOutput("modelPlot"),
+               conditionalPanel(r"{!([''].includes(input.modelSelect))}")),
       tabPanel("Phase Plane", plotOutput("modelPhasePlane")),
       tabPanel(
         "Output Summary",
@@ -48,21 +49,12 @@ modelResultsPanel <-
 
 ## NOTE: https://englishlessonsbrighton.co.uk/names-letters-english-alphabet/
 ### Parameters
-beta <- numericInput("beta", "ERROR", 0.5,
-  min = 0, max = 1, # TODO: Adjust minimum and maximum
-  step = 0.01,
-  width = "300px"
-)
-
-gamma <- numericInput("gamma", "ERROR", 0.5,
-  min = 0, max = 3, # TODO: Adjust minimum and maximum
-  step = 0.01, # TODO: Adjust the stepping constant.
-  width = "300px"
-)
+beta <- uiOutput("beta")
+gamma <- uiOutput("gamma")
 
 delta <- conditionalPanel(
   r"{['SIRD', 'SEIRD'].includes(input.modelSelect)}",
-  numericInput("delta", r"(Fatality rate ($ \delta $))", 0.5,
+  numericInput("delta", r"[Fatality rate (\(\delta\))]", 0.5,
     min = 0, max = 1, # TODO: Adjust minimum and maximum
     step = 0.01,
     width = "300px"
@@ -71,7 +63,7 @@ delta <- conditionalPanel(
 
 sigma <- conditionalPanel(
   r"{['SEIR', 'SEIRS', 'SEIRD'].includes(input.modelSelect)}",
-  numericInput("sigma", r"(Rate of recovery ($ \sigma $))", 0.5,
+  numericInput("sigma", r"[Rate of recovery (\(\sigma\))]", 0.5,
     min = 0, max = 1, # TODO: Adjust minimum and maximum
     step = 0.01,
     width = "300px"
@@ -80,7 +72,7 @@ sigma <- conditionalPanel(
 
 xi <- conditionalPanel(
   r"{['SIRS', 'SEIRS'].includes(input.modelSelect)}",
-  numericInput("xi", r"(Rate of loss of immunity ($ \xi $))", 0.5,
+  numericInput("xi", r"[Rate of loss of immunity (\(\xi\))]", 0.5,
     min = 0, max = 1, # TODO: Adjust minimum and maximum
     step = 0.01,
     width = "300px"
@@ -88,27 +80,27 @@ xi <- conditionalPanel(
 )
 
 ## 🥌 Rinks dev The emoji is a landmark in this file.
-N <- numericInput("population", r"(Population (N))", 2, min = 2, step = 1, width = "300px")
-S <- numericInput("susceptible", r"(Susceptible (S))", 1, min = 1, step = 1, width = "300px")
-I <- numericInput("infected", r"(Infected (I))", 1, min = 1, step = 1, width = "300px")
-R <- numericInput("recovered", r"(Recovered (R))", 0, min = 0, step = 1, width = "300px")
+N <- numericInput("population", r"[Population (\(N\))]", 2, min = 2, step = 1, width = "300px")
+S <- numericInput("susceptible", r"[Susceptible (\(S\))]", 1, min = 1, step = 1, width = "300px")
+I <- numericInput("infected", r"[Infected (\(I\))]", 1, min = 1, step = 1, width = "300px")
+R <- numericInput("recovered", r"[Recovered (\(R\))]", 0, min = 0, step = 1, width = "300px")
 
 ## Given the modelSelection string is available in the calling environment
 ## of these functions, display (or don't) the appropriate input.
 D <- conditionalPanel(
   r"(['SIRD', 'SEIRD'].includes(input.modelSelect))",
-  numericInput("dead", r"(Dead)", 0, min = 0, step = 1, width = "300px")
+  numericInput("dead", r"[Dead (\(D\))]", 0, min = 0, step = 1, width = "300px")
 )
 
 E <- conditionalPanel(
   r"{['SEIR', 'SEIRS', 'SEIRD'].includes(input.modelSelect)}",
-  numericInput("exposed", r"(Exposed)", 0, min = 0, step = 1, width = "300px")
+  numericInput("exposed", r"[Exposed (\(E\))]", 0, min = 0, step = 1, width = "300px")
 )
 
 V <- conditionalPanel(
   ## TODO: write which modoels have vaccination when they're implemented.
   r"{[].includes(input.modelSelect)}",
-  numericInput("vaccinated", r"(Vaccinated)", 0, min = 0, step = 1, width = "300px")
+  numericInput("vaccinated", r"[Vaccinated (\(V\))]", 0, min = 0, step = 1, width = "300px")
 )
 
 bold <- function(...) p(..., style = "font-weight: bold")
@@ -164,9 +156,9 @@ modelSelect <- pickerInput("modelSelect",
   models,
   width = "300px"
 )
-modelDiagram <- uiOutput("modelDiagram")
+
 ## FIXME: https://shiny.posit.co/r/articles/build/images/
-modelSelectAndDiagram <- div(modelSelect, modelDiagram)
+modelSelectAndDiagram <- div(modelSelect, uiOutput("modelDiagram"))
 
 massAction <- radioButtons("trueMassAction",
   strong("Model Formulation"),
@@ -193,10 +185,10 @@ vitalDynamics <-
       conditionalPanel(
         r"[input.vitalDynamics == '1']",
         numericInput("muBirth",
-                     r"[Rate of births ($\mu_B$)]",
+                     r"[Rate of births (\(\mu_B\))]",
                      0, 0, 0.1, 0.0001),
         numericInput("muDeath",
-                     r"[Rate of naturally caused death ($\mu_D$)]",
+                     r"[Rate of naturally caused death (\(\mu_D\))]",
                      0, 0, 0.1, 0.0001)),
       id = "vitalDynamics-card",
       class = "card bslib-card",
@@ -318,6 +310,12 @@ mainSidebar <- sidebar(
 
 ## APPLICATION UI ROOT -----------------------------------------------------
 page_sidebar(
+  tags$script(
+         type = "text/javascript",
+         id = "modelSelectECMAScript",
+         async = NA,
+         src = "modelSelect.js"
+  ),
   tags$script(
     type = "text/javascript",
     id = "MathJax-script",

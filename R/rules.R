@@ -2,7 +2,10 @@ rules <- tribble(
   ~ model,
   ~ ruleList,
   "SIR",
-  list(beta = c(sv_between(0, 1)), gamma = c(sv_between(0, 1))),
+  list(
+    beta = c(sv_between(0, 1)),
+    gamma = c(sv_between(0, 1))
+  ),
   "SIRS",
   list(
     beta = c(sv_between(0, 1)),
@@ -43,19 +46,15 @@ rules <- tribble(
     muBirth = c(sv_between(0, 0.1)),
     muDeath = c(sv_between(0, 0.1)),
 
+    ## Compartments
     population = c(sv_integer(), sv_gt(0)),
-    # GT, not GTE
     susceptible = c(sv_integer(), sv_gt(0)),
-    # GT, not GTE
-    ## NOTE: unused at the moment. There are no models with a vaccinated compartment.
-    vaccinated = c(sv_integer(), sv_gte(0)),
-    # These are all GTE
     exposed = c(sv_integer(), sv_gte(0)),
-    infected = c(sv_integer(), sv_gte(0)),
-    # FIXME: this might need GT
+    infected = c(sv_integer(), sv_gte(0)), # FIXME: this might need GT
     recovered = c(sv_integer(), sv_gte(0)),
     dead = c(sv_integer(), sv_gte(0)),
 
+    ## Simulation options
     ## NOTE: the number of replicates might need to be limited.
     ## replicates = c(sv_integer(), sv_between(0, 100, c(FALSE, TRUE))),
     replicates = c(sv_integer(), sv_gt(0)),

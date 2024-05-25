@@ -107,19 +107,10 @@ server <- function(input, output, session) {
   ## FIXME: https://shiny.posit.co/r/articles/build/images/
   output$modelDiagram <- renderUI({
     req(input$modelSelect)
-    if (input$modelSelect %in% "") {
+    if (!(input$modelSelect %in% "")) {
       tagList(
         img(
-          src = "",
-          alt = "No model selected; no image available.",
-          contentType = "image/png",
-          height = "40px"
-        )
-      )
-    } else {
-      tagList(
-        img(
-          src = here("www", "images", paste0(input$modelSelect, ".png")),
+          src = paste0("images/", input$modelSelect, ".png"),
           contentType = "image/png",
           height = "40px",
           alt = "The diagram of the model compartments failed to load, or the accessibility text is being read by a screen reader."
@@ -153,22 +144,51 @@ server <- function(input, output, session) {
     } else {
       ## Widget visibility and labelling
       hide("outputPanel")
-      updateNumericInputs(defaults(), session)
       ## NOTE: this triggers the anonymous function in
       ## www/whenModelSelectChangesTypesetLaTeX.js to be called, typesetting the
       ## updated labels.
       if (grepl("SI", input$modelSelect, ignore.case = TRUE)) {
-        updateNumericInput(session, "beta", r"[Rate of infection ($ \beta $)]")
-        updateNumericInput(session, "gamma", r"[Rate of recovery ($ \gamma $)]")
+        output$beta <- renderUI({
+          withMathJax(
+            numericInput("beta", r"[Rate of infection (\(\beta\))]", 0.5,
+              min = 0, max = 3, # TODO: Adjust minimum and maximum
+              step = 0.01, # TODO: Adjust the stepping constant.
+              width = "300px"
+            )
+          )
+        })
+        output$gamma <- renderUI({
+          withMathJax(
+            numericInput("gamma", r"[Rate of recovery (\(\gamma\))]", 0.5,
+              min = 0, max = 3, # TODO: Adjust minimum and maximum
+              step = 0.01, # TODO: Adjust the stepping constant.
+              width = "300px"
+            )
+          )
+        })
       } else if (grepl("SEI", input$modelSelect, ignore.case = TRUE)) {
-        updateNumericInput(session, "beta", r"[Rate of exposure ($ \beta $)]")
-        updateNumericInput(session, "gamma", r"[Rate of infection ($ \gamma $)]")
+        output$beta <- renderUI({
+          withMathJax(
+            numericInput("beta", r"[Rate of exposure (\(\beta\))]", 0.5,
+              min = 0, max = 3, # TODO: Adjust minimum and maximum
+              step = 0.01, # TODO: Adjust the stepping constant.
+              width = "300px"
+            )
+          )
+        })
+        output$gamma <- renderUI({
+          withMathJax(
+            numericInput("gamma", r"[Rate of infection (\(\gamma\))]", 0.5,
+              min = 0, max = 3, # TODO: Adjust minimum and maximum
+              step = 0.01, # TODO: Adjust the stepping constant.
+              width = "300px"
+            )
+          )
+        })
       }
+      updateNumericInputs(defaults(), session)
       show("modelConfiguration")
       show("actionButtons")
-
-      ## FIXME: RStudio's MathJax is broken, and calling it borks reactivity.
-      ## runjs(modelSelectJavaScript)
     }
   })
 
@@ -210,9 +230,6 @@ server <- function(input, output, session) {
           writexl::write_xlsx(modelResults[, 1:6], file)
         }
       )
-
-      ## FIXME: RStudio's MathJax is broken, and calling it borks reactivity.
-      ## runjs(modelSelectJavaScript)
     }))
   })
 
@@ -234,18 +251,24 @@ server <- function(input, output, session) {
 
     ## Simulation options widget values
     updateNumericInput(session, "timesteps", value = 100)
-
-    ## FIXME: RStudio's MathJax is broken, and calling it borks reactivity.
-    ## runjs(modelSelectJavaScript)
   })
 
   ## FIXME: the input is not being validated properly, because the global
   ## validator is returning the incorrect value and "go" is never being enabled.
   ## observeEvent(input, {
-  ##   if (globalValidator$is_valid()) {
+  ##   if (print(globalValidator$is_valid())) {
   ##     enable("go")
   ##   } else {
   ##     disable("go")
   ##   }
   ## })
+  reactive({
+    print(input)
+    print(globalValidator$is_valid())
+    if (print(globalValidator$is_valid())) {
+      enable("go")
+    } else {
+      disable("go")
+    }
+  })
 }
