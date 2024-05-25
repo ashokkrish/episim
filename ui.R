@@ -1,6 +1,7 @@
 tabPanel <- function(...) {
   shiny::tabPanel(..., class = "p-3 border border-top-0 rounded-bottom")
 }
+
 ## NOTE: lintr [object_usage_linter] warnings about a lack of a visible global
 ## definition for some of the shiny elements here are erroneous and can be
 ## ignored. There is no reason to evaluate these function definitions in the
