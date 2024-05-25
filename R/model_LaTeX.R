@@ -35,5 +35,5 @@ renderModelLaTeX <- function(reactiveValuesList) {
     )
   )
 
-  generate_latex(equations) |> helpText()
+  generate_latex(equations) |> helpText() |> withMathJax()
 }
