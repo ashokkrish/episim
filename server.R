@@ -101,7 +101,6 @@ server <- function(input, output, session) {
     }
   })
 
-  ## FIXME: https://shiny.posit.co/r/articles/build/images/
   output$modelDiagram <- renderUI({
     req(input$modelSelect)
     if (!(input$modelSelect %in% "")) {
@@ -211,8 +210,6 @@ server <- function(input, output, session) {
 
 
   # RESET: hide outputPanel; modelConfiguration; actionButtons; rese --------
-  ## TODO: resetting the application should set the widget values to those which
-  ## are defined for the model in the spreadsheet.
   observeEvent(input$resetAll, {
     ## Widget visibility
     hide("outputPanel")
