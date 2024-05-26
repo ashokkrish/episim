@@ -1,32 +1,5 @@
 server <- function(input, output, session) {
-  ## NOTE: Remove the btn-light class from the model select button to make its
-  ## interior have a white background, rather than a light background matching
-  ## the surrounding sidepanel.
-  runjs(r"[$(document).ready($('#modelSelect + button').removeClass('btn-light'))]")
-  r"($(document)
-     .ready($('div:has(> #modelSelect)')
-            .css({
-            'border':'var(--bs-border-width) solid #8D959E',
-            'border-radius':'var(--bs-border-radius)',
-            'transition':'border-color 0.15s ease-in-out,box - shadow 0.15 s ease - in - out '
-            })
-     )
-    )" |>
-  gsub(pattern = r"(\n\s*)", replacement = "") |>
-  runjs()
-
-  ## NOTE: hack on the styling of the vitalDynamics widget group.
-  r"[$(document).ready($('#vitalDynamics-card).css('padding', '10px'))]" |>
-    gsub(pattern = r"(\n\s*)", replacement = "") |>
-    runjs()
-  r"[$(document).ready($('#vitalDynamics-card > div > div.checkbox')
-                        .css('margin-bottom', '10px'))]" |>
-    gsub(pattern = r"(\n\s*)", replacement = "") |>
-    runjs()
-  r"[$(document).ready($('#vitalDynamics-card > div')
-                        .css({'padding':'10px'}))]" |>
-    gsub(pattern = r"(\n\s*)", replacement = "") |>
-    runjs()
+  documentReadyPainter() # Restyle some elements with JavaScript.
 
   # Functions, such as the solveAndRender dispatcher -----------------------------
   updateNumericInputs <- function(defaults, session) {
@@ -42,18 +15,25 @@ server <- function(input, output, session) {
   renderNumericInputWithMathJax <-
     function(inputId, label) {
       numericInputWithMathJax <-
-      withMathJax(numericInput(
-        inputId,
-        label,
-        0.5,
-        min = 0,
-        max = 3,
-        # TODO: Adjust minimum and maximum
-        step = 0.01,
-        # TODO: Adjust the stepping constant.
-        width = "300px"
-      ))
-      eval.parent(bquote(renderUI({.(numericInputWithMathJax)})))
+        withMathJax(numericInput(
+          inputId,
+          label,
+          0.5,
+          min = 0,
+          max = 3,
+          # TODO: Adjust minimum and maximum
+          step = 0.01,
+          # TODO: Adjust the stepping constant.
+          width = "300px"
+        ))
+      ## Evaluate the renderUI function call in the parent environment, so the
+      ## expected environment that renderUI runs in is the server function
+      ## scope, rather than below another function. numericInputWithMathJax is
+      ## substituted, so renderUI it is the already-evaluated result of the
+      ## above assignment expresison.
+      eval.parent(bquote(renderUI({
+        .(numericInputWithMathJax)
+      })))
     }
 
   # Validation --------------------------------------------------------------
