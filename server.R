@@ -1,5 +1,7 @@
 server <- function(input, output, session) {
   documentReadyPainter() # Restyle some elements with JavaScript.
+  disable(selector = "#stochastic button:eq(1)")
+  disable(selector = "#stochastic > div:nth-child(2) > label:nth-child(2) > input:nth-child(1)")
 
   # Functions, such as the solveAndRender dispatcher -----------------------------
   updateNumericInputs <- function(defaults, session) {
