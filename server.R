@@ -226,22 +226,22 @@ server <- function(input, output, session) {
     updateNumericInput(session, "timesteps", value = 100)
   })
 
-  ## FIXME: the input is not being validated properly, because the global
-  ## validator is returning the incorrect value and "go" is never being enabled.
-  ## observeEvent(input, {
-  ##   if (print(globalValidator$is_valid())) {
-  ##     enable("go")
-  ##   } else {
-  ##     disable("go")
-  ##   }
-  ## })
-  reactive({
-    print(input)
-    print(globalValidator$is_valid())
-    if (print(globalValidator$is_valid())) {
-      enable("go")
-    } else {
+  ## HACK: wrapping input in a reactive, despite it already being a reactive
+  ## value, allows the observable to depend on all inputs simultaneously, and
+  ## forces the expression to be recalculated whenever any input is changed,
+  ## because the reactive value allInput() will be invalidated and recalculated.
+  ## Returning NULL or something else in the reactive wouldn't work; the value
+  ## needs to be dependent on all inputs, so invisibly returning all inputs is a
+  ## useful hack to quickly solve the issue.
+  allInput <- reactive({ invisible(input) })
+  observe({
+    allInput()
+    if (globalValidator$is_valid()) enable("go")
+    else {
+      print("Printing result of globalValidator$validate():")
+      print(globalValidator$validate())
       disable("go")
+      print("The go button _should_ be disabled!")
     }
   })
 }
