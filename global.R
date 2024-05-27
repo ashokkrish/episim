@@ -8,7 +8,6 @@ library(shinyhelper)
 library(shinyjs)
 library(shinyvalidate)
 library(shinyWidgets)
-library(xlsx) # FIXME: this is slow and gross.
 library(rlang)
 library(R.utils)
 library(readxl)
