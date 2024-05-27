@@ -1,7 +1,6 @@
 server <- function(input, output, session) {
   documentReadyPainter() # Restyle some elements with JavaScript.
   disable(selector = "#stochastic > div:nth-child(2) > label:nth-child(2) > input:nth-child(1)")
-  disable("Reproduction Ratio")
 
   # Functions, such as the solveAndRender dispatcher -----------------------------
   updateNumericInputs <- function(defaults, session) {

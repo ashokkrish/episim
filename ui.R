@@ -44,7 +44,7 @@ modelResultsPanel <-
         )
       ),
       tabPanel("Mathematical Model", uiOutput("modelLaTeX")),
-      tabPanel("Reproduction Ratio")
+      tabPanel("Basic Reproduction Number (R0)")
     )
   )
 
