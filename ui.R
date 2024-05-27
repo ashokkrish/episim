@@ -27,7 +27,7 @@ modelResultsPanel <-
     id = "outputPanel", style = "display: none;", # Hidden by default
     tabsetPanel(
       id = "tabSet",
-      tabPanel("Plot", plotly::plotlyOutput("modelPlot"), plotly::plotlyOutput("modelSubPlots")),
+      tabPanel("Plot", plotly::plotlyOutput("modelPlot"), uiOutput("modelSubPlots")),
       tabPanel("Phase Plane", plotly::plotlyOutput("modelPhasePlane")),
       tabPanel(
         "Output Summary",

@@ -65,9 +65,11 @@ server <- function(input, output, session) {
   validatorsAndLambdas <-
     filter(rules, !is.na(model)) |>
     rowwise() |>
-    mutate(vld = list(addRuleListToValidator(InputValidator$new(), ruleList)),
-           ## The body of the lambda may need to be embraced.
-           lambda = list(eval(bquote(\() input$modelSelect == .(model))))) |>
+    mutate(
+      vld = list(addRuleListToValidator(InputValidator$new(), ruleList)),
+      ## The body of the lambda may need to be embraced.
+      lambda = list(eval(bquote(\() input$modelSelect == .(model))))
+    ) |>
     select(vld, lambda)
 
   ## NOTE: condition each validator upon its corresponding lambda, and then add
@@ -157,6 +159,22 @@ server <- function(input, output, session) {
     }
   })
 
+  createSubPlotsUI <- function(subplots) {
+    plot_output_list <- lapply(seq_along(subplots), function(i) {
+      plotname <- paste("subplot", i, sep = "")
+      output[[plotname]] <- plotly::renderPlotly({
+        plotly::ggplotly(subplots[[i]])
+      })
+      column(6, plotly::plotlyOutput(plotname))
+    })
+
+    fluidRow(
+      lapply(plot_output_list, function(plot_output) {
+        plot_output
+      })
+    )
+  }
+
   # StochasticSelect --------------------------------------------------------
   ## NOTE: hide the output panel and update the input widgets with defaults when
   ## the user changes to stochastic modelling.
@@ -184,7 +202,7 @@ server <- function(input, output, session) {
         .ignoreUnusedArguments = TRUE
       )
       output$modelPlot <- plotly::renderPlotly(plotly::ggplotly(modelPlotter(modelResults)))
-      output$modelSubPlots <- plotly::renderPlotly(modelSubPlotter(modelResults))
+      output$modelSubPlots <- renderUI(createSubPlotsUI(modelSubPlotter(modelResults)))
       output$modelPhasePlane <- plotly::renderPlotly(plotly::ggplotly(modelPhasePlanePlotter(modelResults)))
       output$modelSummaryTable <- DT::renderDataTable({
         DT::datatable(
@@ -234,11 +252,14 @@ server <- function(input, output, session) {
   ## Returning NULL or something else in the reactive wouldn't work; the value
   ## needs to be dependent on all inputs, so invisibly returning all inputs is a
   ## useful hack to quickly solve the issue.
-  allInput <- reactive({ invisible(input) })
+  allInput <- reactive({
+    invisible(input)
+  })
   observe({
     allInput()
-    if (globalValidator$is_valid()) enable("go")
-    else {
+    if (globalValidator$is_valid()) {
+      enable("go")
+    } else {
       print("Printing result of globalValidator$validate():")
       print(globalValidator$validate())
       disable("go")
