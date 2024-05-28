@@ -1,3 +1,18 @@
+birthRateMessage <- gsub("\n[\ \t]+", " ", r"(Must be between {left} and
+  {right}; these limits are based on the global average birth rate per woman in
+  2021. The limits are based on such data as mentioned in the article
+  "Fertility Rate" published by ourworldindata.org. The current average
+  global birth rate of 2.4 births per woman is halved to a value of 1.2, given
+  muB is multiplied by N to produce the number of new individuals added to the
+  susceptible compartment. The upper limit of 5 is based on the pre-industrial
+  average birth rate of seven per woman. Allowing an outlier limit of 10 births
+  per woman, halving that to achieve the number of women, the upper limit is set
+  to five.)")
+
+deathRateMessage <- gsub("\n[\ \t]+", " ", r"(Must be between {left} and
+  {right}; these limits are taken from ourworldindata.org's global death rate
+  from 1950 to 2021. The upper limit is the global death rate in 1950.)")
+
 rules <- tribble(
   ~ model,
   ~ ruleList,
@@ -43,10 +58,10 @@ rules <- tribble(
   NA,
   list(
     ## Vital dynamics
-    muBirth = c(sv_between(0, 0.1)),
-    muDeath = c(sv_between(0, 0.1)),
+    muBirth = c(sv_between(0, 5, message_fmt = birthRateMessage)),
+    muDeath = c(sv_between(0, 0.01952, message_fmt = deathRateMessage)),
 
-    ## Compartments
+    ## Compartmentsk
     population = c(sv_integer(), sv_gt(0)),
     susceptible = c(sv_integer(), sv_gt(0)),
     exposed = c(sv_integer(), sv_gte(0)),
