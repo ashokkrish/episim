@@ -13,6 +13,7 @@ library(R.utils)
 library(readxl)
 library(writexl)
 library(plotly)
+library(DT)
 
 here::i_am("global.R")
 
