@@ -216,7 +216,7 @@ server <- function(input, output, session) {
       output$modelPhasePlane <-
         renderPlotly(ggplotly(modelPhasePlanePlotter(modelResults)))
 
-      output$modelSummaryTable <- renderDataTable({
+      output$modelSummaryTable <- renderDT({
         if (!grepl("SE?IRD", input$modelSelect, ignore.case = TRUE)) {
           modelResults <- select(modelResults, !D)
         }
