@@ -19,14 +19,14 @@ plotSIRS <- function(model) {
   plot <- ggplot2::ggplot(model, ggplot2::aes(x = time)) +
     plotTheme +
     ggplot2::labs(
-      title = "SIRS Epidemic Model", 
+      title = "SIRS Epidemic Model",
       y = "Number of People",
       x = "Time"
     ) +
     ggplot2::geom_line(ggplot2::aes(y = S, color = "Susceptible"), linewidth = 0.7) +
     ggplot2::geom_line(ggplot2::aes(y = I, color = "Infected"), linewidth = 0.7) +
     ggplot2::geom_line(ggplot2::aes(y = R, color = "Recovered"), linewidth = 0.7) +
-    ggplot2::guides(color = ggplot2::guide_legend(title = "SIRS")) 
+    ggplot2::guides(color = ggplot2::guide_legend(title = "SIRS"))
 
   Reduce(`+`, c(list(plot), plotSettings))
 }
@@ -39,7 +39,7 @@ plotPhasePlaneSIRS <- function(model) {
     ggplot2::ggtitle("SI Phase Plane") +
     ggplot2::ylab("Infected (I)") +
     ggplot2::xlab("Susceptible (S)") +
-    ggplot2::guides(color = ggplot2::guide_legend(title = "SIRS")) 
+    ggplot2::guides(color = ggplot2::guide_legend(title = "SIRS"))
 
   Reduce(`+`, c(list(plot), plotSettings))
 }
@@ -58,13 +58,16 @@ plotSubPlotsSIRS <- function(model) {
   compartment_colors <- ggplot2::ggplot_build(plotMain)$data[[1]]$colour %>%
     unique()
 
+  compartmentLabels <- c(S = "Susceptible", I = "Infected", R = "Recovered")
+
+
   lapply(unique(data_long$Compartment), function(compartment) {
     ggplot2::ggplot(dplyr::filter(data_long, Compartment == compartment), ggplot2::aes(x = time, y = Value, color = Compartment)) +
       ggplot2::geom_line(linewidth = 0.7) +
       ggplot2::labs(
         title = paste("Compartment:", compartment),
         x = "Time",
-        y = "Number of People"
+        y = compartmentLabels[compartment]
       ) +
       plotTheme +
       ggplot2::scale_x_continuous(limits = x_limits, expand = c(0, 0)) +

@@ -58,6 +58,8 @@ plotSubPlotsSEIR <- function(model) {
 
   compartment_colors <- ggplot2::ggplot_build(plotMain)$data[[1]]$colour %>% 
     unique()
+  
+  compartmentLabels <- c(S = "Susceptible", E = "Exposed", I = "Infected", R = "Recovered")
 
   lapply(unique(data_long$Compartment), function(compartment) {
     ggplot2::ggplot(dplyr::filter(data_long, Compartment == compartment), ggplot2::aes(x = time, y = Value, color = Compartment)) +
@@ -65,7 +67,7 @@ plotSubPlotsSEIR <- function(model) {
       ggplot2::labs(
         title = paste("Compartment:", compartment),
         x = "Time",
-        y = "Number of People"
+        y = compartmentLabels[compartment]
       ) +
       plotTheme +
       ggplot2::scale_x_continuous(limits = x_limits, expand = c(0, 0)) +
