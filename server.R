@@ -22,9 +22,7 @@ server <- function(input, output, session) {
           0.5,
           min = 0,
           max = 3,
-          # TODO: Adjust minimum and maximum
           step = 0.01,
-          # TODO: Adjust the stepping constant.
           width = "300px"
         ))
       ## Evaluate the renderUI function call in the parent environment, so the
@@ -94,7 +92,7 @@ server <- function(input, output, session) {
         defaultInputValues,
         modelType == input$modelSelect,
 
-        ## FIXME: using logicals in any way seems to bork everything.
+        ## WARN DONT: using logicals in any way seems to bork everything.
         stochastic == input$stochastic,
         vitalDynamics == input$vitalDynamics,
         massAction == input$trueMassAction
@@ -194,19 +192,36 @@ server <- function(input, output, session) {
     modelSubPlotter <- modellingFunctions()[[3]]
     modelPhasePlanePlotter <- modellingFunctions()[[4]]
 
+    ## MAYBE: this may be the needed fix; there is associated JavaScript in
+    ## www/modelSelect.js. TODO: in the morning of 2024-05-28, assess whether
+    ## the code has had the desired effect after integrating Tobias' new
+    ## plotting code which fixes previous errors. NOTE: this reactive value is
+    ## created by JavaScript. See the corresponding JavaScript code in
+    ## modelSelect.js.
+    inputs <- isolate(reactiveValuesToList(input))
+    inputs <- inputs[ ! inputs %in% input$hiddenInputs]
     eval(substitute({
-      inputs <- reactiveValuesToList(input)
       modelResults <- doCall.default(
         .fcn = modelSolver,
         args = inputs,
         .ignoreUnusedArguments = TRUE
       )
-      output$modelPlot <- plotly::renderPlotly(plotly::ggplotly(modelPlotter(modelResults)))
-      output$modelSubPlots <- renderUI(createSubPlotsUI(modelSubPlotter(modelResults)))
-      output$modelPhasePlane <- plotly::renderPlotly(plotly::ggplotly(modelPhasePlanePlotter(modelResults)))
-      output$modelSummaryTable <- DT::renderDT({
-        DT::datatable(
-          round(modelResults[, 1:6], 2),
+
+      output$modelPlot <-
+        renderPlotly(ggplotly(modelPlotter(modelResults)))
+
+      output$modelSubPlots <-
+        renderUI(createSubPlotsUI(modelSubPlotter(modelResults)))
+
+      output$modelPhasePlane <-
+        renderPlotly(ggplotly(modelPhasePlanePlotter(modelResults)))
+
+      output$modelSummaryTable <- renderDataTable({
+        if (!grepl("SE?IRD", input$modelSelect, ignore.case = TRUE)) {
+          modelResults <- select(modelResults, !D)
+        }
+        datatable(
+          round(modelResults, 2),
           options = list(
             dom = "lprti",
             pageLength = 50
@@ -214,6 +229,7 @@ server <- function(input, output, session) {
           rownames = FALSE
         )
       })
+
       output$modelLaTeX <- renderUI(renderModelLaTeX(inputs))
 
       output$downloadData <- downloadHandler(
@@ -221,7 +237,7 @@ server <- function(input, output, session) {
           paste(input$modelSelect, "_Model_Summary", Sys.Date(), ".xlsx", sep = "")
         },
         content = function(file) {
-          writexl::write_xlsx(modelResults[, 1:6], file)
+          write_xlsx(modelResults, file)
         }
       )
     }))
@@ -257,13 +273,6 @@ server <- function(input, output, session) {
   })
   observe({
     allInput()
-    if (globalValidator$is_valid()) {
-      enable("go")
-    } else {
-      print("Printing result of globalValidator$validate():")
-      print(globalValidator$validate())
-      disable("go")
-      print("The go button _should_ be disabled!")
-    }
+    if (globalValidator$is_valid()) enable("go") else disable("go")
   })
 }
