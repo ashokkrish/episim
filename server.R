@@ -204,7 +204,7 @@ server <- function(input, output, session) {
       output$modelPlot <- plotly::renderPlotly(plotly::ggplotly(modelPlotter(modelResults)))
       output$modelSubPlots <- renderUI(createSubPlotsUI(modelSubPlotter(modelResults)))
       output$modelPhasePlane <- plotly::renderPlotly(plotly::ggplotly(modelPhasePlanePlotter(modelResults)))
-      output$modelSummaryTable <- DT::renderDataTable({
+      output$modelSummaryTable <- DT::renderDT({
         DT::datatable(
           round(modelResults[, 1:6], 2),
           options = list(
