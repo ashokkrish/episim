@@ -17,11 +17,11 @@ generate_latex <- function(equations) {
   HTML(paste0(
     css_styles,
     '<div class="equation-container">',
-    '<blockquote class="equation-block">',
+    '<div class="equation-block">',
     r"(\begin{align*})",
     paste(equations, collapse = r"(\\)"),
     r"(\end{align*})",
-    '</blockquote>',
+    '</div>',
     '</div>'
   ))
 }
