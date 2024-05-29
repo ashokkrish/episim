@@ -192,12 +192,8 @@ server <- function(input, output, session) {
     modelSubPlotter <- modellingFunctions()[[3]]
     modelPhasePlanePlotter <- modellingFunctions()[[4]]
 
-    ## MAYBE: this may be the needed fix; there is associated JavaScript in
-    ## www/modelSelect.js. TODO: in the morning of 2024-05-28, assess whether
-    ## the code has had the desired effect after integrating Tobias' new
-    ## plotting code which fixes previous errors. NOTE: this reactive value is
-    ## created by JavaScript. See the corresponding JavaScript code in
-    ## modelSelect.js.
+    ## NOTE: this reactive value is created by JavaScript. See the corresponding
+    ## JavaScript code in modelSelect.js.
     inputs <- isolate(reactiveValuesToList(input))
     inputs <- inputs[ ! inputs %in% input$hiddenInputs]
     eval(substitute({
