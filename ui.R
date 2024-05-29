@@ -186,10 +186,10 @@ vitalDynamics <-
         r"[input.vitalDynamics == '1']",
         numericInput("muBirth",
                      r"[Rate of births (\(\mu_B\))]",
-                     0, 0, 0.1, 0.0001),
+                     0, 0, 1.2, 0.0001),
         numericInput("muDeath",
                      r"[Rate of naturally caused death (\(\mu_D\))]",
-                     0, 0, 0.1, 0.0001)),
+                     0, 0, 0.00876, 0.0001)),
       id = "vitalDynamics-card",
       class = "card bslib-card",
       style = "margin: 10px;")

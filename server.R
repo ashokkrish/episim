@@ -1,8 +1,12 @@
 server <- function(input, output, session) {
   documentReadyPainter() # Restyle some elements with JavaScript.
-  disable(selector = "#stochastic > div:nth-child(2) > label:nth-child(2) > input:nth-child(1)")
 
-  # Functions, such as the solveAndRender dispatcher -----------------------------
+  ## NOTE: Disable the stochastic radio button and the R0 nav tab, respectively.
+  ## When these are implemented the respective line can be removed.
+  disable(selector = "#stochastic > div:nth-child(2) > label:nth-child(2) > input:nth-child(1)")
+  disable(selector = "li.nav-item:nth-child(5) > a:nth-child(1)")
+
+  # Functions ---------------------------------------------------------------
   updateNumericInputs <- function(defaults, session) {
     if (any(is.null(dim(defaults)), dim(defaults)[1] != 1)) {
       warning("The `defaults` dataframe is not a single row!")
@@ -41,8 +45,7 @@ server <- function(input, output, session) {
     mapply(
       function(inputId, ruleVector) {
         validator$add_rule(inputId, sv_required())
-        ## inputId is intentionally recycled while adding the rules in
-        ## ruleVector.
+        ## inputId intentionally recycled ♺!
         mapply(validator$add_rule, inputId, ruleVector)
       },
       names(ruleList),
@@ -54,7 +57,6 @@ server <- function(input, output, session) {
     invisible(validator)
   }
 
-  ## NOTE: all inputs have the required rule automatically added.
   globalValidator <- addRuleListToValidator(
     InputValidator$new(),
     filter(rules, is.na(model))[, 2][[1]][[1]]
@@ -65,19 +67,14 @@ server <- function(input, output, session) {
     rowwise() |>
     mutate(
       vld = list(addRuleListToValidator(InputValidator$new(), ruleList)),
-      ## The body of the lambda may need to be embraced.
       lambda = list(eval(bquote(\() input$modelSelect == .(model))))
     ) |>
     select(vld, lambda)
 
-  ## NOTE: condition each validator upon its corresponding lambda, and then add
-  ## each validator to the global validator as a child.
   isolate(
     mapply(
       FUN = \(validator, lambda) {
         validator$condition(lambda)
-        ## NOTE: the return value of the previous statement is unused. It's
-        ## void!
         globalValidator$add_validator(validator)
       },
       validatorsAndLambdas[[1]],
@@ -91,8 +88,9 @@ server <- function(input, output, session) {
       filter(
         defaultInputValues,
         modelType == input$modelSelect,
-
-        ## WARN DONT: using logicals in any way seems to bork everything.
+        ## WARN DONT: compare numerical booleans following C style; using
+        ## logicals in any way—coercing numeric to logical on the RHS or using
+        ## logical values in the defaultInputValues—seems to bork everything.
         stochastic == input$stochastic,
         vitalDynamics == input$vitalDynamics,
         massAction == input$trueMassAction
@@ -110,7 +108,9 @@ server <- function(input, output, session) {
           src = paste0("images/", input$modelSelect, ".png"),
           contentType = "image/png",
           height = "40px",
-          alt = "The diagram of the model compartments failed to load, or the accessibility text is being read by a screen reader."
+          alt = gsub("\n[\t\ ]+?", " ", r"(The diagram of the model compartments
+                     failed to load, or the accessibility text is being read by
+                     a screen reader.)")
         )
       )
     }
@@ -130,20 +130,16 @@ server <- function(input, output, session) {
 
   # Observables -------------------------------------------------------------
   # MODEL SELECT: update numeric inputs to model defaults on change. --------
-  ## Whenever the model selection changes (whether the parameters and variables
-  ## are set manually or taken from pre-defined models), the widget values
-  ## throughout the application are updated as appropriate.
+  ## Whenever the model selection changes, the widget values throughout the
+  ## application are updated according to the defaults specified for the model
+  ## configuration in the defaultInputValues.xlsx spreadsheet in the data/
+  ## project subfolder.
   observeEvent(input$modelSelect, {
-    ## If no model is selected, hide the model configuration and action buttons.
     if (input$modelSelect %in% "") {
       hide("actionButtons")
       hide("modelConfiguration")
     } else {
-      ## Widget visibility and labelling
       hide("outputPanel")
-      ## NOTE: this triggers the anonymous function in
-      ## www/whenModelSelectChangesTypesetLaTeX.js to be called, typesetting the
-      ## updated labels.
       if (grepl("SI", input$modelSelect, ignore.case = TRUE)) {
         output$beta <- renderNumericInputWithMathJax("beta", r"[Rate of infection (\(\beta\))]")
         output$gamma <- renderNumericInputWithMathJax("gamma", r"[Rate of recovery (\(\gamma\))]")
@@ -157,20 +153,13 @@ server <- function(input, output, session) {
     }
   })
 
-  createSubPlotsUI <- function(subplots) {
-    plot_output_list <- lapply(seq_along(subplots), function(i) {
-      plotname <- paste("subplot", i, sep = "")
-      output[[plotname]] <- plotly::renderPlotly({
-        plotly::ggplotly(subplots[[i]])
-      })
-      column(6, plotly::plotlyOutput(plotname))
-    })
-
-    fluidRow(
-      lapply(plot_output_list, function(plot_output) {
-        plot_output
-      })
-    )
+  createSubPlotsUI <- function(ggplots) {
+    imap(ggplots, \(plot, index) {
+      plotName <- paste0("subplot.", index)
+      output[[plotName]] <- renderPlotly({ ggplotly(plot) })
+      column(6, plotlyOutput(plotName))
+    }) |>
+      fluidRow()
   }
 
   # StochasticSelect --------------------------------------------------------
