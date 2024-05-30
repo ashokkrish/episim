@@ -21,7 +21,8 @@ equationsSusceptibleInfected <- function(time, variables, parameters, ...,
     ## Enable fatality if delta is non-zero.
     if (delta == 0 && D != 0) stop("D (dead) must be zero when delta is zero.")
     if (delta != 0) {
-      dI <- append(dI, -(delta * I))
+      dD <- (delta * I)
+      dI <- append(dI, -dD)
     }
 
     results <- map(list(dS, dI, dR), sum)
@@ -31,9 +32,7 @@ equationsSusceptibleInfected <- function(time, variables, parameters, ...,
     dN <- sum(dS, dI, dR)
 
     dEqns <- c(dN, dS, dI, dR)
-    if (delta != 0) {
-      dEqns <- append(dEqns, dD <- (delta * I))
-    }
+    if (delta != 0) dEqns <- append(dEqns, dD)
 
     return(list(dEqns, trueMassAction))
   })
@@ -51,7 +50,7 @@ solveSusceptibleInfected <-
            trueMassAction = FALSE,
 
            ## Simulation variables
-           numIterations = 100,
+           timesteps = 25,
            increment = 1)
 {
   variables <- c(population, susceptible, infected, recovered, dead)
@@ -62,13 +61,23 @@ solveSusceptibleInfected <-
   names(parameters) <- c("beta", "gamma", "delta", "xi", "muB", "muD")
 
   ## NOTE: the variable D must not be passed to lsoda if delta is zero.
-  if (delta == 0) variables <- variables[-variables["D"]]
+  if (delta == 0) variables <- variables[!(names(variables) %in% c("D"))]
+  results <-
   lsoda(variables,
-        seq(0, length = numIterations, by = increment),
+        ## TODO: FIXME: these need to be updated with reading on lsoda.
+        seq(0, length = timesteps, by = increment),
         equationsSusceptibleInfected,
         parameters,
         trueMassAction = as.numeric(trueMassAction)) |>
     as.data.frame()
+
+  print(paste("delta:", delta))
+  print(paste("Dead:", dead))
+  print("Dimensions of results:")
+  print(dim(results))
+  print(head(results))
+
+  return(results)
 }
 
 ## alias model-specific symbols to the unified solver functions for each model

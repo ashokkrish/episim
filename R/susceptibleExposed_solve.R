@@ -10,7 +10,7 @@ equationsSusceptibleExposed <- function(time, variables, parameters, ...,
     dS <- c((muB * N),   -(betaSIN),   -(muD * S))
     dE <- c((betaSIN),   -(gamma * E), -(muD * E))
     dI <- c((gamma * E), -(sigma * I), -(muD * I))
-    dR <- c((sigma * I), -(muD * R))
+    dR <- c(              (sigma * I), -(muD * R))
 
     ## Enable loss of immunity if xi is non-zero.
     if (xi != 0) {
@@ -22,7 +22,7 @@ equationsSusceptibleExposed <- function(time, variables, parameters, ...,
     ## Enable fatality if delta is non-zero.
     if (delta == 0 && D != 0) stop("D (dead) must be zero when delta is zero.")
     if (delta != 0) {
-      dD <- delta * I
+      dD <- (delta * I)
       dI <- append(dI, -dD)
     }
 
@@ -34,9 +34,7 @@ equationsSusceptibleExposed <- function(time, variables, parameters, ...,
     dN <- sum(dS, dE, dI, dR)
 
     dEqns <- c(dN, dS, dE, dI, dR)
-    if (delta != 0) {
-      dEqns <- append(dEqns, dD)
-    }
+    if (delta != 0) dEqns <- append(dEqns, dD)
 
     return(list(dEqns, trueMassAction))
   })
@@ -54,7 +52,7 @@ solveSusceptibleExposed <-
            trueMassAction = FALSE, # Formerly, the variable was named "q".
 
            ## Simulation variables
-           numIterations = 100,
+           timesteps = 25,
            increment = 1)
 {
   variables <- c(population, susceptible, exposed, infected, recovered, dead)
@@ -65,13 +63,20 @@ solveSusceptibleExposed <-
   names(parameters) <- c("beta", "gamma", "sigma", "delta", "xi", "muB", "muD")
 
   ## NOTE: the variable D must not be passed to lsoda if delta is zero.
-  if (delta == 0) variables <- variables[-variables["D"]]
-  lsoda(variables,
-        seq(0, length = numIterations, by = increment),
-        equationsSusceptibleExposed,
-        parameters,
-        trueMassAction = as.numeric(trueMassAction)) |>
+  if (delta == 0) variables <- variables[!(names(variables) %in% c("D"))]
+  results <-
+    lsoda(variables,
+          ## TODO: FIXME: these need to be updated with reading on lsoda.
+          seq(0, length = timesteps, by = increment),
+          equationsSusceptibleExposed,
+          parameters,
+          trueMassAction = as.numeric(trueMassAction)) |>
     as.data.frame()
+
+  print("Dimensions of results:")
+  print(dim(results))
+
+  return(results)
 }
 
 ## alias model-specific symbols to the unified solver functions for each model
