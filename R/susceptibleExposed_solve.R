@@ -11,6 +11,7 @@ equationsSusceptibleExposed <- function(time, variables, parameters, ...,
     dE <- c((betaSIN),   -(gamma * E), -(muD * E))
     dI <- c((gamma * E), -(sigma * I), -(muD * I))
     dR <- c(              (sigma * I), -(muD * R))
+    dD <- (delta * I) # Always zero if delta == 0.
 
     ## Enable loss of immunity if xi is non-zero.
     if (xi != 0) {
@@ -20,12 +21,9 @@ equationsSusceptibleExposed <- function(time, variables, parameters, ...,
     }
 
     ## Enable fatality if delta is non-zero.
-    if (delta == 0 && D != 0) stop("D (dead) must be zero when delta is zero.")
-    if (delta != 0) {
-      dD <- (delta * I)
-      dI <- append(dI, -dD)
-    }
+    if (delta != 0) dI <- append(dI, -dD)
 
+    ## NOTE: dD is already equal to its sum.
     results <- map(list(dS, dE, dI, dR), sum)
     dS <- results[[1]]
     dE <- results[[2]]
@@ -33,10 +31,7 @@ equationsSusceptibleExposed <- function(time, variables, parameters, ...,
     dR <- results[[4]]
     dN <- sum(dS, dE, dI, dR)
 
-    dEqns <- c(dN, dS, dE, dI, dR)
-    if (delta != 0) dEqns <- append(dEqns, dD)
-
-    return(list(dEqns, trueMassAction))
+    return(list(c(dN, dS, dE, dI, dR, dD), trueMassAction))
   })
 }
 
@@ -49,7 +44,7 @@ solveSusceptibleExposed <-
 
            ## Simulation options
            muB = 0, muD = 0, vitalDynamics = FALSE,
-           trueMassAction = FALSE, # Formerly, the variable was named "q".
+           trueMassAction = FALSE,
 
            ## Simulation variables
            timesteps = 25,
@@ -62,21 +57,15 @@ solveSusceptibleExposed <-
                   muD * vitalDynamics)
   names(parameters) <- c("beta", "gamma", "sigma", "delta", "xi", "muB", "muD")
 
-  ## NOTE: the variable D must not be passed to lsoda if delta is zero.
-  if (delta == 0) variables <- variables[!(names(variables) %in% c("D"))]
-  results <-
-    lsoda(variables,
-          ## TODO: FIXME: these need to be updated with reading on lsoda.
-          seq(0, length = timesteps, by = increment),
-          equationsSusceptibleExposed,
-          parameters,
-          trueMassAction = as.numeric(trueMassAction)) |>
+  if(delta == 0) stopifnot(dead == 0)
+
+  lsoda(variables,
+        ## TODO: FIXME: these need to be updated with reading on lsoda.
+        seq(1, length = timesteps, by = increment),
+        equationsSusceptibleExposed,
+        parameters,
+        trueMassAction = as.numeric(trueMassAction)) |>
     as.data.frame()
-
-  print("Dimensions of results:")
-  print(dim(results))
-
-  return(results)
 }
 
 ## alias model-specific symbols to the unified solver functions for each model

@@ -165,27 +165,37 @@ server <- function(input, output, session) {
   ## construction herein.
   visibleInputs <- reactive({
     allInputs <- reactiveValuesToList(input)
-    nameAmongHiddenInputs <- names(allInputs) %in% c(input$hiddenInputs, "hiddenInputs")
-    allInputs[!nameAmongHiddenInputs]
+    nameAmongHiddenInputs <-
+      names(allInputs) %in% c(input$hiddenInputs, "hiddenInputs")
+    visibleInputs <- allInputs[!nameAmongHiddenInputs]
+    stopifnot(is.list(visibleInputs))
+    return(visibleInputs)
   })
 
   observeEvent(input$go, {
     show("outputPanel")
 
     modelSolver <- modellingFunctions()[[1]]
-    modelSolverArguments <- visibleInputs()
-
     modelPlotter <- modellingFunctions()[[2]]
     modelSubPlotter <- modellingFunctions()[[3]]
     modelPhasePlanePlotter <- modellingFunctions()[[4]]
 
-    ## NOTE:columns are removed from the dataframe that aren't relevant to the
-    ## model, if they happen to be included.
-    modelResults <-
-      doCall.default(.fcn = modelSolver,
-                     args = modelSolverArguments,
-                     .ignoreUnusedArguments = TRUE) |>
+    ## NOTE: if the D compartment is not enabled, it's column is removed from
+    ## the dataframe. D would always equal zero if not enabled.
+    modelResults <- doCall(modelSolver, args = visibleInputs()) |>
       select(c(time, N, matches(str_split_1(input$modelSelect, ""))))
+
+    ## NOTE: if the D compartment is not enabled, it's column is removed from
+    ## the dataframe. D would always equal zero if not enabled.
+    modelResultsFromExposuRe <-
+      doCall(exposuRe, args = visibleInputs()) |>
+      select(c(time, N, matches(str_split_1(input$modelSelect, ""))))
+
+    printf("%s model results equal regardless of solveR? %s",
+           input$modelSelect,
+           if(equals(modelResults, modelResultsFromExposuRe)) "YES."
+           else "NO.") |>
+      print()
 
     output$modelPlot <-
       renderPlotly(ggplotly(modelPlotter(modelResults)))
@@ -202,7 +212,8 @@ server <- function(input, output, session) {
                 rownames = FALSE)
     })
 
-    output$modelLaTeX <- renderUI(renderModelLaTeX(inputs))
+    output$modelLaTeX <-
+      doCall(renderModelLaTeX, args = visibleInputs()) |> renderUI()
 
     output$downloadData <-
       downloadHandler(

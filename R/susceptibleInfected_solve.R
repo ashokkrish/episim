@@ -10,6 +10,7 @@ equationsSusceptibleInfected <- function(time, variables, parameters, ...,
     dS <- c((muB * N),   -(betaSIN),   -(muD * S))
     dI <- c((betaSIN),   -(gamma * I), -(muD * I))
     dR <- c(              (gamma * I), -(muD * R))
+    dD <- (delta * I) # Always zero if delta == 0.
 
     ## Enable loss of immunity if xi is non-zero.
     if (xi != 0) {
@@ -19,22 +20,31 @@ equationsSusceptibleInfected <- function(time, variables, parameters, ...,
     }
 
     ## Enable fatality if delta is non-zero.
-    if (delta == 0 && D != 0) stop("D (dead) must be zero when delta is zero.")
-    if (delta != 0) {
-      dD <- (delta * I)
-      dI <- append(dI, -dD)
-    }
+    if (delta != 0) dI <- append(dI, -dD)
 
+    ## NOTE NEXT TODO: the following code using purrr::map can be replaced with
+    ## this functional code only using functions included in the base package.
+    ## This algorithm also is the stepping stone to unifying
+    ## equationsSusceptibleInfected and equationsSusceptibleExposed, and
+    ## unifying solveSusceptibleInfected and solveSusceptibleExposed to dispatch
+    ## arguments to these functions. The next step would be to make a package
+    ## and document the functions for users, and include examples.
+    ##
+    ## Reduce(`+`,
+    ##        lapply(X = list(list(1, 2, 3, 4),
+    ##                        list(5, 6, 7, 8),
+    ##                        list(9)),
+    ##               FUN = Reduce,
+    ##               f = `+`))
+
+    ## NOTE: dD is already equal to its sum.
     results <- map(list(dS, dI, dR), sum)
     dS <- results[[1]]
     dI <- results[[2]]
     dR <- results[[3]]
-    dN <- sum(dS, dI, dR)
+    dN <- sum(dS, dI, dR) # Non-zero if muB != muD.
 
-    dEqns <- c(dN, dS, dI, dR)
-    if (delta != 0) dEqns <- append(dEqns, dD)
-
-    return(list(dEqns, trueMassAction))
+    return(list(c(dN, dS, dI, dR, dD), trueMassAction))
   })
 }
 
@@ -60,24 +70,15 @@ solveSusceptibleInfected <-
                   muD * vitalDynamics)
   names(parameters) <- c("beta", "gamma", "delta", "xi", "muB", "muD")
 
-  ## NOTE: the variable D must not be passed to lsoda if delta is zero.
-  if (delta == 0) variables <- variables[!(names(variables) %in% c("D"))]
-  results <-
+  if(delta == 0) stopifnot(dead == 0)
+
   lsoda(variables,
         ## TODO: FIXME: these need to be updated with reading on lsoda.
-        seq(0, length = timesteps, by = increment),
+        seq(1, length = timesteps, by = increment),
         equationsSusceptibleInfected,
         parameters,
         trueMassAction = as.numeric(trueMassAction)) |>
     as.data.frame()
-
-  print(paste("delta:", delta))
-  print(paste("Dead:", dead))
-  print("Dimensions of results:")
-  print(dim(results))
-  print(head(results))
-
-  return(results)
 }
 
 ## alias model-specific symbols to the unified solver functions for each model
