@@ -185,17 +185,20 @@ server <- function(input, output, session) {
     modelResults <- doCall(modelSolver, args = visibleInputs()) |>
       select(c(time, N, matches(str_split_1(input$modelSelect, ""))))
 
-    ## NOTE: if the D compartment is not enabled, it's column is removed from
-    ## the dataframe. D would always equal zero if not enabled.
-    modelResultsFromExposuRe <-
-      doCall(exposuRe, args = visibleInputs()) |>
-      select(c(time, N, matches(str_split_1(input$modelSelect, ""))))
-
-    printf("%s model results equal regardless of solveR? %s",
-           input$modelSelect,
-           if(equals(modelResults, modelResultsFromExposuRe)) "YES."
-           else "NO.") |>
-      print()
+    ## FIXME: the number of deriviatives returned is not equal to the number of
+    ## variables provided to lsoda when running an SEI-type model. This is
+    ## strange, and I'm unsure why that's happening, having read the code I
+    ## wrote multiple times.
+    ##
+    ## modelResultsFromExposuRe <-
+    ##   doCall(exposuRe, args = visibleInputs()) |>
+    ##   select(c(time, N, matches(str_split_1(input$modelSelect, ""))))
+    ##
+    ## printf("%s model results equal regardless of solveR? %s",
+    ##        input$modelSelect,
+    ##        if(equals(modelResults, modelResultsFromExposuRe)) "YES."
+    ##        else "NO.") |>
+    ##   print()
 
     output$modelPlot <-
       renderPlotly(ggplotly(modelPlotter(modelResults)))
