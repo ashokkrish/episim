@@ -61,7 +61,7 @@ rules <- tribble(
     muBirth = c(sv_between(0, 5, message_fmt = birthRateMessage)),
     muDeath = c(sv_between(0, 0.01952, message_fmt = deathRateMessage)),
 
-    ## Compartmentsk
+    ## Compartments
     population = c(sv_integer(), sv_gt(0)),
     susceptible = c(sv_integer(), sv_gt(0)),
     exposed = c(sv_integer(), sv_gte(0)),
