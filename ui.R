@@ -2,6 +2,15 @@ tabPanel <- function(...) {
   shiny::tabPanel(..., class = "p-3 border border-top-0 rounded-bottom")
 }
 
+renderSubPlotsUI <- function(ggplots) {
+  imap(ggplots, \(plot, index) {
+    plotName <- paste0("subplot.", index)
+    output[[plotName]] <- renderPlotly({ ggplotly(plot) })
+    column(6, plotlyOutput(plotName))
+  }) |>
+    fluidRow()
+}
+
 ## NOTE: lintr [object_usage_linter] warnings about a lack of a visible global
 ## definition for some of the shiny elements here are erroneous and can be
 ## ignored. There is no reason to evaluate these function definitions in the
