@@ -27,7 +27,6 @@ plotSEIRS <- function(model) {
     ggplot2::geom_line(ggplot2::aes(y = E, color = "Exposed"), linewidth = 0.7) +
     ggplot2::geom_line(ggplot2::aes(y = I, color = "Infected"), linewidth = 0.7) +
     ggplot2::geom_line(ggplot2::aes(y = R, color = "Recovered"), linewidth = 0.7) +
-    ggplot2::geom_line(ggplot2::aes(y = D, color = "Dead"), linewidth = 0.7) +
     ggplot2::guides(color = ggplot2::guide_legend(title = "SEIRD")) 
 
   Reduce(`+`, c(list(plot), plotSettings))
