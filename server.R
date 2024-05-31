@@ -119,7 +119,7 @@ server <- function(input, output, session) {
           c("plot", "plotSubPlots", "plotPhasePlane"),
           input$modelSelect
         ),
-        envir = environment(solveSusceptibleInfected),
+        envir = environment(exposuRe),
         mode = "function"
       )
     })
