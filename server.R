@@ -183,12 +183,6 @@ server <- function(input, output, session) {
       doCall(exposuRe, args = visibleInputs()) |>
       select(c(time, N, matches(str_split_1(input$modelSelect, ""))))
 
-    ## DONE: verified all combinations of model configuration options result in the same output. YES.
-    ## printf("%s model results equal regardless of solveR? %s\n",
-    ##        input$modelSelect,
-    ##        if(equals(modelResults, modelResultsFromExposuRe)) "YES."
-    ##        else "NO.")
-
     output$modelPlot <-
       renderPlotly(ggplotly(modelPlotter(modelResults)))
 
