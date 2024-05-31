@@ -147,6 +147,15 @@ server <- function(input, output, session) {
     }
   })
 
+  createSubPlotsUI <- function(ggplots) {
+    imap(ggplots, \(plot, index) {
+      plotName <- paste0("subplot.", index)
+      output[[plotName]] <- renderPlotly({ ggplotly(plot) })
+      column(6, plotlyOutput(plotName))
+    }) |>
+      fluidRow()
+  }
+
   observeEvent(input$stochasticSelect, {
     hide("outputPanel") # TODO: the outputPanel should be reactive!
     updateNumericInputs(defaults(), session)
@@ -178,7 +187,7 @@ server <- function(input, output, session) {
       renderPlotly(ggplotly(modelPlotter(modelResults)))
 
     output$modelSubPlots <-
-      renderUI(renderSubPlotsUI(modelSubPlotter(modelResults)))
+      renderUI(createSubPlotsUI(modelSubPlotter(modelResults)))
 
     output$modelPhasePlane <-
       renderPlotly(ggplotly(modelPhasePlanePlotter(modelResults)))
