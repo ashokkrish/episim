@@ -116,7 +116,7 @@ server <- function(input, output, session) {
     reactive({
       mget(
         paste0(
-          c("solve", "plot", "plotSubPlots", "plotPhasePlane"),
+          c("plot", "plotSubPlots", "plotPhasePlane"),
           input$modelSelect
         ),
         envir = environment(solveSusceptibleInfected),
@@ -175,30 +175,19 @@ server <- function(input, output, session) {
   observeEvent(input$go, {
     show("outputPanel")
 
-    modelSolver <- modellingFunctions()[[1]]
-    modelPlotter <- modellingFunctions()[[2]]
-    modelSubPlotter <- modellingFunctions()[[3]]
-    modelPhasePlanePlotter <- modellingFunctions()[[4]]
+    modelPlotter <- modellingFunctions()[[1]]
+    modelSubPlotter <- modellingFunctions()[[2]]
+    modelPhasePlanePlotter <- modellingFunctions()[[3]]
 
-    ## NOTE: if the D compartment is not enabled, it's column is removed from
-    ## the dataframe. D would always equal zero if not enabled.
-    modelResults <- doCall(modelSolver, args = visibleInputs()) |>
+    modelResults <-
+      doCall(exposuRe, args = visibleInputs()) |>
       select(c(time, N, matches(str_split_1(input$modelSelect, ""))))
 
-    ## FIXME: the number of deriviatives returned is not equal to the number of
-    ## variables provided to lsoda when running an SEI-type model. This is
-    ## strange, and I'm unsure why that's happening, having read the code I
-    ## wrote multiple times.
-    ##
-    ## modelResultsFromExposuRe <-
-    ##   doCall(exposuRe, args = visibleInputs()) |>
-    ##   select(c(time, N, matches(str_split_1(input$modelSelect, ""))))
-    ##
-    ## printf("%s model results equal regardless of solveR? %s",
+    ## DONE: verified all combinations of model configuration options result in the same output. YES.
+    ## printf("%s model results equal regardless of solveR? %s\n",
     ##        input$modelSelect,
     ##        if(equals(modelResults, modelResultsFromExposuRe)) "YES."
-    ##        else "NO.") |>
-    ##   print()
+    ##        else "NO.")
 
     output$modelPlot <-
       renderPlotly(ggplotly(modelPlotter(modelResults)))
