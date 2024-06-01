@@ -15,12 +15,11 @@ timesteps <- numericInput("timesteps", r"[Number of Timesteps (\(m\))]",
 )
 
 actionButtonStyle <- "color: #fff; background-color: #337ab7; border-color: #2e6da4;"
-runSimulationOrResetButtons <-
-  div(
-    id = "actionButtons", style = "display: none;", # Hidden by default
-    actionButton("go", "Run Simulation", style = actionButtonStyle),
-    actionButton("resetAll", "Reset Values", style = actionButtonStyle)
-  )
+runSimulationOrResetButtons <- div(id = "actionButtons",
+  # style = "display: none;", # Hidden by default
+  actionButton("go", "Run Simulation", style = actionButtonStyle),
+  actionButton("resetAll", "Reset Values", style = actionButtonStyle)
+)
 
 modelResultsPanel <-
   mainPanel(
@@ -43,7 +42,9 @@ modelResultsPanel <-
           )
         )
       ),
-      tabPanel("Mathematical Model", uiOutput("modelLaTeX")),
+      tabPanel("Mathematical Model",
+               uiOutput("modelLaTeX"),
+               uiOutput("modelDiagram")),
       tabPanel("Basic Reproduction Number (R0)")
     )
   )
@@ -155,22 +156,17 @@ models <- append(models, list("Please choose a model" = ""), after = 0)
 modelSelect <- pickerInput("modelSelect",
   strong("Epidemic Model"),
   models,
-  width = "300px"
-)
-
-modelSelectAndDiagram <- div(modelSelect, uiOutput("modelDiagram"))
+  width = "300px")
 
 massAction <- radioButtons("trueMassAction",
   strong("Model Formulation"),
   choices = list("Pseudo-Mass Action" = 0, "True-Mass Action" = 1),
-  inline = TRUE
-)
+  inline = TRUE)
 
 deterministic <- radioButtons("stochastic",
   strong("Model Stochasticity"),
   choices = list("Deterministic" = 0, "Stochastic" = 1),
-  inline = TRUE
-)
+  inline = TRUE)
 
 ## Vaccination
 ## alpha <- numericInput("alpha", r"(Rate of vaccination ($ \alpha $))", 0.0,
@@ -186,7 +182,7 @@ vitalDynamics <-
         r"[input.vitalDynamics == '1']",
         numericInput("muBirth",
                      r"[Rate of births (\(\mu_B\))]",
-                     0, 0, 1.2, 0.0001),
+                     0.012, 0, 1.2, 0.0001),
         numericInput("muDeath",
                      r"[Rate of naturally caused death (\(\mu_D\))]",
                      0, 0, 0.00876, 0.0001)),
@@ -202,45 +198,31 @@ modelOptions <- div(id = "modelOptions",
 replicates <-
   conditionalPanel(
     r"[input.stochastic == '1']",
-    numericInput(
-      "replicates",
+    numericInput("replicates",
       "Number of Replicates (simulations)",
       50, 0, 100, 1,
-      "300px"
-    )
-  )
+      "300px"))
 
 modelParameters <-
-  div(
-    id = "parameters",
+  div(id = "parameters",
     div(id = "commonParameters", beta, gamma),
-    div(id = "additionalParameters", delta, sigma, xi),
+    div(id = "additionalParameters", delta, sigma, xi))
 
-    ## TODO: include the following objects if these model options are implemented.
-    ## vaccinationParameters
-    ## immigrationParameters
-  )
-
-modelVariables <- div(id = "variables",
-  div(id = "commonVariables", N, S, E, I, R, D)
-)
+modelVariables <-
+  div(id = "variables", div(id = "commonVariables", N, S, E, I, R, D))
 
 ### Design
 modelConfigurationPanel <-
-  sidebarPanel(
-    id = "inputPanel",
-    modelSelectAndDiagram,
-    div(
-      id = "modelConfiguration", style = "display: none;",
-      modelOptions,
-      modelParameters,
-      modelVariables,
-      timesteps,
-      replicates
-    ),
-    runSimulationOrResetButtons
-  )
-
+  sidebarPanel(id = "inputPanel",
+    modelSelect,
+    conditionalPanel(r"--(input.modelSelect !== '')--",
+      div(id = "modelConfiguration",
+          modelOptions,
+          modelParameters,
+          modelVariables,
+          timesteps,
+          replicates),
+      runSimulationOrResetButtons))
 
 disclaimer <-
   p(gsub(
@@ -255,10 +237,8 @@ of this usage.)"
   ))
 
 episimModelTab <-
-  nav_panel(
-    title = "Model",
-    sidebarLayout(withMathJax(modelConfigurationPanel), modelResultsPanel)
-  )
+  nav_panel(title = "Model",
+    sidebarLayout(withMathJax(modelConfigurationPanel), modelResultsPanel))
 
 nonspatial <- navset_card_pill(
   title = "Non-spatial Compartmental Models of Epidemiology",
@@ -266,11 +246,8 @@ nonspatial <- navset_card_pill(
   episimModelTab,
   episimModelAuthorshipTab,
   nav_spacer(),
-  nav_menu(
-    title = "Links",
-    nav_item(a("Mount Royal University", href = "https://mtroyal.ca")),
-  )
-)
+  nav_menu(title = "Links",
+    nav_item(a("Mount Royal University", href = "https://mtroyal.ca"))))
 
 ## TODO: make this selectable
 nonspatialModelValueBox <-
@@ -281,7 +258,7 @@ nonspatialModelValueBox <-
     p("Non-spatial compartmental models... are what we have in ye olde episim currently.")
   )
 
-## TODO: integrate spatial modelling into this application
+## TODO: integrate spatial modeling into this application
 spatialModelValueBox <-
   value_box(
     title = "Compartmental",

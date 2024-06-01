@@ -14,6 +14,9 @@ library(readxl)
 library(writexl)
 library(plotly)
 library(DT)
+library(reactlog)
+
+options(shiny.reactlog=TRUE)
 
 here::i_am("global.R")
 
