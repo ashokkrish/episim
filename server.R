@@ -63,13 +63,7 @@ server <- function(input, output, session) {
     rowwise() |>
     mutate(
       vld = list(addRuleListToValidator(InputValidator$new(), ruleList)),
-      lambda = list(eval(bquote(\() {
-        print(sprintf("%s's input validator condition passes? %s",
-                      .(model),
-                      grepl(.(model), input$modelSelect)))
-        grepl(.(model), input$modelSelect)
-        })))
-    ) |>
+      lambda = list(eval(bquote(\() grepl(.(model), input$modelSelect))))) |>
     select(vld, lambda)
 
   isolate(
