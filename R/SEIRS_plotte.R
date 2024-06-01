@@ -14,7 +14,7 @@ plotSettings <- list(
   ggplot2::scale_y_continuous(expand = c(0, 0))
 )
 
-# Plot SEIRD model
+# Plot SEIRS model
 plotSEIRS <- function(model) {
   plot <- ggplot2::ggplot(model, ggplot2::aes(x = time)) +
     plotTheme +
@@ -27,12 +27,12 @@ plotSEIRS <- function(model) {
     ggplot2::geom_line(ggplot2::aes(y = E, color = "Exposed"), linewidth = 0.7) +
     ggplot2::geom_line(ggplot2::aes(y = I, color = "Infected"), linewidth = 0.7) +
     ggplot2::geom_line(ggplot2::aes(y = R, color = "Recovered"), linewidth = 0.7) +
-    ggplot2::guides(color = ggplot2::guide_legend(title = "SEIRD")) 
+    ggplot2::guides(color = ggplot2::guide_legend(title = "SEIRS")) 
 
   Reduce(`+`, c(list(plot), plotSettings))
 }
 
-# Plot phase plane for SEIRD model
+# Plot phase plane for SEIRS model
 plotPhasePlaneSEIRS <- function(model) {
   plot <- ggplot2::ggplot(model, ggplot2::aes(x = S)) +
     ggplot2::geom_line(ggplot2::aes(y = I, color = "Infected"), linewidth = 1.5) + 
@@ -40,12 +40,12 @@ plotPhasePlaneSEIRS <- function(model) {
     ggplot2::ggtitle("SI Phase Plane") +
     ggplot2::ylab("Infected (I)") +
     ggplot2::xlab("Susceptible (S)") +
-    ggplot2::guides(color = ggplot2::guide_legend(title = "SEIRD")) 
+    ggplot2::guides(color = ggplot2::guide_legend(title = "SEIRS")) 
 
   Reduce(`+`, c(list(plot), plotSettings))
 }
 
-# Plot subplots for SEIRD model compartments
+# Plot subplots for SEIRS model compartments
 plotSubPlotsSEIRS <- function(model) {
   data_long <- tidyr::pivot_longer(model, cols = c(S, E, I, R, S), names_to = "Compartment", values_to = "Value")
 
