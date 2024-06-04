@@ -180,13 +180,11 @@ server <- function(input, output, session) {
                    input$susceptible,
                    input$exposed,
                    input$infected,
-                   input$recovered,
-                   input$dead)
-    names(variables) <- c("N", "S", "E", "I", "R", "D")
+                   input$recovered)
+    names(variables) <- c("N", "S", "E", "I", "R")
     applicableVariables <-
       variables[names(variables) %in%
-                  (unique(str_split(input$modelSelect, "")[[1]]) |>
-                  str_remove("D"))]
+                  unique(str_split(input$modelSelect, "")[[1]])]
     boolean <- input$population == sum(applicableVariables)
     stopifnot(length(boolean) == 1)
     message = "Population must be equal to the sum of the initial compartments values!"
