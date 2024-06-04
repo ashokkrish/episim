@@ -150,9 +150,6 @@ server <- function(input, output, session) {
 
   observeEvent(input$resetAll, {
     updatePickerInput(session, "modelSelect", selected = "")
-    updateRadioButtons(session, "trueMassAction", selected = 0)
-    updateRadioButtons(session, "stochasticSelect", selected = 0)
-    updateCheckboxInput(session, "vitalDynamics", value = FALSE)
     updateNumericInputs(defaults(), session)
   })
 
