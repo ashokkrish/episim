@@ -149,14 +149,6 @@ server <- function(input, output, session) {
     renderModel()
   })
 
-  observeEvent(
-    { # Any of these three inputs will cause a "partial reset."
-      input$stochasticSelect
-      input$trueMassAction
-      input$vitalDynamics
-    },
-    isolate(updateNumericInputs(defaults(), session))
-  )
   observeEvent(input$resetAll, {
     updatePickerInput(session, "modelSelect", selected = "")
     updateRadioButtons(session, "trueMassAction", selected = 0)
