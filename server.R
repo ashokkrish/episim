@@ -64,8 +64,7 @@ server <- function(input, output, session) {
     })
   })
 
-  ## Remove the inputs which are currently hidden from the reactive value under
-  ## construction herein.
+  ## A reactive value like input, but with hidden and irrelevant inputs removed.
   visibleInputs <- reactive({
     allInputs <- reactiveValuesToList(input)
     nameAmongHiddenInputs <-
