@@ -28,4 +28,11 @@ documentReadyPainter <-
                         .css({'padding':'10px'}))]" |>
       gsub(pattern = r"(\n\s*)", replacement = "") |>
       runjs()
+
+    ## NOTE: Disable the stochastic radio button and the sidebar to toggle
+    ## between sub-apps, respectively. When these are implemented the
+    ## respective line can be removed.
+    disable(selector = "#stochastic > div:nth-child(2) > label:nth-child(2) > input:nth-child(1)")
+    disable(selector = "button.collapse-toggle")
+    runjs(r"--($('button.collapse-toggle').hide())--")
   }

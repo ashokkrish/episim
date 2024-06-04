@@ -16,38 +16,10 @@ timesteps <- numericInput("timesteps", r"[Number of Timesteps (\(m\))]",
 
 actionButtonStyle <- "color: #fff; background-color: #337ab7; border-color: #2e6da4;"
 runSimulationOrResetButtons <- div(id = "actionButtons",
-  # style = "display: none;", # Hidden by default
-  actionButton("go", "Run Simulation", style = actionButtonStyle),
   actionButton("resetAll", "Reset Values", style = actionButtonStyle)
 )
 
-modelResultsPanel <-
-  mainPanel(
-    id = "outputPanel", style = "display: none;", # Hidden by default
-    tabsetPanel(
-      id = "tabSet",
-      tabPanel("Plot", plotly::plotlyOutput("modelPlot"), uiOutput("modelSubPlots")),
-      tabPanel("Phase Plane", plotly::plotlyOutput("modelPhasePlane")),
-      tabPanel(
-        "Output Summary",
-        # FIXME: previously, only the button had to be added to the tabpanel
-        # but now doing so places the button behind the datatable. I have
-        # added some custom CSS to fix this for now.
-        div(
-          style = "display: flex; flex-direction: column;",
-          DT::dataTableOutput("modelSummaryTable"),
-          downloadButton(
-            "downloadData", "Download as Excel",
-            style = "align-self: flex-start; margin-top: 1vh;"
-          )
-        )
-      ),
-      tabPanel("Mathematical Model",
-               uiOutput("modelLaTeX"),
-               uiOutput("modelDiagram")),
-      tabPanel("Basic Reproduction Number (R0)")
-    )
-  )
+modelResultsPanel <- uiOutput("outputPanel")
 
 ## NOTE: https://englishlessonsbrighton.co.uk/names-letters-english-alphabet/
 ### Parameters
@@ -177,39 +149,38 @@ deterministic <- radioButtons("stochastic",
 ##   ## TODO: write which models have vaccination when they're implemented.
 ##   conditionalPanel(r"{[].includes(input.modelSelect)}")
 vitalDynamics <-
-  div(checkboxInput("vitalDynamics", "Vital Dynamics", FALSE, "300px"),
-      conditionalPanel(
-        r"[input.vitalDynamics == '1']",
-        numericInput("muBirth",
-                     r"[Rate of births (\(\mu_B\))]",
-                     0.012, 0, 1.2, 0.0001),
-        numericInput("muDeath",
-                     r"[Rate of naturally caused death (\(\mu_D\))]",
-                     0, 0, 0.00876, 0.0001)),
-      id = "vitalDynamics-card",
-      class = "card bslib-card",
-      style = "margin: 10px;")
+  wellPanel(checkboxInput("vitalDynamics", "Vital Dynamics", FALSE, "300px"),
+            conditionalPanel(
+              r"[input.vitalDynamics == '1']",
+              numericInput("muBirth",
+                           r"[Rate of births (\(\mu_B\))]",
+                           0.012, 0, 1.2, 0.0001),
+              numericInput("muDeath",
+                           r"[Rate of naturally caused death (\(\mu_D\))]",
+                           0, 0, 0.00876, 0.0001)))
 
-modelOptions <- div(id = "modelOptions",
-                    div(massAction, style = "margin: 10px;"),
-                    div(deterministic, style = "margin: 10px;"),
-                    vitalDynamics)
-
-replicates <-
-  conditionalPanel(
-    r"[input.stochastic == '1']",
-    numericInput("replicates",
-      "Number of Replicates (simulations)",
-      50, 0, 100, 1,
-      "300px"))
+modelOptions <- wellPanel(id = "modelOptions",
+                          h3("Options"),
+                          div(massAction, style = "margin: 10px;"),
+                          wellPanel(deterministic, conditionalPanel(
+                                                     r"[input.stochastic == '1']",
+                                                     numericInput("replicates",
+                                                                  "Number of Replicates (simulations)",
+                                                                  50, 0, 100, 1,
+                                                                  "300px"))),
+                          vitalDynamics,
+                          timesteps)
 
 modelParameters <-
-  div(id = "parameters",
-    div(id = "commonParameters", beta, gamma),
-    div(id = "additionalParameters", delta, sigma, xi))
+  wellPanel(id = "parameters",
+            h3("Parameters"),
+            div(id = "commonParameters", beta, gamma),
+            div(id = "additionalParameters", delta, sigma, xi))
 
 modelVariables <-
-  div(id = "variables", div(id = "commonVariables", N, S, E, I, R, D))
+  wellPanel(id = "variables",
+            h3("Variables"),
+            div(id = "commonVariables", N, S, E, I, R, D))
 
 ### Design
 modelConfigurationPanel <-
@@ -219,9 +190,7 @@ modelConfigurationPanel <-
       div(id = "modelConfiguration",
           modelOptions,
           modelParameters,
-          modelVariables,
-          timesteps,
-          replicates),
+          modelVariables),
       runSimulationOrResetButtons))
 
 disclaimer <-
@@ -247,7 +216,7 @@ nonspatial <- navset_card_pill(
   episimModelAuthorshipTab,
   nav_spacer(),
   nav_menu(title = "Links",
-    nav_item(a("Mount Royal University", href = "https://mtroyal.ca"))))
+           nav_item(a("Mount Royal University", href = "https://mtroyal.ca"))))
 
 ## TODO: make this selectable
 nonspatialModelValueBox <-
@@ -287,9 +256,11 @@ mainSidebar <- sidebar(
 
 ## APPLICATION UI ROOT -----------------------------------------------------
 page_sidebar(
+  useShinyFeedback(),
+  autoWaiter(),
   tags$script(
          type = "text/javascript",
-         id = "modelSelectECMAScript",
+         id = "modelSelectCustomizationsScript",
          async = NA,
          src = "modelSelect.js"
   ),
