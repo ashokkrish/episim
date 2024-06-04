@@ -6,6 +6,17 @@ wellPanel <- function(...) {
   div(class = "well", style = "margin-bottom: 0.75rem;", ...)
 }
 
+developer <- function(lastName, firstName, degree = "", affiliationIndex = 1, href = "") {
+  tag("address",
+      list(a(style = "font-weight: bold;",
+             href = href,
+             lastName,
+             ",",
+             firstName,
+             degree,
+             tag("sup", affiliationIndex))))
+}
+
 ## NOTE: lintr [object_usage_linter] warnings about a lack of a visible global
 ## definition for some of the shiny elements here are erroneous and can be
 ## ignored. There is no reason to evaluate these function definitions in the
@@ -33,7 +44,7 @@ gamma <- uiOutput("gamma")
 delta <- conditionalPanel(
   r"{['SIRD', 'SEIRD'].includes(input.modelSelect)}",
   numericInput("delta", r"[Fatality rate (\(\delta\))]", 0.5,
-    min = 0, max = 1, # TODO: Adjust minimum and maximum
+    min = 0, max = 1,
     step = 0.01,
     width = "300px"
   )
@@ -42,7 +53,7 @@ delta <- conditionalPanel(
 sigma <- conditionalPanel(
   r"{['SEIR', 'SEIRS', 'SEIRD'].includes(input.modelSelect)}",
   numericInput("sigma", r"[Rate of recovery (\(\sigma\))]", 0.5,
-    min = 0, max = 1, # TODO: Adjust minimum and maximum
+    min = 0, max = 1,
     step = 0.01,
     width = "300px"
   )
@@ -51,7 +62,7 @@ sigma <- conditionalPanel(
 xi <- conditionalPanel(
   r"{['SIRS', 'SEIRS'].includes(input.modelSelect)}",
   numericInput("xi", r"[Rate of loss of immunity (\(\xi\))]", 0.5,
-    min = 0, max = 1, # TODO: Adjust minimum and maximum
+    min = 0, max = 1,
     step = 0.01,
     width = "300px"
   )
@@ -75,13 +86,8 @@ E <- conditionalPanel(
   numericInput("exposed", r"[Exposed (\(E\))]", 0, min = 0, step = 1, width = "300px")
 )
 
-V <- conditionalPanel(
-  ## TODO: write which modoels have vaccination when they're implemented.
-  r"{[].includes(input.modelSelect)}",
-  numericInput("vaccinated", r"[Vaccinated (\(V\))]", 0, min = 0, step = 1, width = "300px")
-)
-
 bold <- function(...) p(..., style = "font-weight: bold")
+
 ## TODO: include FontAwesome GitHub logo
 GitHub <- function(username, ...) {
   a(..., href = paste0("https://github.com/", username))
@@ -90,41 +96,29 @@ GitHub <- function(username, ...) {
 episimModelAuthorshipTab <-
   nav_panel(
     title = "Authors",
-    h3("Development Team", style = "font-weight:bold"), br(),
-
-    ## TODO: Bryce's information
-    bold("Bryce Carson, B.Sc."),
-    p("Lead Developer"),
-    GitHub("bryce-carson"),
+    h2("Developers", style = "font-weight:bold"),
+    developer("Carson", "Bryce", "B.Sc", href = "https://github.com/bryce-carson/"),
+    developer("Le", "Khanh", href = "https://github.com/kle6951/"),
+    developer("Wondwossen", "Tobias", href = "https://github.com/Toby-exe"),
     br(),
 
-    # D evelopers' Information
-    bold("Khanh Le, Tobias Wondwossen"),
-    p("Developer - Undergraduate Student, Mount Royal University, Calgary, AB, CANADA"),
-    br(),
-    ## GitHub(),
+    h3("Affiliations"),
+    p(tag("sup", 1), "Mount Royal University", br(),
+      "4825 Mount Royal Gate SW", br(),
+      "Calgary, Alberta, Canada", br(),
+      "T3E 6K6"),
 
-    ## TODO: Reformat Ashok's information so it reads like a physical mailing
-    ## address, and the digital links aren't ugly.
-    bold("Ashok Krishnamurthy, Ph.D."),
-    p("Project Supervisor,"),
-    p("Mount Royal University"),
-    p("Department of Mathematics & Computing,"),
-    p("Calgary, AB, Canada"), br(),
-    p("Email:", a("akrishnamurthy@mtroyal.ca",
-      href = "mailto:akrishnamurthy@mtroyal.ca"
-    )),
-    p("Website:", a(
-      href = "https://bit.ly/2YKrXjX",
-      "https://bit.ly/2YKrXjX",
-      target = "_blank"
-    )),
-    p("Github: ", a(
-      href = "https://github.com/ashokkrish/episim",
-      "https://github.com/ashokkrish/episim",
-      target = "_blank"
-    )), br(), br(),
-  )
+    h2("Supervisor"),
+    ## TODO: Reformat Ashok's information so the digital links aren't ugly.
+    tag("address",
+        list(
+          p(a("Ashok Krishnamurthy, Ph.D.", href = "https://bit.ly/2YKrXjX", target = "_blank", style = "font-weight: bold;"), br(),
+            "Mount Royal University", br(),
+            "Department of Mathematics & Computing,", br(),
+            "Calgary, AB, Canada", br(),
+            a("akrishnamurthy@mtroyal.ca", href = "mailto:akrishnamurthy@mtroyal.ca"), br(),
+            a("Episim GitHub", href = "https://github.com/ashokkrish/episim", target = "_blank")),
+          style = r"(a[href^='mailto']::before {content: '📧 ';} a[href^='tel']::before {content: '📞 ';})")))
 
 models <- list("SIR", "SIRS", "SIRD", "SEIR", "SEIRS", "SEIRD")
 names(models) <- models
@@ -144,14 +138,7 @@ deterministic <- radioButtons("stochastic",
   choices = list("Deterministic" = 0, "Stochastic" = 1),
   inline = TRUE)
 
-## Vaccination
-## alpha <- numericInput("alpha", r"(Rate of vaccination ($ \alpha $))", 0.0,
-##   min = 0.0, max = 1.0,
-##   step = 0.01,
-##   width = "300px"
-##   ) |>
-##   ## TODO: write which models have vaccination when they're implemented.
-##   conditionalPanel(r"{[].includes(input.modelSelect)}")
+## FIXME: use this CSS path to fix the margin-bottom of the vital dynamics checkbox within this well panel: div.well:nth-child(4) > div:nth-child(1); set the margin-bottom property to zero pixels.
 vitalDynamics <-
   wellPanel(checkboxInput("vitalDynamics", "Vital Dynamics", FALSE, "300px"),
             conditionalPanel(
@@ -277,7 +264,14 @@ page_sidebar(
   useShinyjs(),
   theme = bs_theme(version = "5"),
   window_title = "Krishnamurthy Episim",
-  title = "The Krishnamurthy Lab Epidemic Modelling app",
+  title = h1("The Krishnamurthy Lab Epidemic Modelling app",
+             style = "margin-bottom: 0px;",
+             a(href = "https://github.com/ashokkrish/episim",
+               tag("button",
+                   list(type = "button",
+                        style = "padding-right: 10px;padding-left: 10px;padding-top: 8px;padding-bottom: 8px;",
+                        class = "btn btn-secondary",
+                        bs_icon("github"))))),
   sidebar = mainSidebar,
   nonspatial
 )
