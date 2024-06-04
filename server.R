@@ -144,9 +144,7 @@ server <- function(input, output, session) {
   })
 
 
-  output$outputPanel <- renderUI({
-    renderModel()
-  })
+  output$outputPanel <- renderUI(renderModel())
 
   observeEvent(input$resetAll, {
     updatePickerInput(session, "modelSelect", selected = "")
