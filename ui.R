@@ -17,11 +17,6 @@ developer <- function(lastName, firstName, degree = "", affiliationIndex = 1, hr
              tag("sup", affiliationIndex))))
 }
 
-## NOTE: lintr [object_usage_linter] warnings about a lack of a visible global
-## definition for some of the shiny elements here are erroneous and can be
-## ignored. There is no reason to evaluate these function definitions in the
-## global environment manually, because that is going to happen regardless.
-
 ### Model options
 timesteps <- numericInput("timesteps", r"[Number of Timesteps (\(m\))]",
   100, 1,
