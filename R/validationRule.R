@@ -3,7 +3,7 @@ rules <- tribble(
   ~ ruleList,
   "S.*S", # Waning learned immunity
   list(
-    xi = c(sv_between(0, 1))
+    xi = c(sv_gt(0), sv_lte(1))
   ),
   "D", # Death
   list(
