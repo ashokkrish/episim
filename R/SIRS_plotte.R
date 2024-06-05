@@ -26,6 +26,7 @@ plotSIRS <- function(model) {
     ggplot2::geom_line(ggplot2::aes(y = S, color = "Susceptible"), linewidth = 0.7) +
     ggplot2::geom_line(ggplot2::aes(y = I, color = "Infected"), linewidth = 0.7) +
     ggplot2::geom_line(ggplot2::aes(y = R, color = "Recovered"), linewidth = 0.7) +
+    theme_classic() +
     ggplot2::guides(color = ggplot2::guide_legend(title = "SIRS"))
 
   Reduce(`+`, c(list(plot), plotSettings))
@@ -36,6 +37,7 @@ plotPhasePlaneSIRS <- function(model) {
   plot <- ggplot2::ggplot(model, ggplot2::aes(x = S)) +
     ggplot2::geom_line(ggplot2::aes(y = I, color = "Infected"), linewidth = 0.7) +
     plotTheme +
+    theme_classic() +
     ggplot2::ggtitle("SI Phase Plane") +
     ggplot2::ylab("Infected (I)") +
     ggplot2::xlab("Susceptible (S)") +
@@ -73,6 +75,7 @@ plotSubPlotsSIRS <- function(model) {
       ggplot2::scale_x_continuous(limits = x_limits, expand = c(0, 0)) +
       ggplot2::scale_y_continuous(limits = y_limits, expand = c(0, 0)) +
       ggplot2::scale_color_manual(values = setNames(compartment_colors, unique(data_long$Compartment))) +
+      theme_classic() +
       ggplot2::theme(legend.position = "none")
   })
 }

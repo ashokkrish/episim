@@ -19,17 +19,18 @@ plotSIRD <- function(model) {
   plot <- ggplot2::ggplot(model, ggplot2::aes(x = time)) +
     plotTheme +
     ggplot2::labs(
-      title = "SIRD Epidemic Model", 
+      title = "SIRD Epidemic Model",
       y = "Number of People",
       x = "Time"
     ) +
     ggplot2::geom_line(ggplot2::aes(y = S, color = "Susceptible"), linewidth = 0.7) +
     ggplot2::geom_line(ggplot2::aes(y = I, color = "Infected"), linewidth = 0.7) +
     ggplot2::geom_line(ggplot2::aes(y = R, color = "Recovered"), linewidth = 0.7) +
-    ggplot2::geom_line(ggplot2::aes(y = D, color = "Dead"), linewidth = 0.7) + 
+    ggplot2::geom_line(ggplot2::aes(y = D, color = "Dead"), linewidth = 0.7) +
+    theme_classic() +
     ggplot2::guides(color = ggplot2::guide_legend(title = "SIRD"))
 
-  Reduce(`+`, c(list(plot), plotSettings)) 
+  Reduce(`+`, c(list(plot), plotSettings))
 }
 
 # Plot phase plane for SIRD model
@@ -37,6 +38,7 @@ plotPhasePlaneSIRD <- function(model) {
   plot <- ggplot2::ggplot(model, ggplot2::aes(x = S)) +
     ggplot2::geom_line(ggplot2::aes(y = I, color = "Infected"), linewidth = 0.7) +
     plotTheme +
+    theme_classic() +
     ggplot2::ggtitle("SI Phase Plane") +
     ggplot2::ylab("Infected (I)") +
     ggplot2::xlab("Susceptible (S)") +
@@ -59,7 +61,7 @@ plotSubPlotsSIRD <- function(model) {
   compartment_colors <- ggplot2::ggplot_build(plotMain)$data[[1]]$colour %>%
     unique()
 
-    compartmentLabels <- c(S = "Susceptible", I = "Infected", R = "Recovered", D = "Dead")
+  compartmentLabels <- c(S = "Susceptible", I = "Infected", R = "Recovered", D = "Dead")
 
 
   lapply(unique(data_long$Compartment), function(compartment) {
@@ -74,6 +76,7 @@ plotSubPlotsSIRD <- function(model) {
       ggplot2::scale_x_continuous(limits = x_limits, expand = c(0, 0)) +
       ggplot2::scale_y_continuous(limits = y_limits, expand = c(0, 0)) +
       ggplot2::scale_color_manual(values = setNames(compartment_colors, unique(data_long$Compartment))) +
-      ggplot2::theme(legend.position = "none") 
+      theme_classic() +
+      ggplot2::theme(legend.position = "none")
   })
 }
