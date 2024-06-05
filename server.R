@@ -129,7 +129,9 @@ server <- function(input, output, session) {
 
   renderModel <- reactive({
     msg <- "The compartment values (except D) must sum to N before simulating."
-    shiny::validate(need(compartmentsEqualPopulation(), message = msg))
+    shiny::validate(need(compartmentsEqualPopulation(), message = msg),
+                    need(recoveryRatePositive(),
+                         message = "Recovery rate must be positive."))
 
     ## BEIGN TODO: obsolete this with a refactoring.
     modellingFunctions <- mget(
@@ -229,8 +231,24 @@ server <- function(input, output, session) {
                   unique(str_split(input$modelSelect, "")[[1]])]
     boolean <- !(input$population == sum(applicableVariables))
     stopifnot(length(boolean) == 1)
-    message = "Population must be equal to the sum of the initial compartments values!"
+    message <- "Population must be equal to the sum of the initial compartments values!"
     feedbackDanger("population", boolean, message)
+    if(boolean) NULL else message
+  })
+
+  ## TODO: if a SI or SEI model without an R compartment is ever introduced then
+  ## this needs to be modified.
+  recoveryRatePositive <- reactive({
+    if("E" %in% str_split(input$modelSelect, "")[[1]]) {
+      message <- "Sigma must be greater than zero when a recovered compartment exists."
+      boolean <- input$sigma == 0
+      feedbackDanger("sigma", boolean, message)
+    } else {
+      message <- "Gamma must be greater than zero when a recovered compartment exists."
+      boolean <- input$gamma == 0
+      feedbackDanger("gamma", boolean, message)
+    }
+
     if(boolean) NULL else message
   })
 }

@@ -12,7 +12,7 @@ rules <- tribble(
   ),
   "E", # Exposure
   list(
-    sigma = c(sv_between(0, 1)),
+    sigma = c(sv_gt(0), sv_lte(1)),
     exposed = c(sv_integer(), sv_gte(0))
   ),
 
@@ -38,8 +38,8 @@ rules <- tribble(
     recovered = c(sv_integer(), sv_gte(0)),
 
     ## Global rules for parameters
-    beta = c(sv_gt(0), sv_between(0, 1)),
-    gamma = c(sv_gt(0), sv_between(0, 1)),
+    beta = c(sv_gt(0), sv_lte(1)),
+    gamma = c(sv_gt(0), sv_lte(1)),
 
     ## Simulation options
     replicates = c(sv_integer(), sv_gt(0)),
