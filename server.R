@@ -163,14 +163,17 @@ server <- function(input, output, session) {
         id = "tabSet",
         tabPanel("Plot",
                  br(),
-                 ggplotly(modelPlotter(modelResults)),
+                 ggplotly(modelPlotter(modelResults)) %>%
+                    layout(xaxis = list(autorange = TRUE), yaxis = list(autorange = TRUE)),
                  fluidRow(
                    modelSubPlotter(modelResults) |>
                      map(\(plot, index) {
-                       column(6, ggplotly(plot))
+                       column(6, ggplotly(plot) %>%
+                                 layout(xaxis = list(autorange = TRUE), yaxis = list(autorange = TRUE)))
                      })
                   )),
-        tabPanel("Phase Plane", br(), ggplotly(modelPhasePlanePlotter(modelResults))),
+        tabPanel("Phase Plane", br(), ggplotly(modelPhasePlanePlotter(modelResults)) %>% 
+                          layout(xaxis = list(autorange = TRUE), yaxis = list(autorange = TRUE))),
         tabPanel("Output Summary",
                  br(),
                  ## FIXME: previously, only the button had to be added to the tabpanel
