@@ -25,9 +25,7 @@ timesteps <- numericInput("timesteps", r"[Number of Timesteps (\(m\))]",
 )
 
 actionButtonStyle <- "color: #fff; background-color: #337ab7; border-color: #2e6da4;"
-runSimulationOrResetButtons <- div(id = "actionButtons",
-  actionButton("resetAll", "Reset Values", style = actionButtonStyle)
-)
+resetButton <- actionButton("resetAll", "Reset Values", style = actionButtonStyle)
 
 modelResultsPanel <- uiOutput("outputPanel")
 
@@ -148,12 +146,16 @@ vitalDynamics <-
 modelOptions <- wellPanel(id = "modelOptions",
                           h3("Options"),
                           div(massAction, style = "margin: 10px;"),
-                          wellPanel(deterministic, conditionalPanel(
-                                                     r"[input.stochastic == '1']",
-                                                     numericInput("replicates",
-                                                                  "Number of Replicates (simulations)",
-                                                                  50, 0, 100, 1,
-                                                                  "300px"))),
+                          wellPanel(deterministic,
+                                    conditionalPanel(
+                                      r"[input.stochastic == '1']",
+                                      numericInput("replicates",
+                                                   "Number of Replicates (simulations)",
+                                                   50, 0, 100, 1,
+                                                   "300px"),
+                                      actionButton("rerunStochasticSimulation",
+                                                   "Rerun stochastic simulation",
+                                                   style = actionButtonStyle))),
                           vitalDynamics,
                           timesteps)
 
@@ -177,7 +179,7 @@ modelConfigurationPanel <-
           modelOptions,
           modelParameters,
           modelVariables),
-      runSimulationOrResetButtons))
+      resetButton))
 
 disclaimer <-
   p(gsub(
@@ -243,7 +245,7 @@ mainSidebar <- sidebar(
 ## APPLICATION UI ROOT -----------------------------------------------------
 page_sidebar(
   useShinyFeedback(),
-  autoWaiter(),
+  ## autoWaiter(),
   tags$script(
          type = "text/javascript",
          id = "modelSelectCustomizationsScript",
