@@ -51,9 +51,15 @@ server <- function(input, output, session) {
         ## WARN DONT: compare numerical booleans following C style; using
         ## logicals in any way—coercing numeric to logical on the RHS or using
         ## logical values in the defaultInputValues—seems to bork everything.
-        stochastic == input$stochastic,
-        vitalDynamics == input$vitalDynamics,
-        massAction == input$trueMassAction
+        ## DEPRECATED DONT: removing this lines may be nice because it is
+        ## commented code, but leaving them informs future programmers better.
+        ## These conditions are no longer used because the values are no longer
+        ## relevant and there is not columns for these values in the dataframe
+        ## or spreadsheet any longer.
+        ##
+        ## stochastic == input$stochastic,
+        ## vitalDynamics == input$vitalDynamics,
+        ## massAction == input$trueMassAction
       ) |>
       select(beta:replicates) |>
       select(where(\(x) all(!is.na(x))))
