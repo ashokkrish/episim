@@ -90,18 +90,48 @@ server <- function(input, output, session) {
   })
 
   ## A reactive value like input, but with hidden and irrelevant inputs removed.
-  visibleInputs <- reactive({
-    allInputs <- reactiveValuesToList(input)
-    nameAmongHiddenInputs <-
-      names(allInputs) %in% c(allInputs$hiddenInputs, "hiddenInputs", "go", "resetAll")
-    visibleInputs <- allInputs[!nameAmongHiddenInputs]
+  greedy_visibleInputs <- reactive({
+    shiny::validate(need(input$modelSelect, "A model must be selected."))
+    ## TODO: this could be imporoved, but I'm not sure how. This is kinda awful and should be built-in to Shiny.
+    relevantInputs <-
+      reactiveValuesToList(
+        reactiveValues(
+          modelSelect    = input$modelSelect,
+          trueMassAction = input$trueMassAction,
+          stochastic     = input$stochastic,
+          vitalDynamics  = input$vitalDynamics,
+          replicates     = input$replicates,
+          rerun          = input$rerunStochasticSimulation, # MAYBE
+          muBirth        = input$muBirth,
+          muDeath        = input$muDeath,
+          timesteps      = input$timesteps,
+          beta           = input$beta,
+          gamma          = input$gamma,
+          delta          = input$delta,
+          sigma          = input$sigma,
+          xi             = input$xi,
+          population     = input$population,
+          susceptible    = input$susceptible,
+          exposed        = input$exposed,
+          infected       = input$infected,
+          recovered      = input$recovered,
+          dead           = input$dead))
+    visibleInputs <- relevantInputs[!(names(relevantInputs) %in% input$hiddenInputs)]
     stopifnot(is.list(visibleInputs))
     visibleInputs
   })
 
-  renderModel <- reactive({
-    shiny::validate(inputsValid(), compartmentsEqualPopulation())
+  ## NOTE: prevent the reactive value from invalidating renderModel too often,
+  ## especially when a slider or numeric input is srolling through values and
+  ## hasn't truly idled on one value yet. See the following link for more
+  ## information: https://shiny.posit.co/r/reference/shiny/1.7.2/debounce.html.
+  visibleInputs <- debounce(greedy_visibleInputs, 1250)
 
+  renderModel <- reactive({
+    msg <- "The compartment values (except D) must sum to N before simulating."
+    shiny::validate(need(compartmentsEqualPopulation(), message = msg))
+
+    ## BEIGN TODO: obsolete this with a refactoring.
     modellingFunctions <- mget(
       paste0(
         c("plot", "plotSubPlots", "plotPhasePlane"),
@@ -113,9 +143,10 @@ server <- function(input, output, session) {
     modelPlotter <- modellingFunctions[[1]]
     modelSubPlotter <- modellingFunctions[[2]]
     modelPhasePlanePlotter <- modellingFunctions[[3]]
+    ## END TODO: obsolte this with a refactoring.
 
     modelResults <-
-      doCall(exposuRe, args = isolate(visibleInputs())) |>
+      doCall(exposuRe, args = visibleInputs()) |>
       select(c(time, N, matches(str_split_1(input$modelSelect, ""))))
 
     output$downloadData <-
@@ -156,7 +187,8 @@ server <- function(input, output, session) {
                                     "Download as Excel",
                                     style = "align-self: flex-start; margin-top: 1vh;"))),
         tabPanel("Mathematical Model",
-                 doCall(renderModelLaTeX, args = isolate(visibleInputs())),
+                 br(),
+                 doCall(renderModelLaTeX, args = visibleInputs()),
                  tagList(img(
                    src = paste0("images/", input$modelSelect, ".svg"),
                    contentType = "image/svg",
@@ -195,10 +227,10 @@ server <- function(input, output, session) {
     applicableVariables <-
       variables[names(variables) %in%
                   unique(str_split(input$modelSelect, "")[[1]])]
-    boolean <- input$population == sum(applicableVariables)
+    boolean <- !(input$population == sum(applicableVariables))
     stopifnot(length(boolean) == 1)
     message = "Population must be equal to the sum of the initial compartments values!"
-    feedbackDanger("population", !boolean, message)
+    feedbackDanger("population", boolean, message)
     if(boolean) NULL else message
   })
 }
