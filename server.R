@@ -164,17 +164,12 @@ server <- function(input, output, session) {
         tabPanel("Plot",
                  br(),
                  ggplotly(modelPlotter(modelResults)),
-                 {
+                 fluidRow(
                    modelSubPlotter(modelResults) |>
                      imap(\(plot, index) {
-                       plotName <- paste0("subplot.", index)
-                       output[[plotName]] <- renderPlotly({
-                         ggplotly(plot)
-                       })
-                       column(6, plotlyOutput(plotName))
-                     }) |>
-                     fluidRow()
-                 }),
+                       column(6, ggplotly(plot))
+                     })
+                  )),
         tabPanel("Phase Plane", br(), ggplotly(modelPhasePlanePlotter(modelResults))),
         tabPanel("Output Summary",
                  br(),
