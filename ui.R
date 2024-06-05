@@ -10,6 +10,7 @@ developer <- function(lastName, firstName, degree = "", affiliationIndex = 1, hr
   tag("address",
       list(a(style = "font-weight: bold;",
              href = href,
+             target = "_blank",
              lastName,
              ",",
              firstName,
@@ -204,7 +205,7 @@ nonspatial <- navset_card_pill(
   episimModelAuthorshipTab,
   nav_spacer(),
   nav_menu(title = "Links",
-           nav_item(a("Mount Royal University", href = "https://mtroyal.ca"))))
+           nav_item(a("Mount Royal University", href = "https://mtroyal.ca", target = "_blank"))))
 
 ## TODO: make this selectable
 nonspatialModelValueBox <-
@@ -263,7 +264,7 @@ page_sidebar(
   window_title = "Krishnamurthy Episim",
   title = h1("The Krishnamurthy Lab Epidemic Modelling app",
              style = "margin-bottom: 0px;",
-             a(href = "https://github.com/ashokkrish/episim",
+             a(href = "https://github.com/ashokkrish/episim", target = "_blank",
                tag("button",
                    list(type = "button",
                         style = "padding-right: 10px;padding-left: 10px;padding-top: 8px;padding-bottom: 8px;",
