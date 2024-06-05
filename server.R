@@ -165,12 +165,14 @@ server <- function(input, output, session) {
                  br(),
                  ggplotly(modelPlotter(modelResults)) %>%
                     layout(xaxis = list(autorange = TRUE), yaxis = list(autorange = TRUE)),
+                 br(),
                  fluidRow(
                    modelSubPlotter(modelResults) |>
-                     map(\(plot, index) {
-                       column(6, ggplotly(plot) %>%
-                                 layout(xaxis = list(autorange = TRUE), yaxis = list(autorange = TRUE)))
-                     })
+                   map(\(plot, index) {
+                     column(6, ggplotly(plot) %>%
+                         layout(xaxis = list(autorange = TRUE), yaxis = list(autorange = TRUE)),
+                         br())
+                   })
                   )),
         tabPanel("Phase Plane", br(), ggplotly(modelPhasePlanePlotter(modelResults)) %>% 
                           layout(xaxis = list(autorange = TRUE), yaxis = list(autorange = TRUE))),
