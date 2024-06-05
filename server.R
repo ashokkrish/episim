@@ -129,6 +129,7 @@ server <- function(input, output, session) {
       tabsetPanel(
         id = "tabSet",
         tabPanel("Plot",
+                 br(),
                  ggplotly(modelPlotter(modelResults)),
                  {
                    modelSubPlotter(modelResults) |>
@@ -141,8 +142,9 @@ server <- function(input, output, session) {
                      }) |>
                      fluidRow()
                  }),
-        tabPanel("Phase Plane", ggplotly(modelPhasePlanePlotter(modelResults))),
+        tabPanel("Phase Plane", br(), ggplotly(modelPhasePlanePlotter(modelResults))),
         tabPanel("Output Summary",
+                 br(),
                  ## FIXME: previously, only the button had to be added to the tabpanel
                  ## but now doing so places the button behind the datatable. I have
                  ## added some custom CSS to fix this for now.
@@ -162,12 +164,9 @@ server <- function(input, output, session) {
                    alt = gsub("\n[\t\ ]+?", " ", r"(The diagram of the model compartments
                      failed to load, or the accessibility text is being read by
                      a screen reader.)")))),
-        # tabPanel("Basic Reproduction Number (R0)",
-        #          disabled = "",
-        #          class = "disabled")
+        ## tabPanel("Basic Reproduction Number (\(R_0\))")
         ))
   })
-
 
   output$outputPanel <- renderUI(renderModel())
 
