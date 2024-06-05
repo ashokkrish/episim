@@ -4,10 +4,10 @@ library(deSolve)
 library(shiny)
 library(bslib)
 library(bsicons)
-library(shinyhelper)
+## library(shinyhelper)
 library(shinyjs)
 library(shinyvalidate)
-library(shinyWidgets)
+## library(shinyWidgets)
 library(rlang)
 library(R.utils)
 library(readxl)
@@ -15,32 +15,16 @@ library(writexl)
 library(plotly)
 library(DT)
 library(reactlog)
-library(waiter)
+## library(waiter)
 library(shinyFeedback)
 
 options(shiny.reactlog=TRUE)
 
-here::i_am("global.R")
-
-## DONE: do not modify the column types given below; they are current as of
-## 2024-05-23. They should only change if the ordering of columns changes.
-columnTypes <- c(
-  "text", # Model name
-  ## WARN DONT: using logicals in any way, it inexplicably borks everything. A
-  ## character vector is used to hold the string "numeric," as modified below.
-  character(19)
-)
-columnTypes[2:20] <- "numeric"
-defaultInputValues <- read_xlsx(here("data/defaultInputValues.xlsx"),
-                                col_types = columnTypes)
-
-## TODO: implement the necessary UI and server logic to have the following be
-## meaningful to the application.
-## publishedInputValues <- read_xlsx(here("data/defaultInputValues.xlsx"), 2)
+## FUNCTIONS
 updateNumericInputs <- function(defaults, session) {
   if (any(is.null(dim(defaults)), dim(defaults)[1] != 1)) {
     warning("The `defaults` dataframe is not a single row!")
-    print(defaults)
+    print(defaults) # DONT remove this. It's intentional, not for development.
   }
   iwalk(defaults, \(value, inputId) {
     updateNumericInput(session, inputId, value = value)
@@ -82,6 +66,33 @@ addRuleListToValidator <- function(validator, ruleList) {
   invisible(validator)
 }
 
+here::i_am("global.R")
+
+## DONE: do not modify the column types given below; they are current as of
+## 2024-05-23. They should only change if the ordering of columns changes.
+columnTypes <- c(
+  "text", # Model name
+  ## WARN DONT: using logicals in any way, it inexplicably borks everything. A
+  ## character vector is used to hold the string "numeric," as modified below.
+  character(16)
+)
+columnTypes[2:17] <- "numeric"
+defaultInputValues <- read_xlsx(here("data/defaultInputValues.xlsx"),
+                                col_types = columnTypes,
+                                sheet = "Ashok")
+
+## defaultColumnTypesWithAdditionalColumns <- c("text", # Model name
+##                                              character(16))
+## defaultColumnTypesWithAdditionalColumns[2:17] <- "numeric"
+## TODO: the type of the additional columns
+
+## TODO: implement the necessary UI and server logic to have the following be
+## meaningful to the application.
+## publishedInputValues <- read_xlsx(here("data/defaultInputValues.xlsx"),
+##                                   col_types = defaultColumnTypesWithAdditionalColumns,
+##                                   sheet = "Literature")
+
+## INITIALIZATION
 ## MAYBE FIXME: do we need an app.R at all? Is global.R a replacement, or is it
 ## just an additional file? What about a two-file app, with server.R and ui.R?
 shinyAppDir(here::here()) # and hurrah!
