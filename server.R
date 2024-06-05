@@ -166,7 +166,7 @@ server <- function(input, output, session) {
                  ggplotly(modelPlotter(modelResults)),
                  fluidRow(
                    modelSubPlotter(modelResults) |>
-                     imap(\(plot, index) {
+                     map(\(plot, index) {
                        column(6, ggplotly(plot))
                      })
                   )),
