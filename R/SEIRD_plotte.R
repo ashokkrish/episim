@@ -36,7 +36,7 @@ plotSEIRD <- function(model) {
 # Plot phase plane for SEIRD model
 plotPhasePlaneSEIRD <- function(model) {
   plot <- ggplot2::ggplot(model, ggplot2::aes(x = S)) +
-    ggplot2::geom_line(ggplot2::aes(y = I, color = "Infected"), linewidth = 1.5) + 
+    ggplot2::geom_line(ggplot2::aes(y = I, color = "Infected"), linewidth = 0.7) +
     plotTheme +
     ggplot2::ggtitle("SI Phase Plane") +
     ggplot2::ylab("Infected (I)") +
