@@ -45,23 +45,7 @@ server <- function(input, output, session) {
   )
 
   defaults <- reactive({
-    defaultInputValues |>
-      filter(
-        modelType == req(input$modelSelect),
-        ## WARN DONT: compare numerical booleans following C style; using
-        ## logicals in any way—coercing numeric to logical on the RHS or using
-        ## logical values in the defaultInputValues—seems to bork everything.
-        ## DEPRECATED DONT: removing this lines may be nice because it is
-        ## commented code, but leaving them informs future programmers better.
-        ## These conditions are no longer used because the values are no longer
-        ## relevant and there is not columns for these values in the dataframe
-        ## or spreadsheet any longer.
-        ##
-        ## stochastic == input$stochastic,
-        ## vitalDynamics == input$vitalDynamics,
-        ## massAction == input$trueMassAction
-      ) |>
-      select(beta:replicates) |>
+    filter(defaultInputValues, modelType == req(input$modelSelect)) |>
       select(where(\(x) all(!is.na(x))))
   })
 
@@ -69,69 +53,80 @@ server <- function(input, output, session) {
   ## application are updated according to the defaults specified for the model
   ## configuration in the defaultInputValues.xlsx spreadsheet in the data/
   ## project subfolder.
+  ## MAYBE TODO: this could possibly be an observe... maybe a bindEvent?
   observeEvent(input$modelSelect, {
     req(defaults())
+    ## MAYBE TODO: these can be combined into a single UI rendering.
     isolate({
-      exposedEnabled <- substr(input$modelSelect, 2, 2) == "E"
       output$beta <- renderUI({
-        rateLabel <- { if (exposedEnabled) "exposure" else "infection" }
+        rateLabel <- { if (exposedCompartmentInModel()) "exposure" else "infection" }
         defaultValue <- select(defaults(), beta) |> as.numeric()
         stopifnot(is.numeric(defaultValue) && length(defaultValue) == 1)
         numericInputWithMathJax("beta", rateLabel, defaultValue)
       })
       output$gamma <- renderUI({
-        rateLabel <- { if (exposedEnabled) "infection" else "recovery" }
+        rateLabel <- { if (exposedCompartmentInModel) "infection" else "recovery" }
         defaultValue <- select(defaults(), gamma) |> as.numeric()
         stopifnot(is.numeric(defaultValue) && length(defaultValue) == 1)
         numericInputWithMathJax("gamma", rateLabel, defaultValue)
       })
-      updateNumericInputs(defaults(), session)
     })
+    updateNumericInputs(defaults(), session)
   })
 
   ## A reactive value like input, but with hidden and irrelevant inputs removed.
   greedy_visibleInputs <- reactive({
     shiny::validate(need(input$modelSelect, "A model must be selected."))
-    ## TODO: this could be imporoved, but I'm not sure how. This is kinda awful and should be built-in to Shiny.
+    ## TODO: this could be improved, but I'm not sure how. This is kinda awful
+    ## and should be built-in to Shiny.
     relevantInputs <-
       reactiveValuesToList(
         reactiveValues(
-          modelSelect    = input$modelSelect,
-          trueMassAction = input$trueMassAction,
-          stochastic     = input$stochastic,
-          vitalDynamics  = input$vitalDynamics,
-          replicates     = input$replicates,
-          rerun          = input$rerunStochasticSimulation, # MAYBE
-          muBirth        = input$muBirth,
-          muDeath        = input$muDeath,
-          timesteps      = input$timesteps,
-          beta           = input$beta,
-          gamma          = input$gamma,
-          delta          = input$delta,
-          sigma          = input$sigma,
-          xi             = input$xi,
-          population     = input$population,
-          susceptible    = input$susceptible,
-          exposed        = input$exposed,
-          infected       = input$infected,
-          recovered      = input$recovered,
-          dead           = input$dead))
+          modelSelect, # The model itself
+
+          trueMassAction, # The model options
+          vitalDynamics,
+          muBirth,
+          muDeath,
+          stochastic,
+          replicates,
+          rerun,
+          timesteps,
+
+          beta, # Parameters
+          gamma,
+          delta,
+          sigma,
+          xi,
+
+          population, # Variables
+          susceptible,
+          exposed,
+          infected,
+          recovered,
+          dead))
     visibleInputs <- relevantInputs[!(names(relevantInputs) %in% input$hiddenInputs)]
     stopifnot(is.list(visibleInputs))
     visibleInputs
   })
 
   ## NOTE: prevent the reactive value from invalidating renderModel too often,
-  ## especially when a slider or numeric input is srolling through values and
+  ## especially when a slider or numeric input is scrolling through values and
   ## hasn't truly idled on one value yet. See the following link for more
   ## information: https://shiny.posit.co/r/reference/shiny/1.7.2/debounce.html.
-  visibleInputs <- debounce(greedy_visibleInputs, 1250)
+  visibleInputs <- debounce(greedy_visibleInputs, 500)
 
   renderModel <- reactive({
     msg <- "The compartment values (except D) must sum to N before simulating."
     shiny::validate(need(compartmentsEqualPopulation(), message = msg),
                     need(recoveryRatePositive(),
                          message = "Recovery rate must be positive."))
+
+    msg <- "Reactive value propagating... please wait."
+    if (exposedCompartmentInModel()) shiny::validate(need(input$exposed,
+                                                          message = msg))
+    if (deadCompartmentInModel()) shiny::validate(need(input$dead,
+                                                       message = msg))
 
     ## BEIGN TODO: obsolete this with a refactoring.
     modellingFunctions <- mget(
@@ -174,8 +169,12 @@ server <- function(input, output, session) {
                          br())
                    })
                   )),
-        tabPanel("Phase Plane", br(), ggplotly(modelPhasePlanePlotter(modelResults)) %>% 
-                          layout(xaxis = list(autorange = TRUE), yaxis = list(autorange = TRUE))),
+       { if (!exposedCompartmentInModel())
+           tabPanel("Phase Plane",
+                    br(),
+                    ggplotly(modelPhasePlanePlotter(modelResults)) %>%
+                    layout(xaxis = list(autorange = TRUE),
+                           yaxis = list(autorange = TRUE))) },
         tabPanel("Output Summary",
                  br(),
                  ## FIXME: previously, only the button had to be added to the tabpanel
@@ -218,8 +217,19 @@ server <- function(input, output, session) {
     }
   })
 
+  exposedCompartmentInModel <-
+    reactive("E" %in% str_split(req(input$modelSelect), "")[[1]])
+
+  deadCompartmentInModel <-
+    reactive("D" %in% str_split(req(input$modelSelect), "")[[1]])
+
   compartmentsEqualPopulation <- reactive({
-    shiny::validate(need(input$modelSelect, "A model must be selected."))
+    shiny::validate(need(input$modelSelect, "A model must be selected."),
+                    need(input$population, "A population is required."),
+                    need(input$susceptible, "A number of people must be susceptible."),
+                    need(input$exposed, "A number of people must be exposed."),
+                    need(input$infected, "A number of people must be infected."),
+                    need(input$recovered, "A number of people must be recovered."))
     variables <- c(input$population,
                    input$susceptible,
                    input$exposed,
@@ -239,13 +249,13 @@ server <- function(input, output, session) {
   ## TODO: if a SI or SEI model without an R compartment is ever introduced then
   ## this needs to be modified.
   recoveryRatePositive <- reactive({
-    if("E" %in% str_split(input$modelSelect, "")[[1]]) {
+    if(exposedCompartmentInModel()) {
       message <- "Sigma must be greater than zero when a recovered compartment exists."
-      boolean <- input$sigma == 0
+      boolean <- req(input$sigma) == 0
       feedbackDanger("sigma", boolean, message)
     } else {
       message <- "Gamma must be greater than zero when a recovered compartment exists."
-      boolean <- input$gamma == 0
+      boolean <- req(input$gamma) == 0
       feedbackDanger("gamma", boolean, message)
     }
 
