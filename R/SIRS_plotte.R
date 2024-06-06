@@ -41,6 +41,7 @@ plotPhasePlaneSIRS <- function(model) {
     ggplot2::ggtitle("SI Phase Plane") +
     ggplot2::ylab("Infected (I)") +
     ggplot2::xlab("Susceptible (S)") +
+    ggplot2::theme(legend.position = "none") +
     ggplot2::guides(color = ggplot2::guide_legend(title = "SIRS"))
 
   Reduce(`+`, c(list(plot), plotSettings))
