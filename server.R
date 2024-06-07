@@ -28,10 +28,9 @@ server <- function(input, output, session) {
   validatorsAndLambdas <-
     filter(rules, !is.na(model)) |>
     rowwise() |>
-    mutate(
-      vld = list(addRuleListToValidator(InputValidator$new(), ruleList)),
-      lambda = list(eval(bquote( \() grepl(.(model), input$modelSelect) ))),
-      .keep = "none")
+    mutate(vld = list(addRuleListToValidator(InputValidator$new(), ruleList)),
+           lambda = list(eval(bquote(\() grepl(.(model), input$modelSelect)))),
+           .keep = "none")
 
   isolate(
     mapply(
