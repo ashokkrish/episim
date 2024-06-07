@@ -65,7 +65,7 @@ server <- function(input, output, session) {
         numericInputWithMathJax("beta", rateLabel, defaultValue)
       })
       output$gamma <- renderUI({
-        rateLabel <- { if (exposedCompartmentInModel) "infection" else "recovery" }
+        rateLabel <- { if (exposedCompartmentInModel()) "infection" else "recovery" }
         defaultValue <- select(defaults(), gamma) |> as.numeric()
         stopifnot(is.numeric(defaultValue) && length(defaultValue) == 1)
         numericInputWithMathJax("gamma", rateLabel, defaultValue)
