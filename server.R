@@ -82,29 +82,26 @@ server <- function(input, output, session) {
     relevantInputs <-
       reactiveValuesToList(
         reactiveValues(
-          modelSelect, # The model itself
-
-          trueMassAction, # The model options
-          vitalDynamics,
-          muBirth,
-          muDeath,
-          stochastic,
-          replicates,
-          rerun,
-          timesteps,
-
-          beta, # Parameters
-          gamma,
-          delta,
-          sigma,
-          xi,
-
-          population, # Variables
-          susceptible,
-          exposed,
-          infected,
-          recovered,
-          dead))
+          modelSelect = input$modelSelect,
+          trueMassAction = input$trueMassAction,
+          vitalDynamics = input$vitalDynamics,
+          muBirth = input$muBirth,
+          muDeath = input$muDeath,
+          stochastic = input$stochastic,
+          replicates = input$replicates,
+          rerun = input$rerun,
+          timesteps = input$timesteps,
+          beta = input$beta,
+          gamma = input$gamma,
+          delta = input$delta,
+          sigma = input$sigma,
+          xi = input$xi,
+          population = input$population,
+          susceptible = input$susceptible,
+          exposed = input$exposed,
+          infected = input$infected,
+          recovered = input$recovered,
+          dead = input$dead))
     visibleInputs <- relevantInputs[!(names(relevantInputs) %in% input$hiddenInputs)]
     stopifnot(is.list(visibleInputs))
     visibleInputs
