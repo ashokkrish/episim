@@ -126,14 +126,12 @@ server <- function(input, output, session) {
                                                        message = msg))
 
     ## BEIGN TODO: obsolete this with a refactoring.
-    modellingFunctions <- mget(
-      paste0(
-        c("plot", "plotSubPlots", "plotPhasePlane"),
-        input$modelSelect
-      ),
-      envir = environment(exposuRe),
-      mode = "function"
-    )
+    modellingFunctions <- mget(paste0(c("plot",
+                                        "plotSubPlots",
+                                        "plotPhasePlane"),
+                                      input$modelSelect),
+                               envir = environment(exposuRe),
+                               mode = "function")
     modelPlotter <- modellingFunctions[[1]]
     modelSubPlotter <- modellingFunctions[[2]]
     modelPhasePlanePlotter <- modellingFunctions[[3]]
