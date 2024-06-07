@@ -262,14 +262,25 @@ page_sidebar(
   useShinyjs(),
   theme = bs_theme(version = "5"),
   window_title = "Krishnamurthy Episim",
-  title = h1("The Krishnamurthy Lab Epidemic Modelling app",
-             style = "margin-bottom: 0px;",
-             a(href = "https://github.com/ashokkrish/episim", target = "_blank",
-               tag("button",
-                   list(type = "button",
-                        style = "padding-right: 10px;padding-left: 10px;padding-top: 8px;padding-bottom: 8px;",
-                        class = "btn btn-secondary",
-                        bs_icon("github"))))),
+  title = div(
+    style = "background-color: #337ab7; padding: 10px; width: 100%; box-sizing: border-box; display: flex; align-items: center;",
+    div(
+      h1(
+        "The Krishnamurthy Lab Epidemic Modelling app",
+        style = "margin-bottom: 0px; color: white;"
+      )
+    ),
+    a(
+      href = "https://github.com/ashokkrish/episim",
+      target = "_blank",
+      tag("button",
+          list(
+            type = "button",
+            #style = "padding: 8px 10px; margin-left: 5px;",
+            class = "btn btn-secondary",
+            bs_icon("github"),
+            style = " font-size: 30px; padding: 8px 10px; margin-left: 10px;" 
+          )))),
   sidebar = mainSidebar,
   nonspatial
 )
