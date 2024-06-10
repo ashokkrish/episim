@@ -97,4 +97,4 @@ exposuRe <-
         parameters,
         trueMassAction = as.numeric(trueMassAction)) |>
     as.data.frame()
-}
+  }

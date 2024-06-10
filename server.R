@@ -16,7 +16,7 @@ server <- function(input, output, session) {
   ## NOTE: Disable the stochastic radio button and the sidebar to toggle
   ## between sub-apps, respectively. TODO: When these are implemented the
   ## respective line can be removed.
-  ## disable(selector = "#stochastic > div:nth-child(2) > label:nth-child(2) > input:nth-child(1)")
+  #disable(selector = "#stochastic > div:nth-child(2) > label:nth-child(2) > input:nth-child(1)")
   disable(selector = "button.collapse-toggle") # sidebar button
   runjs(r"--($('button.collapse-toggle').hide())--") # sidebar button
 
@@ -124,7 +124,7 @@ server <- function(input, output, session) {
     if (deadCompartmentInModel()) shiny::validate(need(input$dead,
                                                        message = msg))
 
-    ## BEIGN TODO: obsolete this with a refactoring.
+    ## BEGIN TODO: obsolete this with a refactoring.
     modellingFunctions <- mget(paste0(c("plot",
                                         "plotSubPlots",
                                         "plotPhasePlane"),

@@ -25,8 +25,7 @@ timesteps <- numericInput("timesteps", r"[Number of Timesteps (\(m\))]",
   width = "300px"
 )
 
-actionButtonStyle <- "color: #fff; background-color: #337ab7; border-color: #2e6da4;"
-resetButton <- actionButton("resetAll", "Reset Values", style = actionButtonStyle)
+resetButton <- actionButton("resetAll", "Reset Values")
 
 modelResultsPanel <- uiOutput("outputPanel")
 
@@ -155,8 +154,7 @@ modelOptions <- wellPanel(id = "modelOptions",
                                                    50, 0, 100, 1,
                                                    "300px"),
                                       actionButton("rerunStochasticSimulation",
-                                                   "Rerun stochastic simulation",
-                                                   style = actionButtonStyle))),
+                                                   "Rerun stochastic simulation"))),
                           vitalDynamics,
                           timesteps)
 
@@ -173,7 +171,7 @@ modelVariables <-
 
 ### Design
 modelConfigurationPanel <-
-  sidebarPanel(id = "inputPanel",
+  sidebarPanel(id = "inputPanel", 
     modelSelect,
     conditionalPanel(r"--(input.modelSelect !== '')--",
       div(id = "modelConfiguration",
@@ -205,6 +203,7 @@ nonspatial <- navset_card_pill(
   episimModelAuthorshipTab,
   nav_spacer(),
   nav_menu(title = "Links",
+           nav_item(a("Github", href = "https://github.com/ashokkrish/episim", target = "_blank")),
            nav_item(a("Mount Royal University", href = "https://mtroyal.ca", target = "_blank"))))
 
 ## TODO: make this selectable
@@ -247,6 +246,21 @@ mainSidebar <- sidebar(
 page_sidebar(
   useShinyFeedback(),
   ## autoWaiter(),
+  tags$head(
+    tags$style(HTML("
+      /* Customize the color of all buttons */
+      .btn, .btn-primary, .btn-success, .btn-warning, .btn-danger, .btn-info, .btn-toggle, .action-button {
+        background-color: #18536F; /* Your desired color */
+        border-color: #18536F; /* Your desired color */
+        color: #fff !important; /* White text */
+      }
+
+      /* Change the hover color of all buttons */
+      .btn:hover, .btn-primary:hover, .btn-success:hover, .btn-warning:hover, .btn-danger:hover, .btn-info:hover, .btn-toggle:hover, .action-button:hover {
+        background-color: #0d3246; /* Darker shade for hover */
+        border-color: #0d3246; /* Darker shade for hover */
+      }
+    "))),
   tags$script(
          type = "text/javascript",
          id = "modelSelectCustomizationsScript",
@@ -260,27 +274,16 @@ page_sidebar(
     src = "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.min.js"
   ),
   useShinyjs(),
-  theme = bs_theme(version = "5"),
+  theme = bs_theme(version = "5", primary = "#18536F"),
   window_title = "Krishnamurthy Episim",
   title = div(
-    style = "background-color: #337ab7; padding: 10px; width: 100%; box-sizing: border-box; display: flex; align-items: center;",
+    style = "background-color: #18536F; padding: 10px; width: 100%; box-sizing: border-box; display: flex; align-items: center;",
     div(
       h1(
-        "The Krishnamurthy Lab Epidemic Modelling app",
-        style = "margin-bottom: 0px; color: white;"
+        strong("The Krishnamurthy Lab Epidemic Modelling app"),
+        style = "margin: 0px 0px; color: white; font-size: 35px"
       )
-    ),
-    a(
-      href = "https://github.com/ashokkrish/episim",
-      target = "_blank",
-      tag("button",
-          list(
-            type = "button",
-            #style = "padding: 8px 10px; margin-left: 5px;",
-            class = "btn btn-secondary",
-            bs_icon("github"),
-            style = " font-size: 30px; padding: 8px 10px; margin-left: 10px;" 
-          )))),
+    )),
   sidebar = mainSidebar,
   nonspatial
 )
