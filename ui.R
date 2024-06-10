@@ -277,7 +277,8 @@ page_sidebar(
   theme = bs_theme(version = "5", primary = "#18536F"),
   window_title = "Krishnamurthy Episim",
   title = div(
-    style = "background-color: #18536F; padding: 10px; width: 100%; box-sizing: border-box; display: flex; align-items: center;",
+    style = "background-color: #18536F; padding: 10px; width: 100%; box-sizing: border-box; display: flex; align-items: center;
+    height: 100px;",
     div(
       h1(
         strong("The Krishnamurthy Lab Epidemic Modelling app"),
