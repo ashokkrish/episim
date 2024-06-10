@@ -131,6 +131,11 @@ deterministic <- radioButtons("stochastic",
   choices = list("Deterministic" = 0, "Stochastic" = 1),
   inline = TRUE)
 
+probability <- radioButtons("distribution",
+  strong("Probability Distribution"),
+  choices = list("Uniform" = 0, "Binomial" = 1),
+  inline = TRUE)
+
 ## FIXME: use this CSS path to fix the margin-bottom of the vital dynamics checkbox within this well panel: div.well:nth-child(4) > div:nth-child(1); set the margin-bottom property to zero pixels.
 vitalDynamics <-
   wellPanel(checkboxInput("vitalDynamics", "Vital Dynamics", FALSE, "300px"),
@@ -149,6 +154,7 @@ modelOptions <- wellPanel(id = "modelOptions",
                           wellPanel(deterministic,
                                     conditionalPanel(
                                       r"[input.stochastic == '1']",
+                                      probability,
                                       numericInput("replicates",
                                                    "Number of Replicates (simulations)",
                                                    50, 0, 100, 1,
