@@ -119,7 +119,7 @@ models <- append(models, list("Please choose a model" = ""), after = 0)
 modelSelect <- pickerInput("modelSelect",
   strong("Epidemic Model"),
   models,
-  width = "300px")
+  width = "98%")
 
 massAction <- radioButtons("trueMassAction",
   strong("Model Formulation"),
