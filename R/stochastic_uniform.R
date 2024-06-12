@@ -2,7 +2,7 @@
 # UNIFORM STOCHASTIC MODEL
 #-------------------------------------------------------------
 library(ggplot2)
-uniform <- function(
+uniform_SI <- function(
     # Variables
   num_replications, population, susceptible, infected, recovered,
   # Parameters
@@ -32,7 +32,7 @@ uniform <- function(
     rSI = beta* ((S[index] * I[index])/N[index]^trueMassAction)  # total rate of S->I
     rIR = gamma* I[index] # total rate of I->R
     totalRate = rSI + rIR # total rate of all combined events
-    print(c(rSI, rIR,totalRate))
+    #print(c(rSI, rIR,totalRate))
     et[index + 1] = et[index] + rexp(1,totalRate) # time of next event
     
     if (runif(1) < rSI/totalRate){
@@ -58,10 +58,13 @@ uniform <- function(
   })
   
   # Combine data into a data frame
-  df <- data.frame(Time = et[1:index], S = S[1:index], I = I[1:index], R = R[1:index])
-  #print(df)
-  
-  print(ggplot(df, aes(x = Time)) +
+  results <- data.frame(Time = et[1:index], S = S[1:index], I = I[1:index], R = R[1:index])
+  plot_uniform_SI(results)
+}
+
+#plot function
+plot_uniform_SI <- function(all_data) {
+  print(ggplot(all_data, aes(x = Time)) +
           geom_line(aes(y = S, color = "S(t)"), linetype = "solid", linewidth = 1) +
           geom_line(aes(y = I, color = "I(t)"), linetype = "solid", linewidth = 1) +
           geom_line(aes(y = R, color = "R(t)"), linetype = "solid", linewidth = 1) +
@@ -76,12 +79,10 @@ uniform <- function(
           geom_vline(xintercept = 0, linetype = "solid") +
           geom_hline(yintercept = 0, linetype = "solid")
   )
-  
-  
 }
 
 # Call the function and assign the returned list to a variable
-test <- uniform(
+test <- uniform_SI(
   num_replications = 50,
   population = 0,
   susceptible = 254,

@@ -17,6 +17,7 @@ library(DT)
 library(reactlog)
 ## library(waiter)
 library(shinyFeedback)
+library(reshape2)
 
 options(shiny.reactlog=TRUE)
 
