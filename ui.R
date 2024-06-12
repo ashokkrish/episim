@@ -152,6 +152,8 @@ modelOptions <- wellPanel(id = "modelOptions",
                           h3("Options"),
                           div(massAction, style = "margin: 10px;"),
                           wellPanel(deterministic,
+                                    conditionalPanel(r"[input.stochastic == '0']",
+                                                     vitalDynamics),
                                     conditionalPanel(
                                       r"[input.stochastic == '1']",
                                       probability,
@@ -161,7 +163,6 @@ modelOptions <- wellPanel(id = "modelOptions",
                                                    "300px"),
                                       actionButton("rerunStochasticSimulation",
                                                    "Rerun stochastic simulation"))),
-                          vitalDynamics,
                           timesteps)
 
 modelParameters <-
