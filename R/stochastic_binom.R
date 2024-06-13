@@ -2,7 +2,7 @@
 # BINOMIAL STOCHASTIC MODEL
 #-------------------------------------------------------------
 binomial_SI <- function(
-  iterations,
+  replicates,
   # Variables
   timestep, population, susceptible, infected, recovered,
   # Parameters
@@ -10,7 +10,7 @@ binomial_SI <- function(
   ## Simulation options
   trueMassAction = FALSE) {
   all_runs <- list()
-  for (i in 1:iterations) {
+  for (i in 1:replicates) {
     run <- run_simulation(timestep,population,susceptible,infected,recovered,
                           beta,gamma,TRUE)
     run$iteration <- as.factor(i)
@@ -84,7 +84,7 @@ plot_binomial_SI <- function(all_data) {
   print(compartments_plot)
   print(phase_plot)
 }
-test_binomial <- binomial_SI(iterations = 50,
+test_binomial <- binomial_SI(replicates = 50,
                              timestep = 100,
                              population = 1000,
                              susceptible = 999,
