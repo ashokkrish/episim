@@ -4,14 +4,14 @@
 binomial_SI <- function(
   iterations,
   # Variables
-  T, population, susceptible, infected, recovered,
+  timestep, population, susceptible, infected, recovered,
   # Parameters
   beta, gamma,
   ## Simulation options
   trueMassAction = FALSE) {
   all_runs <- list()
   for (i in 1:iterations) {
-    run <- run_simulation(T,population,susceptible,infected,recovered,
+    run <- run_simulation(timestep,population,susceptible,infected,recovered,
                           beta,gamma,TRUE)
     run$iteration <- as.factor(i)
     all_runs[[i]] <- run
@@ -23,7 +23,7 @@ binomial_SI <- function(
 # Function to simulate the stochastic SI models
 run_simulation <- function(
     # Variables
-  T, population, susceptible, infected, recovered,
+  timestep, population, susceptible, infected, recovered,
   # Parameters
   beta, gamma,
   ## Simulation options
@@ -38,7 +38,7 @@ run_simulation <- function(
   results <- data.frame(time = 0, S=S, I=I, R=R)
   
   # Run the simulation
-  for (t in 1:T) {
+  for (t in 1:timestep) {
     # Transition rates
     lambda <- beta * I / (N^trueMassAction)
     mu <- gamma
@@ -85,7 +85,7 @@ plot_binomial_SI <- function(all_data) {
   print(phase_plot)
 }
 test_binomial <- binomial_SI(iterations = 50,
-                             T = 100,
+                             timestep = 100,
                              population = 1000,
                              susceptible = 999,
                              infected = 1,

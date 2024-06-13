@@ -183,11 +183,13 @@ server <- function(input, output, session) {
                                     style = "align-self: flex-start; margin-top: 1vh;"))),
         tabPanel("Mathematical Model",
                  br(),
+                 generate_latex(c(r"(\textbf{MATHEMATICAL EQUATIONS})")) |> helpText() |> withMathJax(),
                  doCall(renderModelLaTeX, args = visibleInputs()),
+                 generate_latex(c(r"(\textbf{COMPARTMENT DIAGRAM})")) |> helpText() |> withMathJax(),
                  tagList(img(
                    src = paste0("images/", input$modelSelect, ".svg"),
                    contentType = "image/svg",
-                   width = "420px",
+                   width = "45%",
                    alt = gsub("\n[\t\ ]+?", " ", r"(The diagram of the model compartments
                      failed to load, or the accessibility text is being read by
                      a screen reader.)"))))

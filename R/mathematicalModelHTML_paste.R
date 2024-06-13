@@ -8,6 +8,7 @@ css_styles <- HTML(paste0(
   '  .equation-block {',
   '    margin: 0;',
   '    padding: 0;',
+  '    font-size: 20px;', 
   '  }',
   '</style>'
 ))
