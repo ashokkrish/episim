@@ -34,3 +34,11 @@ renderModelLaTeX <- function(modelSelect, vitalDynamics, trueMassAction) {
     helpText() |>
     withMathJax()
 }
+
+renderStochasticModelLaTex <- function(modelSelect, trueMassAction){
+  do.call(paste0(modelSelect,"_nonVD"),
+          list(forceOfInfection(trueMassAction))) |>
+    generate_latex() |>
+    helpText() |>
+    withMathJax()
+}

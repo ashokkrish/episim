@@ -19,16 +19,64 @@ forceOfInfection <- function(trueMassAction)
   }
 }
 
+SIR_nonVD <- function(forceOfInfection) {
+  S = paste0(Susceptible, "- ", forceOfInfection, r"(\\)")
+  I = paste0(Infection, forceOfInfection, r"(- \gamma {I}\\)")
+  R = paste0(Recover, r"(\gamma {I}\\)")
+  return(c(S,I,R))
+}
+
+SIRS_nonVD <- function(forceOfInfection) {
+  S = paste0(Susceptible, "- ", forceOfInfection, r"(+ \xi{R}\\)")
+  I = paste0(Infection, forceOfInfection, r"(- \gamma {I}\\)")
+  R = paste0(Recover, r"(\gamma {I} - \xi{R}\\)")
+  return(c(S,I,R))
+}
+
+SIRD_nonVD <- function(forceOfInfection) {
+  S <- paste0(Susceptible, "- ", forceOfInfection, r"(\\)")
+  I <- paste0(Infection, forceOfInfection, r"(- \gamma {I} - \delta {I}\\)")
+  R <- paste0(Recover, r"(\gamma {I}\\)")
+  D <- paste0(Dead, r"(\delta {I})")
+  return(c(S,I,R,D))
+}
+
+SEIR_nonVD <- function(forceOfInfection){
+  S <- paste0(Susceptible, "- ", forceOfInfection, r"(\\)")
+  E <- paste0(Exposure, forceOfInfection, r"(- \gamma {E}\\)")
+  I <- paste0(Infection, r"(\gamma {E} - \sigma {I}\\)")
+  R <- paste0(Recover, r"(\sigma {I}\\)")
+  return(c(S,E,I,R))
+}
+
+SEIRD_nonVD <- function(forceOfInfection){
+  S <- paste0(Susceptible, "- ", forceOfInfection, r"(\\)")
+  E <- paste0(Exposure, forceOfInfection, r"(- \gamma {E}\\)")
+  I <- paste0(Infection, r"(\gamma {E} - \sigma {I} - \delta {I}\\)")
+  R <- paste0(Recover, r"(\sigma {I}\\)")
+  D <- paste0(Dead, r"(\delta {I})")
+  return(c(S,E,I,R,D))
+}
+
+SEIRS_nonVD <- function(forceOfInfection){
+  S <- paste0(Susceptible, "- ", forceOfInfection, r"(+ \xi {R}\\)")
+  E <- paste0(Exposure, forceOfInfection, r"(- \gamma {E}\\)")
+  I <- paste0(Infection, r"(\gamma {E} - \sigma {I}\\)")
+  R <- paste0(Recover, r"(\sigma {I} - \xi{R}\\)")
+  return(c(S,E,I,R))
+}
+
 SIR <- function(mu, forceOfInfection)
 {
   if (!mu)
   {
-    S = paste0(Susceptible, "- ", forceOfInfection, r"(\\)")
-    I = paste0(Infection, forceOfInfection, r"(- \gamma {I}\\)")
-    R = paste0(Recover, r"(\gamma {I}\\)")
+    variables = SIR_nonVD(forceOfInfection)
+    S = variables[[1]]
+    I = variables[[2]]
+    R = variables[[3]]
   } else
   {
-    S = paste0(Susceptible, r"(\mu_B N - \mu_D S -)", forceOfInfection)
+    S = paste0(Susceptible, r"(\mu_B N - \mu_D S -)", forceOfInfection,r"(\\)")
     I = paste0(Infection, forceOfInfection, r"(- \gamma I - \mu_D {I}\\)")
     R = paste0(Recover, r"(\gamma {I} - \mu_D {R}\\)")
   }
@@ -41,9 +89,10 @@ SIRS <- function(mu, forceOfInfection)
 {
   if (!mu)
   {
-    S = paste0(Susceptible, "- ", forceOfInfection, r"(+ \xi{R}\\)")
-    I = paste0(Infection, forceOfInfection, r"(- \gamma {I}\\)")
-    R = paste0(Recover, r"(\gamma {I} - \xi{R}\\)")
+    variables = SIRS_nonVD(forceOfInfection)
+    S = variables[[1]]
+    I = variables[[2]]
+    R = variables[[3]]
   } else
   {
     S = paste0(Susceptible,
@@ -61,9 +110,11 @@ SIRD <- function(mu, forceOfInfection)
 {
   if (!mu)
   {
-    S <- paste0(Susceptible, "- ", forceOfInfection, r"(\\)")
-    I <- paste0(Infection, forceOfInfection, r"(- \gamma {I} - \delta {I}\\)")
-    R <- paste0(Recover, r"(\gamma {I}\\)")
+    variables = SIRD_nonVD(forceOfInfection)
+    S = variables[[1]]
+    I = variables[[2]]
+    R = variables[[3]]
+    D = variables[[4]]
   } else
   {
     S <- paste0(Susceptible, r"(\mu_B {N} - \mu_D {S} - )", forceOfInfection, r"(\\)")
@@ -71,8 +122,8 @@ SIRD <- function(mu, forceOfInfection)
                 forceOfInfection,
                 r"(- \gamma {I} - \delta {I} - \mu_D {I}\\)")
     R <- paste0(Recover, r"(\gamma {I} - \mu_D {R}\\)")
+    D <- paste0(Dead, r"(\delta {I})")
   }
-  D <- paste0(Dead, r"(\delta {I})")
   equation <- c(S, I, R, D)
   return(equation)
 }
@@ -81,10 +132,11 @@ SEIR <- function(mu, forceOfInfection)
 {
   if (!mu)
   {
-    S <- paste0(Susceptible, "- ", forceOfInfection, r"(\\)")
-    E <- paste0(Exposure, forceOfInfection, r"(- \gamma {E}\\)")
-    I <- paste0(Infection, r"(\gamma {E} - \sigma {I}\\)")
-    R <- paste0(Recover, r"(\sigma {I}\\)")
+    variables = SEIR_nonVD(forceOfInfection)
+    S = variables[[1]]
+    E = variables[[2]]
+    I = variables[[3]]
+    R = variables[[4]]
   } else
   {
     S <- paste0(Susceptible, r"(\mu_B {N} - \mu_D {S} -)", forceOfInfection, r"(\\)")
@@ -100,10 +152,12 @@ SEIRD <- function(mu, forceOfInfection)
 {
   if (!mu)
   {
-    S <- paste0(Susceptible, "- ", forceOfInfection, r"(\\)")
-    E <- paste0(Exposure, forceOfInfection, r"(- \gamma {E}\\)")
-    I <- paste0(Infection, r"(\gamma {E} - \sigma {I} - \delta {I}\\)")
-    R <- paste0(Recover, r"(\sigma {I}\\)")
+    variables = SEIRD_nonVD(forceOfInfection)
+    S = variables[[1]]
+    E = variables[[2]]
+    I = variables[[3]]
+    R = variables[[4]]
+    D = variables[[5]]
   } else
   {
     S <- paste0(Susceptible, r"(\mu_B {N} - \mu_D {S} -)", forceOfInfection, r"(\\)")
@@ -111,8 +165,8 @@ SEIRD <- function(mu, forceOfInfection)
     I <- paste0(Infection,
                 r"(\gamma {E} - \sigma {I} -  \delta {I} - \mu_D {I}\\)")
     R <- paste0(Recover, r"(\sigma {I} - \mu_D {R}\\)")
+    D <- paste0(Dead, r"(\delta {I})")
   }
-  D <- paste0(Dead, r"(\delta {I})")
   equation <- c(S, E, I, R, D)
   return(equation)
 }
@@ -121,10 +175,11 @@ SEIRS <- function(mu, forceOfInfection)
 {
   if (!mu)
   {
-    S <- paste0(Susceptible, "- ", forceOfInfection, r"(+ \xi {R}\\)")
-    E <- paste0(Exposure, forceOfInfection, r"(- \gamma {E}\\)")
-    I <- paste0(Infection, r"(\gamma {E} - \sigma {I}\\)")
-    R <- paste0(Recover, r"(\sigma {I} - \xi{R}\\)")
+    variables = SEIRS_nonVD(forceOfInfection)
+    S = variables[[1]]
+    E = variables[[2]]
+    I = variables[[3]]
+    R = variables[[4]]
   } else
   {
     S <- paste0(Susceptible,

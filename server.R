@@ -185,6 +185,8 @@ server <- function(input, output, session) {
                  br(),
                  generate_latex(c(r"(\textbf{MATHEMATICAL EQUATIONS})")) |> helpText() |> withMathJax(),
                  doCall(renderModelLaTeX, args = visibleInputs()),
+                 #TODO: Call this render latex functions for stochastic option
+                 #doCall(renderStochasticModelLaTex, args = visibleInputs()),
                  generate_latex(c(r"(\textbf{COMPARTMENT DIAGRAM})")) |> helpText() |> withMathJax(),
                  tagList(img(
                    src = paste0("images/", input$modelSelect, ".svg"),
