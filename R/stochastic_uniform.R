@@ -8,7 +8,6 @@ uniform_SI <- function(
   # Parameters
   beta, gamma,
   ## Simulation options
-  muB = 0, muD = 0, vitalDynamics = FALSE,
   trueMassAction = FALSE
 ){
   vector_length = num_replications
@@ -90,5 +89,5 @@ test <- uniform_SI(
   recovered = 0,
   beta = 0.0178,
   gamma = 2.73,
-  muB = 0, muD = 0, FALSE, FALSE
+  FALSE
 )
