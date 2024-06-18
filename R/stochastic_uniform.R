@@ -2,15 +2,15 @@
 # UNIFORM STOCHASTIC MODEL
 #-------------------------------------------------------------
 library(ggplot2)
-uniform_SI <- function(
+uniformSI <- function(
     # Variables
-  num_replications, population, susceptible, infected, recovered,
+  replicates, population, susceptible, infected, recovered,
   # Parameters
   beta, gamma,
   ## Simulation options
   trueMassAction = FALSE
 ){
-  vector_length = num_replications
+  vector_length = replicates
   
   initial_values <- c(population,susceptible, infected, recovered,0)
   
@@ -18,7 +18,7 @@ uniform_SI <- function(
   
   # Initialize vectors using assign
   lapply(seq_along(vector_names), function(i) {
-    assign(vector_names[i], c(initial_values[i], rep(0, num_replications)), envir = .GlobalEnv)
+    assign(vector_names[i], c(initial_values[i], rep(0,replicates)), envir = .GlobalEnv)
   })
   
   index = 1;
@@ -28,7 +28,7 @@ uniform_SI <- function(
     #print(sprintf('event number %d, t=%g, I = %d', index, et[index], I[index]))
     
     #TODO: need to consider vital dynamic
-    rSI = beta* ((S[index] * I[index])/N[index]^trueMassAction)  # total rate of S->I
+    rSI = beta* ((S[index] * I[index])/N[index]^as.numeric(trueMassAction))  # total rate of S->I
     rIR = gamma* I[index] # total rate of I->R
     totalRate = rSI + rIR # total rate of all combined events
     #print(c(rSI, rIR,totalRate))
@@ -45,7 +45,7 @@ uniform_SI <- function(
     }
     index = index + 1
     if (index == vector_length){
-      vector_length = vector_length + num_replications
+      vector_length = vector_length + replicates
       
       lapply(vector_names, function(name) {
         assign(name, `length<-`(get(name, envir = .GlobalEnv), vector_length), envir = .GlobalEnv)
@@ -57,8 +57,8 @@ uniform_SI <- function(
   })
   
   # Combine data into a data frame
-  results <- data.frame(Time = et[1:index], S = S[1:index], I = I[1:index], R = R[1:index])
-  plot_uniform_SI(results)
+  results <- data.frame(time = et[1:index], S = S[1:index], I = I[1:index], R = R[1:index])
+  # plot_uniform_SI(results)
 }
 
 #plot function
@@ -81,13 +81,13 @@ plot_uniform_SI <- function(all_data) {
 }
 
 # Call the function and assign the returned list to a variable
-test <- uniform_SI(
-  num_replications = 50,
-  population = 0,
-  susceptible = 254,
-  infected = 7,
-  recovered = 0,
-  beta = 0.0178,
-  gamma = 2.73,
-  FALSE
-)
+# test <- uniform_SI(
+# replicatess = 50,
+#   population = 0,
+#   susceptible = 254,
+#   infected = 7,
+#   recovered = 0,
+#   beta = 0.0178,
+#   gamma = 2.73,
+#   FALSE
+# )

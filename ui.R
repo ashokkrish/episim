@@ -27,7 +27,55 @@ timesteps <- numericInput("timesteps", r"[Number of Timesteps (\(m\))]",
 
 resetButton <- actionButton("resetAll", "Reset Values")
 
-modelResultsPanel <- uiOutput("outputPanel")
+  generatePlotSettingsUI <- function(id) {
+
+  div(
+    style = "position: relative;", 
+    div(
+      style = "position: absolute; top: 5px; left: 10px; z-index: 1000;",
+      dropdown(
+        tags$h3("Plot Options"),
+        textInput(paste0(id, "_title"), "Title:"),
+        textInput(paste0(id, "_xAxisLabel"), "X-axis label:"),
+        textInput(paste0(id, "_yAxisLabel"), "Y-axis label:"),
+        uiOutput(paste0(id, "_colorPickers")),  
+        icon = icon("cog"),
+        status = "primary",
+        circle = FALSE,
+        inline = TRUE,
+        size = "xs",
+        style = "simple",
+        animate = animateOptions(
+          enter = animations$fading_entrances$fadeInDown,
+          exit = animations$fading_exits$fadeOutUp
+        )
+      )
+    )
+  )
+}
+
+
+
+modelResultsPanel <- mainPanel(
+  tabsetPanel(
+    tabPanel("Plot", br(), 
+             conditionalPanel(
+               condition = "input.modelSelect != ''",
+               generatePlotSettingsUI("plotSettings")
+             ), 
+             uiOutput("plot"),
+             uiOutput("subPlots")),
+    tabPanel("Phase Plane", br(),
+             conditionalPanel(
+               condition = "input.modelSelect != ''",
+               generatePlotSettingsUI("phasePlanePlotSettings")
+             ), 
+             uiOutput("phasePlanePlot")),
+    tabPanel("Output Summary", br(), uiOutput("outputSummary")),
+    tabPanel("Mathematical Model", br(), uiOutput("mathematicalModel")),
+  )
+)
+
 
 ## NOTE: https://englishlessonsbrighton.co.uk/names-letters-english-alphabet/
 ### Parameters

@@ -20,6 +20,8 @@ server <- function(input, output, session) {
   disable(selector = "button.collapse-toggle") # sidebar button
   runjs(r"--($('button.collapse-toggle').hide())--") # sidebar button
 
+
+
   globalValidator <- addRuleListToValidator(
     InputValidator$new(),
     filter(rules, is.na(model))[, 2][[1]][[1]]
@@ -112,6 +114,29 @@ server <- function(input, output, session) {
   ## information: https://shiny.posit.co/r/reference/shiny/1.7.2/debounce.html.
   visibleInputs <- debounce(greedy_visibleInputs, 500)
 
+  settings <- reactive({
+    modelSelect <- input$modelSelect
+    compartments <- strsplit(modelSelect, "")[[1]]
+    numCompartments <- length(compartments)
+
+    # Generate list of colors
+    plotSettings_colors <- sapply(compartments, function(compartment) {
+      input[[paste0(compartment, "PlotSettings_color")]]
+    }, simplify = FALSE, USE.NAMES = FALSE)
+
+    list(
+      plotSettings_title = input$plotSettings_title,
+      phasePlanePlotSettings_title = input$phasePlanePlotSettings_title,
+      plotSettings_xAxisLabel = input$plotSettings_xAxisLabel,
+      plotSettings_yAxisLabel = input$plotSettings_yAxisLabel,
+      phasePlanePlotSettings_xAxisLabel = input$phasePlanePlotSettings_xAxisLabel,
+      phasePlanePlotSettings_yAxisLabel = input$phasePlanePlotSettings_yAxisLabel,
+      plotSettings_colors = plotSettings_colors,
+      phasePlanePlotSettings_color = input$phasePlanePlotSettings_color
+    )
+  })
+  
+
   renderModel <- reactive({
     msg <- "The compartment values (except D) must sum to N before simulating."
     shiny::validate(need(compartmentsEqualPopulation(), message = msg),
@@ -123,87 +148,133 @@ server <- function(input, output, session) {
                                                           message = msg))
     if (deadCompartmentInModel()) shiny::validate(need(input$dead,
                                                        message = msg))
-
-    ## BEGIN TODO: obsolete this with a refactoring.
-    modellingFunctions <- mget(paste0(c("plot",
-                                        "plotSubPlots",
-                                        "plotPhasePlane"),
-                                      input$modelSelect),
-                               envir = environment(exposuRe),
-                               mode = "function")
-    modelPlotter <- modellingFunctions[[1]]
-    modelSubPlotter <- modellingFunctions[[2]]
-    modelPhasePlanePlotter <- modellingFunctions[[3]]
-    ## END TODO: obsolte this with a refactoring.
-
+    plotterType <- "normal"
     modelResults <-
-      doCall(exposuRe, args = visibleInputs()) |>
-      select(c(time, N, matches(str_split_1(input$modelSelect, ""))))
+      if (input$stochastic == 1) {
+        if (input$distribution == 0) {
+          doCall(uniformSI, args = visibleInputs())
+        } else {
+          doCall(binomialSI, args = visibleInputs())
+          plotterType <- "binomial"
+        }
+      } else {
+        {
+          doCall(exposuRe, args = visibleInputs())
+        } |>
+          select(c(time, N, matches(str_split_1(input$modelSelect, ""))))
+      }
+      
+    plotSettings <- settings()[grep("^plotSettings_", names(settings()))]
+    names(plotSettings) <- sub("^plotSettings_", "", names(plotSettings))
 
-    output$downloadData <-
-      downloadHandler(
-        \() paste0(input$modelSelect, "_Model_Summary", Sys.Date(), ".xlsx"),
-        \(file) write_xlsx(modelResults, file)
-      )
+    phasePlanePlotSettings <- settings()[grep("^phasePlanePlotSettings_", names(settings()))]
+    names(phasePlanePlotSettings) <- sub("^phasePlanePlotSettings_", "", names(phasePlanePlotSettings))
 
-    mainPanel(
-      id = "outputPanel",
-      tabsetPanel(
-        id = "tabSet",
-        tabPanel("Plot",
-                 br(),
-                 ggplotly(modelPlotter(modelResults)) %>%
-                    layout(xaxis = list(autorange = TRUE), yaxis = list(autorange = TRUE)),
-                 br(),
-                 fluidRow(
-                   modelSubPlotter(modelResults) |>
-                   map(\(plot, index) {
-                     column(6, ggplotly(plot) %>%
-                         layout(xaxis = list(autorange = TRUE), yaxis = list(autorange = TRUE)),
-                         br())
-                   })
-                  )),
-       { if (!exposedCompartmentInModel())
-           tabPanel("Phase Plane",
-                    br(),
-                    ggplotly(modelPhasePlanePlotter(modelResults)) %>%
-                    layout(xaxis = list(autorange = TRUE),
-                           yaxis = list(autorange = TRUE))) },
-        tabPanel("Output Summary",
-                 br(),
-                 ## FIXME: previously, only the button had to be added to the tabpanel
-                 ## but now doing so places the button behind the datatable. I have
-                 ## added some custom CSS to fix this for now.
-                 div(style = "display: flex; flex-direction: column;",
-                     datatable(round(modelResults, 2),
-                               options = list(dom = "lprti", pageLength = 50),
-                               rownames = FALSE),
-                     downloadButton("downloadData",
-                                    "Download as Excel",
-                                    style = "align-self: flex-start; margin-top: 1vh;"))),
-        tabPanel("Mathematical Model",
-                 br(),
-                 generate_latex(c(r"(\textbf{MATHEMATICAL EQUATIONS})")) |> helpText() |> withMathJax(),
-                 doCall(renderModelLaTeX, args = visibleInputs()),
-                 #TODO: Call this render latex functions for stochastic option
-                 #doCall(renderStochasticModelLaTex, args = visibleInputs()),
-                 generate_latex(c(r"(\textbf{COMPARTMENT DIAGRAM})")) |> helpText() |> withMathJax(),
-                 tagList(img(
-                   src = paste0("images/", input$modelSelect, ".svg"),
-                   contentType = "image/svg",
-                   width = "45%",
-                   alt = gsub("\n[\t\ ]+?", " ", r"(The diagram of the model compartments
-                     failed to load, or the accessibility text is being read by
-                     a screen reader.)"))))
-        ## tabPanel("Basic Reproduction Number (\(R_0\))")
-        ))
+    model <- list(data = modelResults, selectedModel = input$modelSelect, plotterType = plotterType)
+    mainPlot <- ggplotly(plotter(model, plotSettings)) %>%
+      layout(xaxis = list(autorange = TRUE), yaxis = list(autorange = TRUE))
+
+    phaseplanePlot <- ggplotly(phasePlanePlotterSI(model, phasePlanePlotSettings)) %>%
+      layout(xaxis = list(autorange = TRUE), yaxis = list(autorange = TRUE))
+
+    subPlots <- subPlotter(model) |>
+      map(\(plot, index) {
+        column(
+          6, ggplotly(plot) %>%
+            layout(xaxis = list(autorange = TRUE), yaxis = list(autorange = TRUE)),
+          br()
+        )
+      })
+
+    modelDataTable <- datatable(round(modelResults, 2), rownames = FALSE)
+
+    # FIX: vital dynamics error
+    # modelLatex <- div(
+    #   generate_latex(c(r"(\textbf{MATHEMATICAL EQUATIONS})")) |> helpText() |> withMathJax(),
+    #   doCall(renderModelLaTeX, args = visibleInputs()),
+    #   #TODO: Call this render latex functions for stochastic option
+    #   #doCall(renderStochasticModelLaTex, args = visibleInputs()),
+    #   generate_latex(c(r"(\textbf{COMPARTMENT DIAGRAM})")) |> helpText() |> withMathJax(),
+    #   tagList(img(
+    #     src = paste0("images/", input$modelSelect, ".svg"),
+    #     contentType = "image/svg",
+    #     width = "45%",
+    #     alt = gsub("\n[\t\ ]+?", " ", r"(The diagram of the model compartments
+    #                  failed to load, or the accessibility text is being read by
+    #                  a screen reader.)")
+    #   ))
+    # )
+
+    return(list(
+      # modelLatex = modelLatex,
+      modelResults = modelResults,
+      mainPlot = mainPlot,
+      subPlots = subPlots,
+      phaseplanePlot = phaseplanePlot,
+      modelDataTable = modelDataTable
+    ))
+    
   })
 
-  output$outputPanel <- renderUI(renderModel())
+  defaultColors <- c(
+    "#9467bd", "#2ca02c", "#ff7f0e", "#1f77b4", "#d62728",
+    "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"
+  )
+
+  output$plot <- renderUI({
+    renderModel()$mainPlot
+  })
+  output$plotSettings_colorPickers <- renderUI({
+    modelSelect <- input$modelSelect
+    compartments <- strsplit(modelSelect, "")[[1]]
+    numCompartments <- length(compartments)
+
+    lapply(1:numCompartments, function(i) {
+      colourInput(
+        inputId = paste0(compartments[i], "PlotSettings_color"),
+        label = strong(paste(compartments[i], "Plot Color")),
+        value = defaultColors[i]
+      )
+    })
+  })
+
+  output$phasePlanePlotSettings_colorPickers <- renderUI({
+    # this is an si phase plane so only 1 color
+    colourInput(
+      inputId = "phasePlanePlotSettings_color",
+      label = strong("Phase Plane Plot Color"),
+      value = defaultColors[1]
+    )
+  })
+
+  output$phasePlanePlot <- renderUI(renderModel()$phaseplanePlot)
+  output$subPlots <- renderUI(div(fluidRow(renderModel()$subPlots)))
+
+  output$outputSummary <- renderUI(div(
+    style = "display: flex; flex-direction: column;",
+    renderModel()$modelDataTable, downloadButton("downloadData", "Download as Excel",
+      style = "align-self: flex-start; margin-top: 1vh;"
+    )
+  ))
+  output$downloadData <-
+    downloadHandler(
+      \() paste0(input$modelSelect, "_Model_Summary", Sys.Date(), ".xlsx"),
+      \(file) write_xlsx(renderModel()$modelResults, file)
+    )
+  # output$mathematicalModel <- renderUI(renderModel()$modelLatex)
+
 
   observeEvent(input$resetAll, {
     updatePickerInput(session, "modelSelect", selected = "")
     updateNumericInputs(defaults(), session)
+    for (id in names(input)) {
+      if (grepl("Settings_", id)) {
+        updateTextInput(session, id, value = "")
+        # TODO: this does not work, need to find away to reset
+        # colors without relying on the settings reactive
+        updateColourInput(session, id, value = "")
+      }
+    }
   })
 
   inputsValid <- reactive({

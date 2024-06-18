@@ -1,29 +1,29 @@
 #-------------------------------------------------------------
 # BINOMIAL STOCHASTIC MODEL
 #-------------------------------------------------------------
-binomial_SI <- function(
+binomialSI <- function(
   replicates,
   # Variables
-  timestep, population, susceptible, infected, recovered,
+  timesteps, population, susceptible, infected, recovered,
   # Parameters
   beta, gamma,
   ## Simulation options
   trueMassAction = FALSE) {
   all_runs <- list()
   for (i in 1:replicates) {
-    run <- run_simulation(timestep,population,susceptible,infected,recovered,
+    run <- run_simulation(timesteps,population,susceptible,infected,recovered,
                           beta,gamma,TRUE)
     run$iteration <- as.factor(i)
     all_runs[[i]] <- run
   }
   all_data <- do.call(rbind, all_runs)
-  plot_binomial_SI(all_data)
+  # plot_binomial_SI(all_data)
 }
 
 # Function to simulate the stochastic SI models
 run_simulation <- function(
     # Variables
-  timestep, population, susceptible, infected, recovered,
+  timesteps, population, susceptible, infected, recovered,
   # Parameters
   beta, gamma,
   ## Simulation options
@@ -38,7 +38,7 @@ run_simulation <- function(
   results <- data.frame(time = 0, S=S, I=I, R=R)
   
   # Run the simulation
-  for (t in 1:timestep) {
+  for (t in 1:timesteps) {
     # Transition rates
     lambda <- beta * I / (N^trueMassAction)
     mu <- gamma
@@ -84,12 +84,12 @@ plot_binomial_SI <- function(all_data) {
   print(compartments_plot)
   print(phase_plot)
 }
-test_binomial <- binomial_SI(replicates = 50,
-                             timestep = 100,
-                             population = 1000,
-                             susceptible = 999,
-                             infected = 1,
-                             recovered = 0,
-                             beta = 0.3,
-                             gamma = 0.1,
-                             TRUE)
+# test_binomial <- binomial_SI(replicates = 50,
+#                              timestep = 100,
+#                              population = 1000,
+#                              susceptible = 999,
+#                              infected = 1,
+#                              recovered = 0,
+#                              beta = 0.3,
+#                              gamma = 0.1,
+#                              TRUE)
