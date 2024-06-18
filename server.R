@@ -1,4 +1,8 @@
 server <- function(input, output, session) {
+  #Temporarily disable the binomial option
+  #TODO: Will re-enable the button once binomial implementation is done
+  disable(selector = "input[name='distribution'][value='1']")
+  
   ## Restyle some elements with JavaScript.
   runjs(r"[$(document).ready($('#modelSelect + button').removeClass('btn-light'))]")
   r"($(document)
