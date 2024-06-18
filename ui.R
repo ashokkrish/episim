@@ -27,8 +27,7 @@ timesteps <- numericInput("timesteps", r"[Number of Timesteps (\(m\))]",
 
 resetButton <- actionButton("resetAll", "Reset Values")
 
-  generatePlotSettingsUI <- function(id) {
-
+generatePlotSettingsUI <- function(id) {
   div(
     style = "position: relative;", 
     div(
@@ -47,11 +46,7 @@ resetButton <- actionButton("resetAll", "Reset Values")
         style = "simple",
         animate = animateOptions(
           enter = animations$fading_entrances$fadeInDown,
-          exit = animations$fading_exits$fadeOutUp
-        )
-      )
-    )
-  )
+          exit = animations$fading_exits$fadeOutUp))))
 }
 
 
@@ -64,7 +59,11 @@ modelResultsPanel <- mainPanel(
                generatePlotSettingsUI("plotSettings")
              ), 
              uiOutput("plot"),
-             uiOutput("subPlots")),
+             conditionalPanel(
+               condition = "output.plot != null",
+               uiOutput("subPlots")
+             )
+    ),
     tabPanel("Phase Plane", br(),
              conditionalPanel(
                condition = "input.modelSelect != ''",
