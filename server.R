@@ -195,7 +195,6 @@ server <- function(input, output, session) {
     # FIX: vital dynamics error
     modelLatex <- div(
        generate_latex(c(r"(\textbf{MATHEMATICAL MODELS})")) |> helpText() |> withMathJax(),
-       #doCall(renderModelLaTeX, args = visibleInputs()),
        if (input$stochastic == 1) {
          doCall(renderStochasticModelLaTex, args = visibleInputs())
        } else if (input$stochastic == 0){
@@ -328,10 +327,16 @@ server <- function(input, output, session) {
       message <- "Sigma must be greater than zero when a recovered compartment exists."
       boolean <- req(input$sigma) == 0
       feedbackDanger("sigma", boolean, message)
+      #Temporarily disable the stochastic option for SEI model type
+      #TODO: Will re-enable the button once the implementation is done
+      disable(selector = "input[name='stochastic'][value='1']")
     } else {
       message <- "Gamma must be greater than zero when a recovered compartment exists."
       boolean <- req(input$gamma) == 0
       feedbackDanger("gamma", boolean, message)
+      
+      #TODO: Will remove this line when all the stochastic implementation is done for all models
+      enable(selector = "input[name='stochastic'][value='1']")
     }
 
     if(boolean) NULL else message
