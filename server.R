@@ -189,24 +189,26 @@ server <- function(input, output, session) {
     modelDataTable <- datatable(round(modelResults, 2), rownames = FALSE)
 
     # FIX: vital dynamics error
-    # modelLatex <- div(
-    #   generate_latex(c(r"(\textbf{MATHEMATICAL EQUATIONS})")) |> helpText() |> withMathJax(),
-    #   doCall(renderModelLaTeX, args = visibleInputs()),
-    #   #TODO: Call this render latex functions for stochastic option
-    #   #doCall(renderStochasticModelLaTex, args = visibleInputs()),
-    #   generate_latex(c(r"(\textbf{COMPARTMENT DIAGRAM})")) |> helpText() |> withMathJax(),
-    #   tagList(img(
-    #     src = paste0("images/", input$modelSelect, ".svg"),
-    #     contentType = "image/svg",
-    #     width = "45%",
-    #     alt = gsub("\n[\t\ ]+?", " ", r"(The diagram of the model compartments
-    #                  failed to load, or the accessibility text is being read by
-    #                  a screen reader.)")
-    #   ))
-    # )
+    modelLatex <- div(
+       generate_latex(c(r"(\textbf{MATHEMATICAL MODELS})")) |> helpText() |> withMathJax(),
+       #doCall(renderModelLaTeX, args = visibleInputs()),
+       if (input$stochastic == 1) {
+         doCall(renderStochasticModelLaTex, args = visibleInputs())
+       } else if (input$stochastic == 0){
+         doCall(renderModelLaTeX, args = visibleInputs()) },
+       generate_latex(c(r"(\textbf{COMPARTMENT DIAGRAM})")) |> helpText() |> withMathJax(),
+       tagList(img(
+         src = paste0("images/", input$modelSelect, ".svg"),
+         contentType = "image/svg",
+         width = "45%",
+         alt = gsub("\n[\t\ ]+?", " ", r"(The diagram of the model compartments
+                      failed to load, or the accessibility text is being read by
+                      a screen reader.)")
+       ))
+    )
 
     return(list(
-      # modelLatex = modelLatex,
+      modelLatex = modelLatex,
       modelResults = modelResults,
       mainPlot = mainPlot,
       subPlots = subPlots,
@@ -261,7 +263,7 @@ server <- function(input, output, session) {
       \() paste0(input$modelSelect, "_Model_Summary", Sys.Date(), ".xlsx"),
       \(file) write_xlsx(renderModel()$modelResults, file)
     )
-  # output$mathematicalModel <- renderUI(renderModel()$modelLatex)
+  output$mathematicalModel <- renderUI(renderModel()$modelLatex)
 
 
   observeEvent(input$resetAll, {
