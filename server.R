@@ -76,18 +76,19 @@ server <- function(input, output, session) {
   ## models have more than one set which is specific to the model and its
   ## configuration.
   defaults <- reactive({
-    input$distribution # take a dependency on this as well.
-
-    filter(defaultInputValues, modelType == req(input$modelSelect)) ->
+    filter(defaultInputValues,
+           modelType == req(input$modelSelect),
+           trueMassAction == input$trueMassAction,
+           vitalDynamics == input$vitalDynamics) ->
       modelSpecific
 
     if (dim(modelSpecific)[1] > 1) {
-      filter(modelSpecific,
-             vitalDynamics == input$vitalDynamics,
-             trueMassAction == input$trueMassAction) |>
+      ## NOTE: stochastic filtering works as intended.
+      configurationSpecific <-
+        modelSpecific |>
         mutate(stochasticTruthy = map(stochastic, shiny::isTruthy)) |>
-        filter(stochasticTruthy == input$stochastic) ->
-        configurationSpecific
+        filter(stochasticTruthy == input$stochastic,
+               stochastic == input$distribution)
 
       # If there is exactly one set of default values for this exact model (i.e.
       # with its configuration) return that, otherwise return the fallback set
@@ -106,13 +107,20 @@ firstDimensionLength)))
         ## Return the set of fallback values.
         filter(modelSpecific,
                is.na(stochastic),
-               is.na(vitalDynamics),
-               is.na(trueMassAction)) |>
+               vitalDynamics == input$vitalDynamics,
+               trueMassAction == input$trueMassAction) |>
+          ## NOTE: deselect the model options columns and empty columns because
+          ## only parameters and variables are used to update the numeric input
+          ## widgets.
           select(!c(trueMassAction,
                     vitalDynamics,
                     stochastic)) |>
         select(where(\(x) all(!is.na(x))))
       } else {
+        ## There is exactly one observation of default values for this exact
+        ## model configuration; return it after removing the model configuration
+        ## columns used for filtering (retain just variables and parameter
+        ## columns).
         configurationSpecific |>
           select(!c(trueMassAction,
                     vitalDynamics,
@@ -121,10 +129,18 @@ firstDimensionLength)))
           select(where(\(x) all(!is.na(x))))
       }
     } else {
-      stopifnot(dim(modelSpecific)[1] == 1)
+      warning("dim(modelSpecific)[1] == 1: ", dim(modelSpecific)[1] == 1)
       ## There is exactly one set of default values for this model, and it can
       ## be returned immediately.
-      modelSpecific |> select(where(\(x) all(!is.na(x))))
+      defaultInputValues |>
+        filter(vitalDynamics == 0,
+               trueMassAction == 0,
+               is.na(stochastic),
+               modelType == input$modelSelect) |>
+        select(!c(vitalDynamics,
+                  trueMassAction,
+                  stochastic)) |>
+        select(where(\(x) all(!is.na(x))))
     }
   })
 
@@ -363,13 +379,7 @@ firstDimensionLength)))
     )
   output$mathematicalModel <- renderUI(renderModel()$modelLatex)
 
-
-  ## When the user presses the reset button the numeric inputs are reset to the
-  ## default values available for the model compartments' parameters and
-  ## variables, and the selected model options. DONT try to combine these; the
-  ## UX-logic is as it should be with these two observers.
-  observe({
-    isolate(updateNumericInputs(defaults(), session))
+  updateTextAndColourInputs <- function() {
     for (id in names(input)) {
       if (grepl("Settings_", id)) {
         updateTextInput(session, id, value = "")
@@ -378,25 +388,29 @@ firstDimensionLength)))
         updateColourInput(session, id, value = "")
       }
     }
-  }) |> bindEvent(input$resetNumericInputs)
+  }
 
+  ## When the user presses the reset button the numeric inputs are reset to the
+  ## default values available for the model compartments' parameters and
+  ## variables, and the selected model options.
+  ##
+  ## DONT try to combine these; the UX-logic is as it should be with these two
+  ## observers.
+  observe({
+    isolate(updateNumericInputs(defaults(), session))
+    updateTextAndColourInputs()
+  }) |> bindEvent(input$resetNumericInputs)
+  ## DONT try to combine these; the UX-logic is as it should be with these two
+  ## observers.
   observe({
     if (input$freezeUpdatingOfInputWidgetValuesWithDefaults == TRUE) {
-      for (id in names(input)) {
-        if (grepl("Settings_", id)) {
-          updateTextInput(session, id, value = "")
-          ## TODO: this does not work, need to find away to reset
-          ## colors without relying on the settings reactive
-          updateColourInput(session, id, value = "")
-        }
-      }
+      updateTextAndColourInputs()
       isolate(updateNumericInputs(defaults(), session))
     }
   }) |> bindEvent(input$freezeUpdatingOfInputWidgetValuesWithDefaults)
 
-  ## DONT: changing the return value in the affirmative case (NULL) is
-  ## ill-advised. You should know what you're doing before mucking about with
-  ## this.
+  ## DONT change the return value in the affirmative case (NULL) is ill-advised.
+  ## You should know what you're doing before mucking about with this.
   inputsValid <- reactive({
     input # Depend on all inputs.
     if (globalValidator$is_valid()) {
