@@ -119,25 +119,24 @@ server <- function(input, output, session) {
   visibleInputs <- debounce(greedy_visibleInputs, 500)
 
   settings <- reactive({
-    modelSelect <- input$modelSelect
-    compartments <- strsplit(modelSelect, "")[[1]]
-
-    # Generate list of colors
+    settingNames <- names(input)[grep("Settings_", names(input))]
+    compartments <- strsplit(input$modelSelect, "")[[1]]
+    
     plotSettings_colors <- sapply(compartments, function(compartment) {
       input[[paste0(compartment, "PlotSettings_color")]]
     }, simplify = FALSE, USE.NAMES = FALSE)
-
-    list(
-      plotSettings_title = input$plotSettings_title,
-      phasePlanePlotSettings_title = input$phasePlanePlotSettings_title,
-      plotSettings_xAxisLabel = input$plotSettings_xAxisLabel,
-      plotSettings_yAxisLabel = input$plotSettings_yAxisLabel,
-      phasePlanePlotSettings_xAxisLabel = input$phasePlanePlotSettings_xAxisLabel,
-      phasePlanePlotSettings_yAxisLabel = input$phasePlanePlotSettings_yAxisLabel,
-      plotSettings_colors = plotSettings_colors,
-      phasePlanePlotSettings_color = input$phasePlanePlotSettings_color
+    
+    settingsList <- list(
+      plotSettings_colors = plotSettings_colors
     )
+
+    for (name in settingNames) {
+      settingsList[[name]] <- input[[name]]
+    }
+    
+    settingsList
   })
+
   
 
   renderModel <- reactive({
