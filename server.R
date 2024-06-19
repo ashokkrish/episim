@@ -55,14 +55,17 @@ server <- function(input, output, session) {
   ## models have more than one set which is specific to the model and its
   ## configuration.
   defaults <- reactive({
+    input$distribution # take a dependency on this as well.
+
     filter(defaultInputValues, modelType == req(input$modelSelect)) ->
       modelSpecific
 
     if (dim(modelSpecific)[1] > 1) {
       filter(modelSpecific,
-             stochastic == input$stochastic,
              vitalDynamics == input$vitalDynamics,
-             trueMassAction == input$trueMassAction) ->
+             trueMassAction == input$trueMassAction) |>
+        mutate(stochasticTruthy = map(stochastic, shiny::isTruthy)) |>
+        filter(stochasticTruthy == input$stochastic) ->
         configurationSpecific
 
       # If there is exactly one set of default values for this exact model (i.e.
@@ -92,7 +95,8 @@ firstDimensionLength)))
         configurationSpecific |>
           select(!c(trueMassAction,
                     vitalDynamics,
-                    stochastic)) |>
+                    stochastic,
+                    stochasticTruthy)) |>
           select(where(\(x) all(!is.na(x))))
       }
     } else {
@@ -341,7 +345,8 @@ firstDimensionLength)))
   ## default values available for the model compartments' parameters and
   ## variables, and the selected model options. DONT try to combine these; the
   ## UX-logic is as it should be with these two observers.
-  observe({ isolate(updateNumericInputs(defaults(), session))}) |>
+  observe({
+    isolate(updateNumericInputs(defaults(), session))
     for (id in names(input)) {
       if (grepl("Settings_", id)) {
         updateTextInput(session, id, value = "")
@@ -350,7 +355,7 @@ firstDimensionLength)))
         updateColourInput(session, id, value = "")
       }
     }
-    bindEvent(input$resetNumericInputs)
+  }) |> bindEvent(input$resetNumericInputs)
   observe({
     if (input$freezeUpdatingOfInputWidgetValuesWithDefaults == TRUE) {
       for (id in names(input)) {

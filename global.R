@@ -79,12 +79,13 @@ here::i_am("global.R")
 ## DONE: do not modify the column types given below; they are current as of
 ## 2024-05-23. They should only change if the ordering of columns changes.
 columnTypes <- c(
-  "text", # Model name
+  "text", # Compartmental model type
+  "text", # Binomial type
   ## WARN DONT: using logicals in any way, it inexplicably borks everything. A
   ## character vector is used to hold the string "numeric," as modified below.
-  character(17)
+  character(18)
 )
-columnTypes[2:20] <- "numeric"
+columnTypes[3:20] <- "numeric"
 defaultInputValues <- read_xlsx(here("data/defaultInputValues.xlsx"),
                                 col_types = columnTypes,
                                 sheet = "Ashok")
