@@ -48,6 +48,15 @@ server <- function(input, output, session) {
       enable(selector = "input[name='trueMassAction'][value='1']")
     }
   })
+  
+  observe({
+    if (input$stochastic == 1) {
+      hideTab(inputId = "tabs", target = "outputSummary")
+    } else {
+      showTab(inputId = "tabs", target = "outputSummary")
+    }
+  })
+
 
   globalValidator <- addRuleListToValidator(
     InputValidator$new(),
