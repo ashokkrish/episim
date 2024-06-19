@@ -27,6 +27,13 @@ server <- function(input, output, session) {
   runjs(r"--($('button.collapse-toggle').hide())--") # sidebar button
 
 
+  observe({
+    if (grepl("E", input$modelSelect)) {
+      hideTab(inputId = "tabs", target = "phasePlane")
+    } else {
+      showTab(inputId = "tabs", target = "phasePlane")
+    }
+  })
 
   globalValidator <- addRuleListToValidator(
     InputValidator$new(),
@@ -356,6 +363,7 @@ firstDimensionLength)))
       }
     }
   }) |> bindEvent(input$resetNumericInputs)
+
   observe({
     if (input$freezeUpdatingOfInputWidgetValuesWithDefaults == TRUE) {
       for (id in names(input)) {

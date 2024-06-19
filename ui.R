@@ -48,7 +48,7 @@ generatePlotSettingsUI <- function(id) {
 }
 
 modelResultsPanel <- mainPanel(
-  tabsetPanel(
+  tabsetPanel(id = "tabs",
     tabPanel("Plot", br(), 
              conditionalPanel(
                condition = "input.modelSelect != ''",
@@ -61,7 +61,8 @@ modelResultsPanel <- mainPanel(
                uiOutput("subPlots")
              )
     ),
-    tabPanel("Phase Plane", br(),
+    tabPanel("Phase Plane", value = "phasePlane",
+             br(),
              conditionalPanel(
                condition = "input.modelSelect != ''",
                generatePlotSettingsUI("phasePlanePlotSettings")
