@@ -7,9 +7,9 @@ defaultColors <- c(
 plotTheme <- ggplot2::theme(
     axis.line = ggplot2::element_line(color = "black"),
     axis.text = ggplot2::element_text(size = 14),
-    axis.title.x = ggplot2::element_text(size = 16, face = "bold"),
-    axis.title.y = ggplot2::element_text(size = 16, face = "bold"),
-    plot.title = ggplot2::element_text(size = 22, face = "bold"),
+    axis.title.x = ggplot2::element_text(size = 14, face = "bold"),
+    axis.title.y = ggplot2::element_text(size = 14, face = "bold"),
+    plot.title = ggplot2::element_text(size = 16, face = "bold", hjust = 0.5),
     legend.position = "bottom"
 )
 
@@ -65,7 +65,6 @@ plotter <- function(model, settings) {
   names(colors) <- compartment_names[compartments]
   
   plot <- ggplot2::ggplot(model$data, ggplot2::aes(x = time)) +
-    plotTheme +
     ggplot2::labs(
       title = labels$title,
       x = labels$xAxisLabel,
@@ -92,6 +91,7 @@ plotter <- function(model, settings) {
   
   plot <- plot +
     theme_classic() +
+    plotTheme +
     scale_color_manual(
       values = colors,
       name = "Compartments"
@@ -155,11 +155,11 @@ subPlotter <- function(model) {
                 x = "Time",
                 y = compartment_names[compartment]
             ) +
-            plotTheme +
             ggplot2::scale_x_continuous(limits = x_limits, expand = c(0, 0)) +
             ggplot2::scale_y_continuous(limits = y_limits, expand = c(0, 0)) +
             ggplot2::scale_color_manual(values = colors) +
             theme_classic() +
+            plotTheme +
             ggplot2::theme(legend.position = "none")
     }
 

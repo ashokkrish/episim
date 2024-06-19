@@ -59,6 +59,7 @@ modelResultsPanel <- mainPanel(
                generatePlotSettingsUI("plotSettings")
              ), 
              uiOutput("plot"),
+             br(),
              conditionalPanel(
                condition = "output.plot != null",
                uiOutput("subPlots")
