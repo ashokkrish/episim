@@ -39,7 +39,7 @@ rules <- tribble(
 
     ## Global rules for parameters
     beta = c(sv_gt(0), sv_lte(1)),
-    gamma = c(sv_gt(0), sv_lte(1)),
+    gamma = c(sv_gt(0)),
 
     ## Simulation options
     replicates = c(sv_integer(), sv_gt(0)),
