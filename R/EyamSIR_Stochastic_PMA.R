@@ -31,7 +31,7 @@ i <- 1
 
 while (I[i] > 0) {
   # while there are still infectious individuals
-  print(sprintf('event number %d, t=%g, I = %d', i, et[i], I[i]))
+  #print(sprintf('event number %d, t=%g, I = %d', i, et[i], I[i]))
   
   rSI <- beta * S[i] * I[i]                # total rate of S->I
   rIR <- gamma * I[i]                      # total rate of I->R
