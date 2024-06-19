@@ -125,6 +125,7 @@ phasePlanePlotterSI <- function(model, settings) {
     }
 
     plot <- plot + plotTheme +
+            theme_classic() +
             ggplot2::labs(
                 title = labels$title,
                 x = labels$xAxisLabel,
