@@ -43,7 +43,6 @@ getAndValidateSettings <- function(model, settings, defaultTitle, defaultXAxisLa
 }
 
 plotter <- function(model, settings) {
-  print("plotting...")
   
   labels <- getAndValidateSettings(
     model, settings,
@@ -110,11 +109,7 @@ phasePlanePlotterSI <- function(model, settings) {
         "Infected (I)"
     )
 
-    color <- if (!is.null(settings$color)) {
-        settings$color
-    } else {
-        defaultColors[1]
-    }
+    color <- if (!is.null(settings$color)) settings$color else defaultColors[1]
 
     if (model$plotterType == "binomial") {
         plot <- ggplot2::ggplot(model$data, ggplot2::aes(x = S, y = I, group = iteration, color = iteration)) +
@@ -124,16 +119,17 @@ phasePlanePlotterSI <- function(model, settings) {
             ggplot2::geom_path(color = color, linewidth = 0.7)
     }
 
-    plot <- plot + plotTheme +
-            theme_classic() +
-            ggplot2::labs(
-                title = labels$title,
-                x = labels$xAxisLabel,
-                y = labels$yAxisLabel
-            ) +
-            ggplot2::theme(legend.position = "none") +
-            ggplot2::scale_x_continuous(expand = c(0, 0)) +
-            ggplot2::scale_y_continuous(expand = c(0, 0))
+    plot <- plot +
+      theme_classic() +
+      plotTheme +
+      ggplot2::labs(
+        title = labels$title,
+        x = labels$xAxisLabel,
+        y = labels$yAxisLabel
+      ) +
+      ggplot2::theme(legend.position = "none") +
+      ggplot2::scale_x_continuous(expand = c(0, 0)) +
+      ggplot2::scale_y_continuous(expand = c(0, 0))
 
 }
 
