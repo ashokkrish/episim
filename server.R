@@ -272,14 +272,14 @@ firstDimensionLength)))
         )
       })
 
-    #modelDataTable <- if (plotterType == "binomial") {
-    #  numericColumns <- sapply(modelResults, is.numeric)
-    #  modelResults[numericColumns] <- round(modelResults[numericColumns], 2)
-    #  datatable(modelResults, rownames = FALSE)
-    #} else {
-    #  datatable(round(modelResults, 2), rownames = FALSE)
-    #}
-    modelDataTable <- datatable(round(modelResults, 2), rownames = FALSE)
+    modelDataTable <- if (plotterType == "binomial") {
+      numericColumns <- sapply(modelResults, is.numeric)
+      modelResults[numericColumns] <- round(modelResults[numericColumns], 2)
+      datatable(modelResults, rownames = FALSE)
+    } else {
+      datatable(round(modelResults, 2), rownames = FALSE)
+    }
+    #modelDataTable <- datatable(round(modelResults, 2), rownames = FALSE)
 
     # FIX: vital dynamics error
     modelLatex <- div(
@@ -449,4 +449,5 @@ firstDimensionLength)))
 
     if(boolean) NULL else message
   })
+  
 }
