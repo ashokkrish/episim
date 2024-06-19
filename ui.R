@@ -68,7 +68,7 @@ modelResultsPanel <- mainPanel(
                generatePlotSettingsUI("phasePlanePlotSettings")
              ), 
              uiOutput("phasePlanePlot")),
-    tabPanel("Output Summary", br(), uiOutput("outputSummary")),
+    tabPanel("Output Summary", value ="outputSummary", br(), uiOutput("outputSummary")),
     tabPanel("Mathematical Model", br(), uiOutput("mathematicalModel")),
   )
 )

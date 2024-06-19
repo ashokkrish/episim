@@ -34,6 +34,14 @@ server <- function(input, output, session) {
       showTab(inputId = "tabs", target = "phasePlane")
     }
   })
+  
+  observe({
+    if (input$stochastic == 1) {
+      hideTab(inputId = "tabs", target = "outputSummary")
+    } else {
+      showTab(inputId = "tabs", target = "outputSummary")
+    }
+  })
 
   globalValidator <- addRuleListToValidator(
     InputValidator$new(),
@@ -264,13 +272,14 @@ firstDimensionLength)))
         )
       })
 
-    modelDataTable <- if (plotterType == "binomial") {
-      numericColumns <- sapply(modelResults, is.numeric)
-      modelResults[numericColumns] <- round(modelResults[numericColumns], 2)
-      datatable(modelResults, rownames = FALSE)
-    } else {
-      datatable(round(modelResults, 2), rownames = FALSE)
-    }
+    #modelDataTable <- if (plotterType == "binomial") {
+    #  numericColumns <- sapply(modelResults, is.numeric)
+    #  modelResults[numericColumns] <- round(modelResults[numericColumns], 2)
+    #  datatable(modelResults, rownames = FALSE)
+    #} else {
+    #  datatable(round(modelResults, 2), rownames = FALSE)
+    #}
+    modelDataTable <- datatable(round(modelResults, 2), rownames = FALSE)
 
     # FIX: vital dynamics error
     modelLatex <- div(
@@ -338,8 +347,7 @@ firstDimensionLength)))
     style = "display: flex; flex-direction: column;",
     renderModel()$modelDataTable, downloadButton("downloadData", "Download as Excel",
       style = "align-self: flex-start; margin-top: 1vh;"
-    )
-  ))
+    )))
   output$downloadData <-
     downloadHandler(
       \() paste0(input$modelSelect, "_Model_Summary", Sys.Date(), ".xlsx"),
