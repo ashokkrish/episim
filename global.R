@@ -4,7 +4,7 @@ library(deSolve)
 library(shiny)
 library(bslib)
 library(bsicons)
-## library(shinyhelper)
+library(shinyhelper)
 library(shinyjs)
 library(shinyvalidate)
 library(shinyWidgets)
@@ -17,7 +17,6 @@ library(writexl)
 library(plotly)
 library(DT)
 library(reactlog)
-## library(waiter)
 library(shinyFeedback)
 library(reshape2)
 source("R/plotte.R")
@@ -83,25 +82,12 @@ columnTypes <- c(
   "text", # Model name
   ## WARN DONT: using logicals in any way, it inexplicably borks everything. A
   ## character vector is used to hold the string "numeric," as modified below.
-  character(16)
+  character(17)
 )
-columnTypes[2:17] <- "numeric"
+columnTypes[2:20] <- "numeric"
 defaultInputValues <- read_xlsx(here("data/defaultInputValues.xlsx"),
                                 col_types = columnTypes,
                                 sheet = "Ashok")
 
-## defaultColumnTypesWithAdditionalColumns <- c("text", # Model name
-##                                              character(16))
-## defaultColumnTypesWithAdditionalColumns[2:17] <- "numeric"
-## TODO: the type of the additional columns
-
-## TODO: implement the necessary UI and server logic to have the following be
-## meaningful to the application.
-## publishedInputValues <- read_xlsx(here("data/defaultInputValues.xlsx"),
-##                                   col_types = defaultColumnTypesWithAdditionalColumns,
-##                                   sheet = "Literature")
-
 ## INITIALIZATION
-## MAYBE FIXME: do we need an app.R at all? Is global.R a replacement, or is it
-## just an additional file? What about a two-file app, with server.R and ui.R?
 shinyAppDir(here::here()) # and hurrah!

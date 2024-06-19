@@ -1,8 +1,10 @@
 server <- function(input, output, session) {
-  #Temporarily disable the binomial option
-  #TODO: Will re-enable the button once binomial implementation is done
-  # disable(selector = "input[name='distribution'][value='1']")
-  
+  ## TODO: re-enable the button after binomial implementation is completed.
+  ## disable(selector = "input[name='distribution'][value='1']")
+
+  observe_helpers(withMathJax = TRUE,
+                  help_dir = "www/markdown")
+
   ## Restyle some elements with JavaScript.
   runjs(r"[$(document).ready($('#modelSelect + button').removeClass('btn-light'))]")
   r"($(document)
@@ -49,35 +51,97 @@ server <- function(input, output, session) {
     )
   )
 
+  ## All models have at least one set of default values, a "fallback". Some
+  ## models have more than one set which is specific to the model and its
+  ## configuration.
   defaults <- reactive({
-    filter(defaultInputValues, modelType == req(input$modelSelect)) |>
-      select(where(\(x) all(!is.na(x))))
+    filter(defaultInputValues, modelType == req(input$modelSelect)) ->
+      modelSpecific
+
+    if (dim(modelSpecific)[1] > 1) {
+      filter(modelSpecific,
+             stochastic == input$stochastic,
+             vitalDynamics == input$vitalDynamics,
+             trueMassAction == input$trueMassAction) ->
+        configurationSpecific
+
+      # If there is exactly one set of default values for this exact model (i.e.
+      # with its configuration) return that, otherwise return the fallback set
+      # of values.
+      firstDimensionLength <- dim(configurationSpecific)[1]
+      if (firstDimensionLength != 1) {
+        if (firstDimensionLength > 1) {
+          warning(
+            print(sprintf(
+              r"(There are %s configuration-specific sets of default values.
+That's an error!
+A warning is returned because a fallback set of values was used instead.)",
+firstDimensionLength)))
+        }
+
+        ## Return the set of fallback values.
+        filter(modelSpecific,
+               is.na(stochastic),
+               is.na(vitalDynamics),
+               is.na(trueMassAction)) |>
+          select(!c(trueMassAction,
+                    vitalDynamics,
+                    stochastic)) |>
+        select(where(\(x) all(!is.na(x))))
+      } else {
+        configurationSpecific |>
+          select(!c(trueMassAction,
+                    vitalDynamics,
+                    stochastic)) |>
+          select(where(\(x) all(!is.na(x))))
+      }
+    } else {
+      stopifnot(dim(modelSpecific)[1] == 1)
+      ## There is exactly one set of default values for this model, and it can
+      ## be returned immediately.
+      modelSpecific |> select(where(\(x) all(!is.na(x))))
+    }
   })
 
   ## Whenever the model selection changes, the widget values throughout the
   ## application are updated according to the defaults specified for the model
   ## configuration in the defaultInputValues.xlsx spreadsheet in the data/
   ## project subfolder.
-  ## MAYBE TODO: this could possibly be an observe... maybe a bindEvent?
-  observeEvent(input$modelSelect, {
-    req(defaults())
-    ## MAYBE TODO: these can be combined into a single UI rendering.
-    isolate({
-      output$beta <- renderUI({
-        rateLabel <- { if (exposedCompartmentInModel()) "exposure" else "infection" }
-        defaultValue <- select(defaults(), beta) |> as.numeric()
-        stopifnot(is.numeric(defaultValue) && length(defaultValue) == 1)
-        numericInputWithMathJax("beta", rateLabel, defaultValue)
-      })
-      output$gamma <- renderUI({
-        rateLabel <- { if (exposedCompartmentInModel()) "infection" else "recovery" }
-        defaultValue <- select(defaults(), gamma) |> as.numeric()
-        stopifnot(is.numeric(defaultValue) && length(defaultValue) == 1)
-        numericInputWithMathJax("gamma", rateLabel, defaultValue)
-      })
+  observe({
+    shiny::validate(need(dim(defaults())[1] == 1,
+                         message = "ERROR: defaults() has length != 1"))
+
+    output$commonParameters <- renderUI({
+      rateLabels <-
+        if (isolate(exposedCompartmentInModel()))
+          c(beta = "exposure", gamma = "infection")
+        else
+          c(beta = "infection", gamma = "recovery")
+
+      rateValues <-
+        select(defaults(), beta, gamma) |>
+        mutate(across(c(beta, gamma), as.numeric))
+
+      div(
+        id = "beta-and-gamma",
+        numericInputWithMathJax("beta",
+                                rateLabels["beta"],
+                                if (input$freezeUpdatingOfInputWidgetValuesWithDefaults == FALSE)
+                                  rateValues$beta
+                                else
+                                  isolate(input$beta)),
+        numericInputWithMathJax("gamma",
+                                rateLabels["gamma"],
+                                if (input$freezeUpdatingOfInputWidgetValuesWithDefaults == FALSE)
+                                  rateValues$gamma
+                                else
+                                  isolate(input$gamma))
+      )
     })
-    updateNumericInputs(defaults(), session)
-  })
+
+    if (input$freezeUpdatingOfInputWidgetValuesWithDefaults == FALSE)
+      updateNumericInputs(defaults(), session)
+  }) |> bindEvent({ defaults() })
 
   ## A reactive value like input, but with hidden and irrelevant inputs removed.
   greedy_visibleInputs <- reactive({
@@ -107,7 +171,8 @@ server <- function(input, output, session) {
           infected = input$infected,
           recovered = input$recovered,
           dead = input$dead))
-    visibleInputs <- relevantInputs[!(names(relevantInputs) %in% input$hiddenInputs)]
+    visibleInputs <-
+      relevantInputs[!(names(relevantInputs) %in% input$hiddenInputs)]
     stopifnot(is.list(visibleInputs))
     visibleInputs
   })
@@ -222,7 +287,6 @@ server <- function(input, output, session) {
       phaseplanePlot = phaseplanePlot,
       modelDataTable = modelDataTable
     ))
-    
   })
 
   defaultColors <- c(
@@ -273,25 +337,44 @@ server <- function(input, output, session) {
   output$mathematicalModel <- renderUI(renderModel()$modelLatex)
 
 
-  observeEvent(input$resetAll, {
-    updatePickerInput(session, "modelSelect", selected = "")
-    updateNumericInputs(defaults(), session)
+  ## When the user presses the reset button the numeric inputs are reset to the
+  ## default values available for the model compartments' parameters and
+  ## variables, and the selected model options. DONT try to combine these; the
+  ## UX-logic is as it should be with these two observers.
+  observe({ isolate(updateNumericInputs(defaults(), session))}) |>
     for (id in names(input)) {
       if (grepl("Settings_", id)) {
         updateTextInput(session, id, value = "")
-        # TODO: this does not work, need to find away to reset
-        # colors without relying on the settings reactive
+        ## TODO: this does not work, need to find away to reset
+        ## colors without relying on the settings reactive
         updateColourInput(session, id, value = "")
       }
     }
-  })
+    bindEvent(input$resetNumericInputs)
+  observe({
+    if (input$freezeUpdatingOfInputWidgetValuesWithDefaults == TRUE) {
+      for (id in names(input)) {
+        if (grepl("Settings_", id)) {
+          updateTextInput(session, id, value = "")
+          ## TODO: this does not work, need to find away to reset
+          ## colors without relying on the settings reactive
+          updateColourInput(session, id, value = "")
+        }
+      }
+      isolate(updateNumericInputs(defaults(), session))
+    }
+  }) |> bindEvent(input$freezeUpdatingOfInputWidgetValuesWithDefaults)
 
+  ## DONT: changing the return value in the affirmative case (NULL) is
+  ## ill-advised. You should know what you're doing before mucking about with
+  ## this.
   inputsValid <- reactive({
     input # Depend on all inputs.
     if (globalValidator$is_valid()) {
       NULL
     } else {
-      "All the required inputs for this model must be valid. Check the warnings and errors on the input widgets."
+      paste("All the required inputs for this model must be valid.",
+            "Check the warnings and errors on the input widgets.")
     }
   })
 

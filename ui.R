@@ -25,8 +25,6 @@ timesteps <- numericInput("timesteps", r"[Number of Timesteps (\(m\))]",
   width = "300px"
 )
 
-resetButton <- actionButton("resetAll", "Reset Values")
-
 generatePlotSettingsUI <- function(id) {
   div(
     style = "position: relative;", 
@@ -48,8 +46,6 @@ generatePlotSettingsUI <- function(id) {
           enter = animations$fading_entrances$fadeInDown,
           exit = animations$fading_exits$fadeOutUp))))
 }
-
-
 
 modelResultsPanel <- mainPanel(
   tabsetPanel(
@@ -76,12 +72,14 @@ modelResultsPanel <- mainPanel(
   )
 )
 
+actionButtonStyle <-
+  "color: #fff; background-color: #337ab7; border-color: #2e6da4;"
+resetButton <- actionButton("resetNumericInputs",
+                            "RESET",
+                            style = actionButtonStyle)
 
 ## NOTE: https://englishlessonsbrighton.co.uk/names-letters-english-alphabet/
 ### Parameters
-beta <- uiOutput("beta")
-gamma <- uiOutput("gamma")
-
 delta <- conditionalPanel(
   r"{['SIRD', 'SEIRD'].includes(input.modelSelect)}",
   numericInput("delta", r"[Fatality rate (\(\delta\))]", 0.5,
@@ -169,10 +167,11 @@ modelSelect <- pickerInput("modelSelect",
   models,
   width = "98%")
 
-massAction <- radioButtons("trueMassAction",
-  strong("Model Formulation"),
-  choices = list("Pseudo-Mass Action" = 0, "True-Mass Action" = 1),
-  inline = TRUE)
+massAction <-
+  radioButtons("trueMassAction",
+               strong("Model Formulation"),
+               choices = list("Pseudo-Mass Action" = 0, "True-Mass Action" = 1),
+               inline = TRUE)
 
 deterministic <- radioButtons("stochastic",
   strong("Model Stochasticity"),
@@ -216,7 +215,7 @@ modelOptions <- wellPanel(id = "modelOptions",
 modelParameters <-
   wellPanel(id = "parameters",
             h3("Parameters"),
-            div(id = "commonParameters", beta, gamma),
+            uiOutput("commonParameters"), # beta and gamma
             div(id = "additionalParameters", delta, sigma, xi))
 
 modelVariables <-
@@ -225,15 +224,26 @@ modelVariables <-
             div(id = "commonVariables", N, S, E, I, R, D))
 
 ### Design
+updateValuesWithDefaultsSwitch <-
+  conditionalPanel(r"(input.modelSelect != '')",
+    helper(
+      checkboxInput(inputId = "freezeUpdatingOfInputWidgetValuesWithDefaults",
+                    label = "Freeze update of inputs with defaults on model (and option) change",
+                    value = FALSE),
+      title = r"(Application "rudeness")",
+      size = "l",
+      content = "freezeAndThaw"))
+
 modelConfigurationPanel <-
-  sidebarPanel(id = "inputPanel", 
-    modelSelect,
-    conditionalPanel(r"--(input.modelSelect !== '')--",
-      div(id = "modelConfiguration",
-          modelOptions,
-          modelParameters,
-          modelVariables),
-      resetButton))
+  sidebarPanel(id = "inputPanel",
+               modelSelect,
+               updateValuesWithDefaultsSwitch,
+               conditionalPanel(r"--(input.modelSelect !== '')--",
+                                div(id = "modelConfiguration",
+                                    modelOptions,
+                                    modelParameters,
+                                    modelVariables),
+                                resetButton))
 
 disclaimer <-
   p(gsub(
