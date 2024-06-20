@@ -160,6 +160,10 @@ server <- function(input, output, session) {
   })
 
   observe({
+    print(defaults())
+  })
+
+  observe({
     if (all(input$totalMassAction == 1, input$stochastic == 1)) {
       updateRadioButtons(inputId = "distribution",
                          selected = 1)
@@ -237,7 +241,7 @@ server <- function(input, output, session) {
     visibleInputs <-
       relevantInputs[!(names(relevantInputs) %in% input$hiddenInputs)]
     stopifnot(is.list(visibleInputs))
-    visibleInputs
+    append(visibleInputs, input$replicates)
   })
 
   ## NOTE: prevent the reactive value from invalidating renderModel too often,
@@ -245,6 +249,9 @@ server <- function(input, output, session) {
   ## hasn't truly idled on one value yet. See the following link for more
   ## information: https://shiny.posit.co/r/reference/shiny/1.7.2/debounce.html.
   visibleInputs <- debounce(greedy_visibleInputs, 500)
+
+
+  observe({ print(req(visibleInputs())) })
 
   settings <- reactive({
     modelSelect <- input$modelSelect
