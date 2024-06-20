@@ -208,16 +208,18 @@ vitalDynamics <-
 modelOptions <- wellPanel(id = "modelOptions",
                           h3("Options"),
                           div(massAction, style = "margin: 10px;"),
-                          wellPanel(modelStochasticity,
-                                    conditionalPanel(
-                                      r"[input.stochastic == '1']",
-                                      probability,
-                                      numericInput("replicates",
-                                                   "Number of Replicates (simulations)",
-                                                   50, 0, 100, 1,
-                                                   "300px"),
-                                      actionButton("rerunStochasticSimulation",
-                                                   "Rerun stochastic simulation"))),
+                          div(id = "model-stochasticity-well",
+                              modelStochasticity,
+                              style = "margin-bottom: 0.75rem;",
+                              conditionalPanel(
+                                r"[input.stochastic == '1']",
+                                probability,
+                                numericInput("replicates",
+                                             "Number of Replicates (simulations)",
+                                             50, 0, 100, 1,
+                                             "300px"),
+                                actionButton("rerunStochasticSimulation",
+                                             "Rerun stochastic simulation"))),
                           vitalDynamics,
                           timesteps)
 

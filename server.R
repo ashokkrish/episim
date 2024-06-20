@@ -154,6 +154,12 @@ server <- function(input, output, session) {
   })
 
   observe({
+    toggleClass(id = "model-stochasticity-well",
+                class = "well",
+                condition = input$stochastic == 1)
+  })
+
+  observe({
     if (input$totalMassAction == 1 && input$stochastic == 1) {
       updateRadioButtons(inputId = "distribution",
                          selected = 1)
