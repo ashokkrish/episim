@@ -425,8 +425,6 @@ server <- function(input, output, session) {
     }
   }) |> bindEvent(input$freezeUpdatingOfInputWidgetValuesWithDefaults)
 
-  observe({ print(defaults()) })
-
   ## DONT change the return value in the affirmative case (NULL) is ill-advised.
   ## You should know what you're doing before mucking about with this.
   inputsValid <- reactive({
