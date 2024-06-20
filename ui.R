@@ -48,30 +48,32 @@ generatePlotSettingsUI <- function(id) {
 }
 
 modelResultsPanel <- mainPanel(
-  tabsetPanel(id = "tabs",
-    tabPanel("Plot", br(), 
-             conditionalPanel(
-               condition = "input.modelSelect != ''",
-               generatePlotSettingsUI("plotSettings")
-             ), 
-             uiOutput("plot"),
+  tabsetPanel(
+    id = "tabs",
+    tabPanel("Plot",
              br(),
              conditionalPanel(
-               condition = "output.plot != null",
-               uiOutput("subPlots")
-             )
-    ),
-    tabPanel("Phase Plane", value = "phasePlane",
+               condition = "input.modelSelect != ''",
+               generatePlotSettingsUI("plotSettings")),
+             uiOutput("plot"),
+             br(),
+             conditionalPanel(condition = "output.plot != null",
+                              uiOutput("subPlots"))),
+    tabPanel("Phase Plane",
+             value = "phasePlane",
              br(),
              conditionalPanel(
                condition = "input.modelSelect != ''",
                generatePlotSettingsUI("phasePlanePlotSettings")
-             ), 
+             ),
              uiOutput("phasePlanePlot")),
-    tabPanel("Output Summary", value ="outputSummary", br(), uiOutput("outputSummary")),
-    tabPanel("Mathematical Model", br(), uiOutput("mathematicalModel")),
-  )
-)
+    tabPanel("Output Summary",
+             value ="outputSummary",
+             br(),
+             uiOutput("outputSummary")),
+    tabPanel("Mathematical Model",
+             br(),
+             uiOutput("mathematicalModel"))))
 
 actionButtonStyle <-
   "color: #fff; background-color: #337ab7; border-color: #2e6da4;"
@@ -174,10 +176,15 @@ massAction <-
                choices = list("Pseudo-Mass Action" = 0, "True-Mass Action" = 1),
                inline = TRUE)
 
-deterministic <- radioButtons("stochastic",
-  strong("Model Stochasticity"),
-  choices = list("Deterministic" = 0, "Stochastic" = 1),
-  inline = TRUE)
+modelStochasticity <- conditionalPanel(
+  r"--(input.modelSelect == 'SIR')--",
+  radioButtons(
+    "stochastic",
+    strong("Model Stochasticity"),
+    choices = list("Deterministic" = 0, "Stochastic" = 1),
+    inline = TRUE
+  )
+)
 
 probability <- radioButtons("distribution",
   strong("Probability Distribution"),
@@ -186,22 +193,22 @@ probability <- radioButtons("distribution",
 
 ## FIXME: use this CSS path to fix the margin-bottom of the vital dynamics checkbox within this well panel: div.well:nth-child(4) > div:nth-child(1); set the margin-bottom property to zero pixels.
 vitalDynamics <-
-  wellPanel(checkboxInput("vitalDynamics", "Vital Dynamics", FALSE, "300px"),
-            conditionalPanel(
-              r"[input.vitalDynamics == '1']",
-              numericInput("muBirth",
-                           r"[Rate of births (\(\mu_B\))]",
-                           0.012, 0, 1.2, 0.0001),
-              numericInput("muDeath",
-                           r"[Rate of naturally caused death (\(\mu_D\))]",
-                           0, 0, 0.00876, 0.0001)))
+  div(id = "vital-dynamics-well",
+      style = "margin-bottom: 0.75rem;",
+      checkboxInput("vitalDynamics", "Vital Dynamics", FALSE, "300px"),
+      conditionalPanel(
+        r"[input.vitalDynamics == '1']",
+        numericInput("muBirth",
+                     r"[Rate of births (\(\mu_B\))]",
+                     0.012, 0, 1.2, 0.0001),
+        numericInput("muDeath",
+                     r"[Rate of naturally caused death (\(\mu_D\))]",
+                     0, 0, 0.00876, 0.0001)))
 
 modelOptions <- wellPanel(id = "modelOptions",
                           h3("Options"),
                           div(massAction, style = "margin: 10px;"),
-                          wellPanel(deterministic,
-                                    conditionalPanel(r"[input.stochastic == '0']",
-                                                     vitalDynamics),
+                          wellPanel(modelStochasticity,
                                     conditionalPanel(
                                       r"[input.stochastic == '1']",
                                       probability,
@@ -211,6 +218,7 @@ modelOptions <- wellPanel(id = "modelOptions",
                                                    "300px"),
                                       actionButton("rerunStochasticSimulation",
                                                    "Rerun stochastic simulation"))),
+                          vitalDynamics,
                           timesteps)
 
 modelParameters <-

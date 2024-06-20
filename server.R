@@ -1,7 +1,4 @@
 server <- function(input, output, session) {
-  ## TODO: re-enable the button after binomial implementation is completed.
-  ## disable(selector = "input[name='distribution'][value='1']")
-
   observe_helpers(withMathJax = TRUE,
                   help_dir = "www/markdown")
 
@@ -19,33 +16,34 @@ server <- function(input, output, session) {
      gsub(pattern = r"(\n\s*)", replacement = "") |>
      runjs()
 
-  ## NOTE: Disable the stochastic radio button and the sidebar to toggle
-  ## between sub-apps, respectively. TODO: When these are implemented the
-  ## respective line can be removed.
-  #disable(selector = "#stochastic > div:nth-child(2) > label:nth-child(2) > input:nth-child(1)")
+  ## NOTE: Disable the sidebar to toggle between sub-apps, respectively.
   disable(selector = "button.collapse-toggle") # sidebar button
   runjs(r"--($('button.collapse-toggle').hide())--") # sidebar button
 
   observe({
-    if (grepl("E", input$modelSelect)) {
+    if ("E" %in% strsplit(input$modelSelect, "")[[1]]) {
       hideTab(inputId = "tabs", target = "phasePlane")
     } else {
       showTab(inputId = "tabs", target = "phasePlane")
     }
   })
-  
+
+  ## Ensure that stochasticity is only enabled for the model for which it is
+  ## implemented. There is also a conditionalPanel surrounding the "stochastic"
+  ## radio buttons in ui.R.
   observe({
-    print(input$modelSelect)
-    if (input$modelSelect != "SIR") { 
+    if (input$modelSelect != "SIR") {
+      updateRadioButtons(inputId = "stochastic", selected = 0)
       disable(selector = "input[name='stochastic'][value='1']")
     }
-  })
-
-  observe({
-    if (input$stochastic == 1 && input$distribution == 0) {
-      disable(selector = "input[name='trueMassAction'][value='1']")
-    } else {
-      enable(selector = "input[name='trueMassAction'][value='1']")
+    else {
+      enable(selector = "input[name='stochastic'][value='1']")
+      if (input$stochastic == 1) {
+        if (input$trueMassAction == 1)
+          disable(selector = "input[name='distribution'][value='0']")
+        else
+          enable(selector = "input[name='distribution'][value='0']")
+      }
     }
   })
   
@@ -85,35 +83,34 @@ server <- function(input, output, session) {
   ## models have more than one set which is specific to the model and its
   ## configuration.
   defaults <- reactive({
-    filter(defaultInputValues,
-           modelType == req(input$modelSelect),
-           trueMassAction == input$trueMassAction,
-           vitalDynamics == input$vitalDynamics) ->
-      modelSpecific
+    modelSpecific <-
+      filter(defaultInputValues,
+             modelType == req(input$modelSelect),
+             trueMassAction == input$trueMassAction,
+             vitalDynamics == input$vitalDynamics)
 
-    if (dim(modelSpecific)[1] > 1) {
-      ## NOTE: stochastic filtering works as intended.
+    ## If more than one observation exists in the spreadsheet for this model
+    ## configuration, that implies there are configurations considering
+    ## stochasticity. Filter the model-specific observation further, considering
+    ## stochasticity.
+    defaultValueSets <- dim(modelSpecific)[1]
+    if (defaultValueSets != 1) {
       configurationSpecific <-
         modelSpecific |>
         mutate(stochasticTruthy = map(stochastic, shiny::isTruthy)) |>
         filter(stochasticTruthy == input$stochastic,
                stochastic == input$distribution)
 
-      # If there is exactly one set of default values for this exact model (i.e.
-      # with its configuration) return that, otherwise return the fallback set
-      # of values.
+      ## If there is exactly one set of default values for this exact model (i.e.
+      ## with its configuration) return that, otherwise return the fallback set
+      ## of values.
       firstDimensionLength <- dim(configurationSpecific)[1]
       if (firstDimensionLength != 1) {
-        if (firstDimensionLength > 1) {
-          warning(
-            print(sprintf(
-              r"(There are %s configuration-specific sets of default values.
-That's an error!
-A warning is returned because a fallback set of values was used instead.)",
-firstDimensionLength)))
-        }
+        warning(sprintf("There are %s observations/sets of default values for this exact configuration.",
+                        firstDimensionLength))
 
-        ## Return the set of fallback values.
+        ## Return the set of fallback values, since there are no default values
+        ## for this configuration with stochasticity.
         filter(modelSpecific,
                is.na(stochastic),
                vitalDynamics == input$vitalDynamics,
@@ -124,7 +121,7 @@ firstDimensionLength)))
           select(!c(trueMassAction,
                     vitalDynamics,
                     stochastic)) |>
-        select(where(\(x) all(!is.na(x))))
+          select(where(\(x) all(!is.na(x))))
       } else {
         ## There is exactly one observation of default values for this exact
         ## model configuration; return it after removing the model configuration
@@ -138,20 +135,30 @@ firstDimensionLength)))
           select(where(\(x) all(!is.na(x))))
       }
     } else {
-      warning("dim(modelSpecific)[1] == 1: ", dim(modelSpecific)[1] == 1)
       ## There is exactly one set of default values for this model, and it can
-      ## be returned immediately.
-      defaultInputValues |>
-        filter(vitalDynamics == 0,
-               trueMassAction == 0,
-               is.na(stochastic),
-               modelType == input$modelSelect) |>
+      ## be returned after removing the model configuration columns and
+      ## parameter and variable columns unrelated to this model (those with no
+      ## values).
+      modelSpecific |>
         select(!c(vitalDynamics,
                   trueMassAction,
                   stochastic)) |>
         select(where(\(x) all(!is.na(x))))
     }
   })
+
+  observe({
+    toggleClass(id = "vital-dynamics-well",
+                class = "well",
+                condition = input$vitalDynamics == 1)
+  })
+
+  observe({
+    if (input$totalMassAction == 1 && input$stochastic == 1) {
+      updateRadioButtons(inputId = "distribution",
+                         selected = 1)
+    }
+  }) |> bindEvent(input$stochastic)
 
   ## Whenever the model selection changes, the widget values throughout the
   ## application are updated according to the defaults specified for the model
@@ -418,6 +425,8 @@ firstDimensionLength)))
     }
   }) |> bindEvent(input$freezeUpdatingOfInputWidgetValuesWithDefaults)
 
+  observe({ print(defaults()) })
+
   ## DONT change the return value in the affirmative case (NULL) is ill-advised.
   ## You should know what you're doing before mucking about with this.
   inputsValid <- reactive({
@@ -466,19 +475,11 @@ firstDimensionLength)))
       message <- "Sigma must be greater than zero when a recovered compartment exists."
       boolean <- req(input$sigma) == 0
       feedbackDanger("sigma", boolean, message)
-      #Temporarily disable the stochastic option for SEI model type
-      #TODO: Will re-enable the button once the implementation is done
-      disable(selector = "input[name='stochastic'][value='1']")
     } else {
       message <- "Gamma must be greater than zero when a recovered compartment exists."
       boolean <- req(input$gamma) == 0
       feedbackDanger("gamma", boolean, message)
-      
-      #TODO: Will remove this line when all the stochastic implementation is done for all models
-      enable(selector = "input[name='stochastic'][value='1']")
     }
-
     if(boolean) NULL else message
   })
-  
 }
