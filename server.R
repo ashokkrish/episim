@@ -79,72 +79,42 @@ server <- function(input, output, session) {
     )
   )
 
-  ## All models have at least one set of default values, a "fallback". Some
-  ## models have more than one set which is specific to the model and its
+  ## FIXME: All models have at least one set of default values, a "fallback".
+  ## Some models have more than one set which is specific to the model and its
   ## configuration.
   defaults <- reactive({
     modelSpecific <-
       filter(defaultInputValues,
              modelType == req(input$modelSelect),
-             trueMassAction == input$trueMassAction,
-             vitalDynamics == input$vitalDynamics)
+             trueMassAction == req(input$trueMassAction),
+             vitalDynamics == req(input$vitalDynamics))
 
-    ## If more than one observation exists in the spreadsheet for this model
-    ## configuration, that implies there are configurations considering
-    ## stochasticity. Filter the model-specific observation further, considering
-    ## stochasticity.
+    if (req(input$stochastic) == 1)
+      modelSpecific %<>%
+        filter(stochastic == req(input$distribution))
+
     defaultValueSets <- dim(modelSpecific)[1]
     if (defaultValueSets != 1) {
-      configurationSpecific <-
-        modelSpecific |>
-        mutate(stochasticTruthy = map(stochastic, shiny::isTruthy)) |>
-        filter(stochasticTruthy == input$stochastic,
-               stochastic == input$distribution)
+      ## If there is exactly one set of default values for this exact model
+      ## (i.e. with its configuration) return that, otherwise return the
+      ## fallback set of values.
+      warning(sprintf("There are %s observations/sets of default values for ",
+                      defaultValueSets),
+              "this exact configuration.")
 
-      ## If there is exactly one set of default values for this exact model (i.e.
-      ## with its configuration) return that, otherwise return the fallback set
-      ## of values.
-      firstDimensionLength <- dim(configurationSpecific)[1]
-      if (firstDimensionLength != 1) {
-        warning(sprintf("There are %s observations/sets of default values for this exact configuration.",
-                        firstDimensionLength))
-
-        ## Return the set of fallback values, since there are no default values
-        ## for this configuration with stochasticity.
-        filter(modelSpecific,
-               is.na(stochastic),
-               vitalDynamics == input$vitalDynamics,
-               trueMassAction == input$trueMassAction) |>
-          ## NOTE: deselect the model options columns and empty columns because
-          ## only parameters and variables are used to update the numeric input
-          ## widgets.
-          select(!c(trueMassAction,
-                    vitalDynamics,
-                    stochastic)) |>
-          select(where(\(x) all(!is.na(x))))
-      } else {
-        ## There is exactly one observation of default values for this exact
-        ## model configuration; return it after removing the model configuration
-        ## columns used for filtering (retain just variables and parameter
-        ## columns).
-        configurationSpecific |>
-          select(!c(trueMassAction,
-                    vitalDynamics,
-                    stochastic,
-                    stochasticTruthy)) |>
-          select(where(\(x) all(!is.na(x))))
-      }
-    } else {
-      ## There is exactly one set of default values for this model, and it can
-      ## be returned after removing the model configuration columns and
-      ## parameter and variable columns unrelated to this model (those with no
-      ## values).
-      modelSpecific |>
-        select(!c(vitalDynamics,
-                  trueMassAction,
-                  stochastic)) |>
-        select(where(\(x) all(!is.na(x))))
+      ## Overwrite the object
+      modelSelect <- filter(defaultInputValues,
+                            modelType == input$modelSelect,
+                            is.na(trueMassAction),
+                            is.na(vitalDynamics),
+                            is.na(stochastic))
     }
+
+    modelSpecific |>
+      select(!c(vitalDynamics,
+                trueMassAction,
+                stochastic)) |>
+      select(where(\(x) all(!is.na(x))))
   })
 
   observe({
