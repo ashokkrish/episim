@@ -160,7 +160,7 @@ server <- function(input, output, session) {
   })
 
   observe({
-    if (input$totalMassAction == 1 && input$stochastic == 1) {
+    if (all(input$totalMassAction == 1, input$stochastic == 1)) {
       updateRadioButtons(inputId = "distribution",
                          selected = 1)
     }
