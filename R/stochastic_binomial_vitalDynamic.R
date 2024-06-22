@@ -1,3 +1,4 @@
+library(ggplot2)
 binomialSI_VD <- function(
     replicates,
     # Variables

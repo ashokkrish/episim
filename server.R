@@ -224,6 +224,7 @@ server <- function(input, output, session) {
           muBirth = input$muBirth,
           muDeath = input$muDeath,
           stochastic = input$stochastic,
+          distribution = input$distribution,
           replicates = input$replicates,
           rerun = input$rerun,
           timesteps = input$timesteps,
@@ -339,6 +340,11 @@ server <- function(input, output, session) {
        generate_latex(c(r"(\textbf{MATHEMATICAL MODELS})")) |> helpText() |> withMathJax(),
        if (input$stochastic == 1) {
          doCall(renderStochasticModelLaTex, args = visibleInputs())
+         tagList(
+            doCall(renderStochasticModelLaTex, args = visibleInputs()),
+            generate_latex(c(r"(\textbf{MODEL EXPLANATION})")) |> helpText() |> withMathJax(),
+            doCall(renderStochasticDescription, args = visibleInputs())
+         )
        } else if (input$stochastic == 0){
          doCall(renderModelLaTeX, args = visibleInputs()) },
        generate_latex(c(r"(\textbf{COMPARTMENT DIAGRAM})")) |> helpText() |> withMathJax(),

@@ -9,6 +9,7 @@ css_styles <- HTML(paste0(
   '    margin: 0;',
   '    padding: 0;',
   '    font-size: 20px;', 
+  '    text-align: justify;',  # Added property for justified text
   '  }',
   '</style>'
 ))
@@ -27,6 +28,28 @@ generate_latex <- function(equations) {
   ))
 }
 
+css_styles_description <- HTML(paste0(
+  '<style>',
+  '  .text-container {',
+  '    display: block;',
+  '    margin: 0;',
+  '    padding: 0;',
+  '    font-size: 20px;', 
+  '    text-align: justify;',  # Added property for justified text
+  '  }',
+  '</style>'
+))
+
+# Helper function to generate the text content
+generate_text_discription <- function(content) {
+  HTML(paste0(
+    css_styles_description,
+    '<div class="text-container">',
+    content,
+    '</div>'
+  ))
+}
+
 renderModelLaTeX <- function(modelSelect, vitalDynamics, trueMassAction) {
   do.call(modelSelect,
           list(vitalDynamics, forceOfInfection(trueMassAction))) |>
@@ -41,4 +64,11 @@ renderStochasticModelLaTex <- function(modelSelect, trueMassAction){
     generate_latex() |>
     helpText() |>
     withMathJax()
+}
+renderStochasticDescription <- function(distribution){
+  if (distribution == 1) { #binomial
+    generate_text_discription(binomialDescription) |> helpText() |> withMathJax()
+  } else { #uniform
+    generate_text_discription(uniformDescription) |> helpText() |> withMathJax()
+  }
 }
