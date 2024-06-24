@@ -21,16 +21,17 @@ binomialSI_VD <- function(
 
 simulate_SI <- function(
     # Variables
-    timesteps, population, susceptible, infected, recovered,
-    # Parameters
-    beta, gamma, xi,
-    mu, #Is mu_B equal to mu_D?
-    ## Simulation options
-    trueMassAction = FALSE){
+  timesteps, population, susceptible, infected, recovered,
+  # Parameters
+  beta, gamma, xi,
+  mu, #Is mu_B equal to mu_D?
+  ## Simulation options
+  trueMassAction = FALSE){
   # Initialize vectors to store results
   S <- numeric(timesteps + 1)
   I <- numeric(timesteps + 1)
   R <- numeric(timesteps + 1)
+  N <- population
   t <- 0:timesteps
   
   S[1] <- susceptible
@@ -57,7 +58,7 @@ simulate_SI <- function(
     R[step + 1] <- max(R[step + 1], 0)
     
     if(xi != 0){
-      loss_of_immunity <- rbinom(1, R[step], 1 - exp(-delta))
+      loss_of_immunity <- rbinom(1, R[step], 1 - exp(-xi))
       S[step + 1] <- S[step + 1] + loss_of_immunity
       R[step + 1] <- R[step + 1] - loss_of_immunity
     }
@@ -65,9 +66,10 @@ simulate_SI <- function(
     # Update total population
     N <- S[step + 1] + I[step + 1] + R[step + 1]
   }
+  data.frame(t = t, S = S, I = I, R = R)
 }
 
-plot_results <- function(run){
+plot_results <- function(all_results){
   # Plot time series of S, I, R
   time_plot <- ggplot(all_results, aes(x = t, group = run)) +
     geom_line(aes(y = S, color = "Susceptible"), linewidth = 1, alpha = 0.5) +
@@ -95,4 +97,4 @@ plot_results <- function(run){
 
 test <- binomialSI_VD(replicates = 50, timesteps = 160, population = 1000, susceptible = 990,
                       infected = 10, recovered = 0, beta = 0.3, gamma = 0.1, xi = 0.05, mu = 0.01,
-                      FALSE)
+                      TRUE)
