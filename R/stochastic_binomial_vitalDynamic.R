@@ -52,16 +52,16 @@ simulate_SI <- function(
     I[step + 1] <- I[step] + new_infections - new_recoveries - deaths_I
     R[step + 1] <- R[step] + new_recoveries - deaths_R
     
-    # Ensure no negative values
-    S[step + 1] <- max(S[step + 1], 0)
-    I[step + 1] <- max(I[step + 1], 0)
-    R[step + 1] <- max(R[step + 1], 0)
-    
     if(xi != 0){
       loss_of_immunity <- rbinom(1, R[step], 1 - exp(-xi))
       S[step + 1] <- S[step + 1] + loss_of_immunity
       R[step + 1] <- R[step + 1] - loss_of_immunity
     }
+    
+    # Ensure no negative values
+    S[step + 1] <- max(S[step + 1], 0)
+    I[step + 1] <- max(I[step + 1], 0)
+    R[step + 1] <- max(R[step + 1], 0)
     
     # Update total population
     N <- S[step + 1] + I[step + 1] + R[step + 1]
@@ -96,5 +96,5 @@ plot_results <- function(all_results){
 }
 
 test <- binomialSI_VD(replicates = 50, timesteps = 160, population = 1000, susceptible = 990,
-                      infected = 10, recovered = 0, beta = 0.3, gamma = 0.1, xi = 0.05, mu = 0.01,
+                      infected = 10, recovered = 0, beta = 0.3, gamma = 0.1, xi = 0, mu = 0.01,
                       TRUE)
