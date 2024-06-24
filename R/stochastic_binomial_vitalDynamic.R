@@ -28,10 +28,10 @@ simulate_SI <- function(
     ## Simulation options
     trueMassAction = FALSE){
   # Initialize vectors to store results
-  S <- numeric(n_steps + 1)
-  I <- numeric(n_steps + 1)
-  R <- numeric(n_steps + 1)
-  t <- 0:n_steps
+  S <- numeric(timesteps + 1)
+  I <- numeric(timesteps + 1)
+  R <- numeric(timesteps + 1)
+  t <- 0:timesteps
   
   S[1] <- susceptible
   I[1] <- infected
