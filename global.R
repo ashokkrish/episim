@@ -19,9 +19,14 @@ library(DT)
 library(reactlog)
 library(shinyFeedback)
 library(reshape2)
-source("R/plotte.R")
+source("R/plotter.R")
 
-options(shiny.reactlog=TRUE)
+## Project-local packages
+if (!require(ehpi))
+  devtools::install_github("bryce-carson/ehpi")
+library(ehpi)
+
+options(shiny.reactlog = TRUE)
 
 ## FUNCTIONS
 updateNumericInputs <- function(defaults, session) {
@@ -29,7 +34,7 @@ updateNumericInputs <- function(defaults, session) {
     warning("The `defaults` dataframe is not a single row!")
     print(defaults) # DONT remove this. It's intentional, not for development.
   }
-  iwalk(defaults, \(value, inputId) {
+  purrr::iwalk(defaults, \(value, inputId) {
     updateNumericInput(session, inputId, value = value)
   })
 }
@@ -76,18 +81,8 @@ addRuleListToValidator <- function(validator, ruleList) {
 
 here::i_am("global.R")
 
-## DONE: do not modify the column types given below; they are current as of
-## 2024-05-23. They should only change if the ordering of columns changes.
-columnTypes <- c(
-  "text", # Compartmental model type
-  "text", # Binomial type
-  ## WARN DONT: using logicals in any way, it inexplicably borks everything. A
-  ## character vector is used to hold the string "numeric," as modified below.
-  character(18)
-)
-columnTypes[3:20] <- "numeric"
-defaultInputValues <- read_xlsx(here("data/defaultInputValues.xlsx"),
-                                col_types = columnTypes,
+defaultInputValues <- read_xls(here("data/defaultInputValues.xls"),
+                                col_types = c(rep("text", 3), rep("numeric", 18)),
                                 sheet = "Ashok")
 
 ## INITIALIZATION

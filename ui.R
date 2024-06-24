@@ -162,13 +162,31 @@ episimModelAuthorshipTab <-
             a("Episim GitHub", href = "https://github.com/ashokkrish/episim", target = "_blank")),
           style = r"(a[href^='mailto']::before {content: '📧 ';} a[href^='tel']::before {content: '📞 ';})")))
 
-models <- list("SIR", "SIRS", "SIRD", "SEIR", "SEIRS", "SEIRD")
-names(models) <- models
-models <- append(models, list("Please choose a model" = ""), after = 0)
-modelSelect <- pickerInput("modelSelect",
-  strong("Epidemic Model"),
-  models,
-  width = "98%")
+modelChoices <-
+  defaultInputValues %>%
+    rename(name = readablePublicationName) %>%
+    select(name, modelType) %>%
+    filter(!is.na(name)) %>%
+    mutate(widerValue = as.vector(map2(name, modelType, \(name, modelType) sprintf("%s_%s", modelType, name)))) %>%
+    select(name, widerValue) %>%
+    pivot_wider(names_from = name, values_from = widerValue) %>%
+    unnest(cols = names(.)) %>%
+    as.list() %>%
+    list("Published models" = .) %>%
+    append(list("SIR" = "SIR_NA",
+                "SIRS" = "SIRS_NA",
+                "SIRD" = "SIRD_NA",
+                "SEIR" = "SEIR_NA",
+                "SEIRS" = "SEIRS_NA",
+                "SEIRD" = "SEIRD_NA") %>%
+            list("Application defaults" = .))
+
+modelSelect <-
+  pickerInput("modelSelect",
+              strong("Epidemic Model"),
+              width = 0.98,
+              choices = modelChoices,
+              selected = NULL)
 
 massAction <-
   radioButtons("trueMassAction",
@@ -238,7 +256,7 @@ modelVariables <-
 updateValuesWithDefaultsSwitch <-
   conditionalPanel(r"(input.modelSelect != '')",
     helper(
-      checkboxInput(inputId = "freezeUpdatingOfInputWidgetValuesWithDefaults",
+      checkboxInput(inputId = "freeze",
                     label = "Freeze update of inputs with defaults on model (and option) change",
                     value = FALSE),
       title = r"(Application "rudeness")",

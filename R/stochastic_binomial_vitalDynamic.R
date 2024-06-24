@@ -15,7 +15,7 @@ binomialSI_VD <- function(
     run$run <- i
     return(run)
   }))
-  
+
   plot_results(all_results)
 }
 
@@ -33,11 +33,11 @@ simulate_SI <- function(
   R <- numeric(timesteps + 1)
   N <- population
   t <- 0:timesteps
-  
+
   S[1] <- susceptible
   I[1] <- infected
   R[1] <- recovered
-  
+
   for(step in 1:timesteps){
     # Calculate the number of new infections, recoveries, births, and deaths
     new_infections <- rbinom(1, S[step], 1 - exp(-beta * I[step] / N^as.numeric(trueMassAction)))
@@ -46,7 +46,7 @@ simulate_SI <- function(
     deaths_S <- rbinom(1, S[step], mu)
     deaths_I <- rbinom(1, I[step], mu)
     deaths_R <- rbinom(1, R[step], mu)
-    
+
     # Update compartments
     S[step + 1] <- S[step] - new_infections + new_births - deaths_S
     I[step + 1] <- I[step] + new_infections - new_recoveries - deaths_I
@@ -62,7 +62,13 @@ simulate_SI <- function(
     S[step + 1] <- max(S[step + 1], 0)
     I[step + 1] <- max(I[step + 1], 0)
     R[step + 1] <- max(R[step + 1], 0)
-    
+
+    if(xi != 0){
+      loss_of_immunity <- rbinom(1, R[step], 1 - exp(-xi))
+      S[step + 1] <- S[step + 1] + loss_of_immunity
+      R[step + 1] <- R[step + 1] - loss_of_immunity
+    }
+
     # Update total population
     N <- S[step + 1] + I[step + 1] + R[step + 1]
   }
@@ -81,7 +87,7 @@ plot_results <- function(all_results){
          color = "Compartment") +
     scale_color_manual(values = c("blue", "red", "green")) +
     theme_minimal()
-  
+
   # SI Phase plane plot
   si_phase_plot <- ggplot(all_results, aes(x = S, y = I, group = run)) +
     geom_path(linewidth = 1, alpha = 0.5, color = "darkred") +
@@ -89,12 +95,12 @@ plot_results <- function(all_results){
          x = "Susceptible",
          y = "Infected") +
     theme_minimal()
-  
+
   # Print the plots
   print(time_plot)
   print(si_phase_plot)
 }
 
-test <- binomialSI_VD(replicates = 50, timesteps = 160, population = 1000, susceptible = 990,
-                      infected = 10, recovered = 0, beta = 0.3, gamma = 0.1, xi = 0, mu = 0.01,
-                      TRUE)
+## test <- binomialSI_VD(replicates = 50, timesteps = 160, population = 1000, susceptible = 990,
+##                       infected = 10, recovered = 0, beta = 0.3, gamma = 0.1, xi = 0.05, mu = 0.01,
+##                       FALSE)

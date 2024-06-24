@@ -1,0 +1,1 @@
+$(document).ready(function() { $('button.collapse-toggle').disable().hide(); });

@@ -1,0 +1,6 @@
+div:has(> #modelSelect) {
+    border: var(--bs-border-width) solid #8D959E;
+    border-radius: var(--bs-border-radius);
+    transition: border-color 0.15s ease-in-out,
+                box-shadow 0.15s ease-in-out;
+}

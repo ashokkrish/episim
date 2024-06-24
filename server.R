@@ -1,27 +1,17 @@
 server <- function(input, output, session) {
-  observe_helpers(withMathJax = TRUE,
-                  help_dir = "www/markdown")
+  observe_helpers(withMathJax = TRUE, help_dir = "www/markdown")
 
-  ## Restyle some elements with JavaScript.
-  runjs(r"[$(document).ready($('#modelSelect + button').removeClass('btn-light'))]")
-  r"($(document)
-     .ready($('div:has(> #modelSelect)')
-            .css({
-            'border':'var(--bs-border-width) solid #8D959E',
-            'border-radius':'var(--bs-border-radius)',
-            'transition':'border-color 0.15s ease-in-out,box - shadow 0.15 s ease - in - out '
-            })
-     )
-    )" |>
-     gsub(pattern = r"(\n\s*)", replacement = "") |>
-     runjs()
+  model <- reactive(str_split_1(req(input$modelSelect), "_"))
+  compartmentalModel <- reactive(model()[[1]])
+  publication <- reactive(model()[[2]])
 
-  ## NOTE: Disable the sidebar to toggle between sub-apps, respectively.
-  disable(selector = "button.collapse-toggle") # sidebar button
-  runjs(r"--($('button.collapse-toggle').hide())--") # sidebar button
+  observe({print(paste("The compartmental model selection is:", compartmentalModel()))})
+
+  exposedCompartmentInModel <- reactive({ str_detect(compartmentalModel(), "E") })
+  deadCompartmentInModel <- reactive({ str_detect(compartmentalModel(), "D") })
 
   observe({
-    if ("E" %in% strsplit(input$modelSelect, "")[[1]]) {
+    if (exposedCompartmentInModel()) {
       hideTab(inputId = "tabs", target = "phasePlane")
     } else {
       showTab(inputId = "tabs", target = "phasePlane")
@@ -32,7 +22,7 @@ server <- function(input, output, session) {
   ## implemented. There is also a conditionalPanel surrounding the "stochastic"
   ## radio buttons in ui.R.
   observe({
-    if (input$modelSelect != "SIR") {
+    if (compartmentalModel() != "SIR") {
       updateRadioButtons(inputId = "stochastic", selected = 0)
       disable(selector = "input[name='stochastic'][value='1']")
     }
@@ -46,7 +36,7 @@ server <- function(input, output, session) {
       }
     }
   })
-  
+
   observe({
     if (input$stochastic == 1) {
       hideTab(inputId = "tabs", target = "outputSummary")
@@ -55,18 +45,68 @@ server <- function(input, output, session) {
     }
   })
 
+  rules <- tribble(
+  ~ model, # A regular expression
+  ~ ruleList,
+  "S.*S", # Waning learned immunity
+  list(
+    xi = c(sv_gt(0), sv_lte(1))
+  ),
+  "D", # Death
+  list(
+    delta = c(sv_between(0, 1)),
+    dead = c(sv_integer(), sv_gte(0))
+  ),
+  "E", # Exposure
+  list(
+    sigma = c(sv_gt(0), sv_lte(1)),
+    exposed = c(sv_integer(), sv_gte(0))
+  ),
+
+  # Global rules
+  NA,
+  list(
+    ## Vital dynamics
+    muBirth = c(sv_between(0, 1)),
+    muDeath = c(sv_between(0, 1)),
+
+    ## Global rules for compartments; only the compartments that are actually
+    ## common to all models can be included here, otherwise all models will be
+    ## invalidated if an inapplicable compartment has an invalid input (e.g.
+    ## the exposed and dead compartments have invalid input while SIR is
+    ## selected).
+    population = c(sv_integer(), sv_gt(0)),
+    susceptible = c(sv_integer(), sv_gt(0)),
+    infected = c(sv_integer(), sv_gte(0)),
+    ## The above example means you---the current editor---must move the
+    ## recovered rule to each model featuring the recovery compartment if ever
+    ## you include an SI model (having no recovered compartment), and remove it
+    ## from the global rule. Make sense? Godspeed.
+    recovered = c(sv_integer(), sv_gte(0)),
+
+    ## Global rules for parameters
+    beta = c(sv_gt(0), sv_lte(1)),
+    gamma = c(sv_gt(0)),
+
+    ## Simulation options
+    replicates = c(sv_integer(), sv_gt(0)),
+    timesteps = c(sv_gt(0))
+    )
+  )
 
   globalValidator <- addRuleListToValidator(
     InputValidator$new(),
     filter(rules, is.na(model))[, 2][[1]][[1]]
   )
 
-  validatorsAndLambdas <-
+  validatorsAndLambdas <- {
     filter(rules, !is.na(model)) |>
-    rowwise() |>
-    mutate(vld = list(addRuleListToValidator(InputValidator$new(), ruleList)),
-           lambda = list(eval(bquote(\() grepl(.(model), input$modelSelect)))),
-           .keep = "none")
+      rowwise() |>
+      mutate(vld = list(addRuleListToValidator(InputValidator$new(), ruleList)),
+            ## FIXME: the value of the selection should be a character vector...
+            lambda = list(eval(bquote(\() grepl(.(model), compartmentalModel())))),
+            .keep = "none")
+  }
 
   isolate(
     mapply(
@@ -85,13 +125,10 @@ server <- function(input, output, session) {
   defaults <- reactive({
     modelSpecific <-
       filter(defaultInputValues,
-             modelType == req(input$modelSelect),
-             trueMassAction == req(input$trueMassAction),
-             vitalDynamics == req(input$vitalDynamics))
-
-    if (req(input$stochastic) == 1)
-      modelSpecific %<>%
-        filter(stochastic == req(input$distribution))
+             modelType == req(compartmentalModel()),
+             readablePublicationName == req(publication()),
+             trueMassAction == input$trueMassAction,
+             vitalDynamics == input$vitalDynamics)
 
     defaultValueSets <- dim(modelSpecific)[1]
     if (defaultValueSets != 1) {
@@ -103,7 +140,7 @@ server <- function(input, output, session) {
               "this exact configuration.")
 
       ## Overwrite the object
-      modelSelect <- filter(defaultInputValues,
+      modelSpecific <- filter(defaultInputValues,
                             modelType == input$modelSelect,
                             is.na(trueMassAction),
                             is.na(vitalDynamics),
@@ -163,26 +200,26 @@ server <- function(input, output, session) {
         id = "beta-and-gamma",
         numericInputWithMathJax("beta",
                                 rateLabels["beta"],
-                                if (input$freezeUpdatingOfInputWidgetValuesWithDefaults == FALSE)
+                                if (input$freeze == FALSE)
                                   rateValues$beta
                                 else
                                   isolate(input$beta)),
         numericInputWithMathJax("gamma",
                                 rateLabels["gamma"],
-                                if (input$freezeUpdatingOfInputWidgetValuesWithDefaults == FALSE)
+                                if (input$freeze == FALSE)
                                   rateValues$gamma
                                 else
                                   isolate(input$gamma))
       )
     })
 
-    if (input$freezeUpdatingOfInputWidgetValuesWithDefaults == FALSE)
+    if (input$freeze == FALSE)
       updateNumericInputs(defaults(), session)
   }) |> bindEvent({ defaults() })
 
   ## A reactive value like input, but with hidden and irrelevant inputs removed.
   greedy_visibleInputs <- reactive({
-    shiny::validate(need(input$modelSelect, "A model must be selected."))
+    shiny::validate(need(compartmentalModel(), "A model must be selected."))
     ## TODO: this could be improved, but I'm not sure how. This is kinda awful
     ## and should be built-in to Shiny.
     relevantInputs <-
@@ -221,12 +258,10 @@ server <- function(input, output, session) {
   ## information: https://shiny.posit.co/r/reference/shiny/1.7.2/debounce.html.
   visibleInputs <- debounce(greedy_visibleInputs, 500)
 
-
   observe({ print(req(visibleInputs())) })
 
   settings <- reactive({
-    modelSelect <- input$modelSelect
-    compartments <- strsplit(modelSelect, "")[[1]]
+    compartments <- strsplit(compartmentalModel(), "")[[1]]
 
     # Generate list of colors
     plotSettings_colors <- sapply(compartments, function(compartment) {
@@ -244,8 +279,6 @@ server <- function(input, output, session) {
       phasePlanePlotSettings_color = input$phasePlanePlotSettings_color
     )
   })
-
-  
 
   renderModel <- reactive({
     msg <- "The compartment values (except D) must sum to N before simulating."
@@ -269,9 +302,9 @@ server <- function(input, output, session) {
         }
       } else {
         {
-          doCall(exposuRe, args = visibleInputs())
+          doCall(ehpi:::epi, args = visibleInputs())
         } |>
-          select(c(time, N, matches(str_split_1(input$modelSelect, ""))))
+          select(c(time, N, matches(str_split_1(compartmentalModel(), ""))))
       }
       
     plotSettings <- settings()[grep("^plotSettings_", names(settings()))]
@@ -280,7 +313,7 @@ server <- function(input, output, session) {
     phasePlanePlotSettings <- settings()[grep("^phasePlanePlotSettings_", names(settings()))]
     names(phasePlanePlotSettings) <- sub("^phasePlanePlotSettings_", "", names(phasePlanePlotSettings))
 
-    model <- list(data = modelResults, selectedModel = input$modelSelect, plotterType = plotterType)
+    model <- list(data = modelResults, selectedModel = compartmentalModel(), plotterType = plotterType)
     mainPlot <- ggplotly(plotter(model, plotSettings)) %>%
       layout(xaxis = list(autorange = TRUE), yaxis = list(autorange = TRUE))
 
@@ -319,7 +352,7 @@ server <- function(input, output, session) {
          doCall(renderModelLaTeX, args = visibleInputs()) },
        generate_latex(c(r"(\textbf{COMPARTMENT DIAGRAM})")) |> helpText() |> withMathJax(),
        tagList(img(
-         src = paste0("images/", input$modelSelect, ".svg"),
+         src = paste0("images/", req(compartmentalModel()), ".svg"),
          contentType = "image/svg",
          width = "45%",
          alt = gsub("\n[\t\ ]+?", " ", r"(The diagram of the model compartments
@@ -347,8 +380,7 @@ server <- function(input, output, session) {
     renderModel()$mainPlot
   })
   output$plotSettings_colorPickers <- renderUI({
-    modelSelect <- input$modelSelect
-    compartments <- strsplit(modelSelect, "")[[1]]
+    compartments <- strsplit(compartmentalModel(), "")[[1]]
     numCompartments <- length(compartments)
 
     lapply(1:numCompartments, function(i) {
@@ -379,7 +411,7 @@ server <- function(input, output, session) {
     )))
   output$downloadData <-
     downloadHandler(
-      \() paste0(input$modelSelect, "_Model_Summary", Sys.Date(), ".xlsx"),
+      \() paste0(compartmentalModel(), "_Model_Summary", Sys.Date(), ".xlsx"),
       \(file) write_xlsx(renderModel()$modelResults, file)
     )
   output$mathematicalModel <- renderUI(renderModel()$modelLatex)
@@ -408,11 +440,11 @@ server <- function(input, output, session) {
   ## DONT try to combine these; the UX-logic is as it should be with these two
   ## observers.
   observe({
-    if (input$freezeUpdatingOfInputWidgetValuesWithDefaults == TRUE) {
+    if (input$freeze == TRUE) {
       updateTextAndColourInputs()
       isolate(updateNumericInputs(defaults(), session))
     }
-  }) |> bindEvent(input$freezeUpdatingOfInputWidgetValuesWithDefaults)
+  }) |> bindEvent(input$freeze)
 
   ## DONT change the return value in the affirmative case (NULL) is ill-advised.
   ## You should know what you're doing before mucking about with this.
@@ -426,14 +458,8 @@ server <- function(input, output, session) {
     }
   })
 
-  exposedCompartmentInModel <-
-    reactive("E" %in% str_split(req(input$modelSelect), "")[[1]])
-
-  deadCompartmentInModel <-
-    reactive("D" %in% str_split(req(input$modelSelect), "")[[1]])
-
   compartmentsEqualPopulation <- reactive({
-    shiny::validate(need(input$modelSelect, "A model must be selected."),
+    shiny::validate(need(compartmentalModel(), "A model must be selected."),
                     need(input$population, "A population is required."),
                     need(input$susceptible, "A number of people must be susceptible."),
                     need(input$exposed, "A number of people must be exposed."),
@@ -447,7 +473,7 @@ server <- function(input, output, session) {
     names(variables) <- c("N", "S", "E", "I", "R")
     applicableVariables <-
       variables[names(variables) %in%
-                  unique(str_split(input$modelSelect, "")[[1]])]
+                  unique(str_split(req(compartmentalModel()), "")[[1]])]
     boolean <- !(input$population == sum(applicableVariables))
     stopifnot(length(boolean) == 1)
     message <- "Population must be equal to the sum of the initial compartments values!"
@@ -458,7 +484,8 @@ server <- function(input, output, session) {
   ## TODO: if a SI or SEI model without an R compartment is ever introduced then
   ## this needs to be modified.
   recoveryRatePositive <- reactive({
-    if(exposedCompartmentInModel()) {
+    print(exposedCompartmentInModel())
+    if (exposedCompartmentInModel()) {
       message <- "Sigma must be greater than zero when a recovered compartment exists."
       boolean <- req(input$sigma) == 0
       feedbackDanger("sigma", boolean, message)
@@ -467,6 +494,6 @@ server <- function(input, output, session) {
       boolean <- req(input$gamma) == 0
       feedbackDanger("gamma", boolean, message)
     }
-    if(boolean) NULL else message
+    if (boolean) NULL else message
   })
 }
