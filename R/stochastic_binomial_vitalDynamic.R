@@ -68,7 +68,12 @@ simulate_SI <- function(
       S[step + 1] <- S[step + 1] + loss_of_immunity
       R[step + 1] <- R[step + 1] - loss_of_immunity
     }
-
+    
+    # Ensure no negative values
+    S[step + 1] <- max(S[step + 1], 0)
+    I[step + 1] <- max(I[step + 1], 0)
+    R[step + 1] <- max(R[step + 1], 0)
+    
     # Update total population
     N <- S[step + 1] + I[step + 1] + R[step + 1]
   }
