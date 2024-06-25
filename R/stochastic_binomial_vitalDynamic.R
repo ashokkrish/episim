@@ -106,6 +106,7 @@ plot_results <- function(all_results){
   print(si_phase_plot)
 }
 
-## test <- binomialSI_VD(replicates = 50, timesteps = 160, population = 1000, susceptible = 990,
-##                       infected = 10, recovered = 0, beta = 0.3, gamma = 0.1, xi = 0.05, mu = 0.01,
-##                       FALSE)
+#EXAMPLE CALL
+#binomialSI_VD(replicates = 50, timesteps = 160, population = 1000, susceptible = 990,
+#              infected = 10, recovered = 0, beta = 0.3, gamma = 0.1, xi = 0, mu = 0.01,
+#              TRUE)
