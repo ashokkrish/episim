@@ -424,7 +424,7 @@ server <- function(input, output, session) {
                      r"(The diagram of the model compartments failed to load, or
                       the accessibility text is being read by a screen
                       reader.)"))
-      ))
+      )
 
     return(list(
       modelLatex = modelLatex,
