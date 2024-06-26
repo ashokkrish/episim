@@ -20,7 +20,6 @@ library(reactlog)
 library(shinyFeedback)
 library(reshape2)
 library(magrittr)
-source("R/plotter.R")
 
 ## Project-local packages
 if (!require(ehpi))
