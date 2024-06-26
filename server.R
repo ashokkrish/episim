@@ -11,6 +11,10 @@ server <- function(input, output, session) {
   exposedCompartmentInModel <- reactive({ str_detect(compartmentalModel(), "E") })
   deadCompartmentInModel <- reactive({ str_detect(compartmentalModel(), "D") })
 
+  ## observe(shinyjs::hide("outputPanel")) %>%
+  ##   bindEvent(reactiveValuesToList(input) %>%
+  ##             subset(not(is_in(names(.), c("run")))))
+
   ## Ensure that stochasticity is only enabled for the model for which it is
   ## implemented. There is also a conditionalPanel surrounding the "stochastic"
   ## radio buttons in ui.R.
@@ -201,7 +205,6 @@ server <- function(input, output, session) {
     selectedModel <- compartmentalModel()
     ## TODO: this could be improved, but I'm not sure how. This is kinda awful
     ## and should be built-in to Shiny.
-    relevantInputs <-
       reactiveValuesToList(
         reactiveValues(
           trueMassAction = input$trueMassAction,
@@ -212,7 +215,7 @@ server <- function(input, output, session) {
           muDeath = input$muDeath,
           timesteps = input$timesteps,
 
-          rerun = input$rerun,
+          rerun = input$rerunStochasticSimulation,
 
           beta = input$beta,
           gamma = input$gamma,
@@ -225,15 +228,12 @@ server <- function(input, output, session) {
           exposed = input$exposed,
           infected = input$infected,
           recovered = input$recovered,
-          dead = input$dead))
-
-    localVisibleInputs <-
-      relevantInputs[!(names(relevantInputs) %in% input$hiddenInputs)]
-
-    localVisibleInputs %<>%
+          dead = input$dead)) %>%
+    subset(not(is_in(names(.), input$hiddenInputs))) %>%
       ## FIXME: why is it necessary to put replicates here?
       append(list(replicates = input$replicates)) %>%
-      append(list(modelSelect = compartmentalModel()))
+      append(list(modelSelect = compartmentalModel())) %>%
+      subset(not(is.na(.)))
   })
 
   ## NOTE: prevent the reactive value from invalidating renderModel too often,
@@ -242,7 +242,8 @@ server <- function(input, output, session) {
   ## information: https://shiny.posit.co/r/reference/shiny/1.7.2/debounce.html.
   visibleInputs <- debounce(greedy_visibleInputs, 500)
 
-  renderModel <- reactive({
+
+  output$outputPanel <- renderUI({
     msg <- "The compartment values (except D) must sum to N before simulating."
     shiny::validate(need(compartmentsEqualPopulation(), message = msg),
                     need(recoveryRatePositive(),
@@ -255,39 +256,12 @@ server <- function(input, output, session) {
                                                        message = msg))
     modelResults <-
       if (input$stochastic == 1) {
-        if (input$distribution == 0) {
-          shiny::validate(need(input$replicates, message = "Replicates are needed."))
-          shiny::validate(need(input$replicates, message = "Replicates are needed."))
-          doCall(uniformSI, args = req(visibleInputs()))
-        } else {
-          shiny::validate(need(input$replicates, message = "Replicates are needed."))
-          doCall(binomialSI, args = req(visibleInputs()))
-        }
+        shiny::validate(need(input$replicates,
+                             message = "Replicates are needed."))
+        doCall(if (input$distribution == 0) uniformSI else binomialSI,
+               args = req(visibleInputs()))
       } else {
-        req(visibleInputs())
-
-        ## FIXME: visibleInputs causes a very strange error to occur. I have
-        ## verified that the problem lay there by ruling out ehpi::epi by
-        ## calling epi directly with a fixed set of arguments, calling epi
-        ## directly with the same arguments as _should be_ passed to doCall by
-        ## visibleInputs. I have ruled out doCall by allowing it to call
-        ## ehpi::epi and providing the same list of arguments I used when I
-        ## called it directly. I have also ruled out dplyr::select here by
-        ## commenting that out and reproducing the error without it. I have also
-        ## ruled out shiny::req by commenting that out and reproducing the error
-        ## without it.
-        ##
-        ## theArgumentsMentionedInTheFIXME <-
-        ##   list(population = 500,
-        ##        susceptible = 499,
-        ##        infected = 1,
-        ##        recovered = 0,
-        ##        beta = 0.001,
-        ##        gamma = 0.1,
-        ##        outputRows = 50)
-        ##
-        ## doCall(epi, args = theArgumentsMentionedIntheFIXME) %>%
-        doCall(epi, args = visibleInputs()) %>%
+        doCall(epi, args = req(visibleInputs())) %>%
           select(c(time, N, matches(str_split_1(compartmentalModel(), ""))))
       }
 
@@ -346,8 +320,10 @@ server <- function(input, output, session) {
     output$downloadData <-
       downloadHandler(
         function() paste0(input$modelSelect, "_Model_Summary", Sys.Date(), ".xlsx"),
-        function(file) write_xlsx(renderModel()$modelResults, file)
+        function(file) write_xlsx(modelResults, file)
       )
+
+    ## shinyjs::show("outputPanel")
 
     mainPanel(id = "outputPanel",
               tabsetPanel(
@@ -376,8 +352,6 @@ server <- function(input, output, session) {
                 tabPanel("Mathematical Model", br(), modelLatex)))
   })
 
-  output$outputPanel <- renderUI(renderModel())
-
   ## When the user presses the reset button the numeric inputs are reset to the
   ## default values available for the model compartments' parameters and
   ## variables, and the selected model options.
@@ -399,14 +373,13 @@ server <- function(input, output, session) {
   ## DONT change the return value in the affirmative case (NULL) is ill-advised.
   ## You should know what you're doing before mucking about with this.
   inputsValid <- reactive({
-    input # Depend on all inputs.
     if (globalValidator$is_valid()) {
       NULL
     } else {
       paste("All the required inputs for this model must be valid.",
             "Check the warnings and errors on the input widgets.")
     }
-  })
+  }) %>% bindEvent(input) # Depend on all inputs.
 
   compartmentsEqualPopulation <- reactive({
     shiny::validate(need(compartmentalModel(), "A model must be selected."),

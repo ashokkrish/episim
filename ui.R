@@ -246,6 +246,7 @@ modelConfigurationPanel <-
                                     modelOptions,
                                     modelParameters,
                                     modelVariables),
+                                ## actionButton("run", "Simulate", icon("play")),
                                 resetButton))
 
 disclaimer <-
