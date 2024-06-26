@@ -324,26 +324,6 @@ server <- function(input, output, session) {
 
   observe({ print(req(visibleInputs())) })
 
-  settings <- reactive({
-    compartments <- strsplit(compartmentalModel(), "")[[1]]
-
-    # Generate list of colors
-    plotSettings_colors <- sapply(compartments, function(compartment) {
-      input[[paste0(compartment, "PlotSettings_color")]]
-    }, simplify = FALSE, USE.NAMES = FALSE)
-
-    list(
-      plotSettings_title = input$plotSettings_title,
-      phasePlanePlotSettings_title = input$phasePlanePlotSettings_title,
-      plotSettings_xAxisLabel = input$plotSettings_xAxisLabel,
-      plotSettings_yAxisLabel = input$plotSettings_yAxisLabel,
-      phasePlanePlotSettings_xAxisLabel = input$phasePlanePlotSettings_xAxisLabel,
-      phasePlanePlotSettings_yAxisLabel = input$phasePlanePlotSettings_yAxisLabel,
-      plotSettings_colors = plotSettings_colors,
-      phasePlanePlotSettings_color = input$phasePlanePlotSettings_color
-    )
-  })
-
   renderModel <- reactive({
     msg <- "The compartment values (except D) must sum to N before simulating."
     shiny::validate(need(compartmentsEqualPopulation(), message = msg),
@@ -371,17 +351,11 @@ server <- function(input, output, session) {
           select(c(time, N, matches(str_split_1(compartmentalModel(), ""))))
       }
 
-    plotSettings <- settings()[grep("^plotSettings_", names(settings()))]
-    names(plotSettings) <- sub("^plotSettings_", "", names(plotSettings))
-
-    phasePlanePlotSettings <- settings()[grep("^phasePlanePlotSettings_", names(settings()))]
-    names(phasePlanePlotSettings) <- sub("^phasePlanePlotSettings_", "", names(phasePlanePlotSettings))
-
     model <- list(data = modelResults, selectedModel = compartmentalModel(), plotterType = plotterType)
-    mainPlot <- ggplotly(plotter(model, plotSettings)) %>%
+    mainPlot <- ggplotly(plotter(model)) %>%
       layout(xaxis = list(autorange = TRUE), yaxis = list(autorange = TRUE))
 
-    phaseplanePlot <- ggplotly(phasePlanePlotterSI(model, phasePlanePlotSettings)) %>%
+    phaseplanePlot <- ggplotly(phasePlanePlotterSI(model)) %>%
       layout(xaxis = list(autorange = TRUE), yaxis = list(autorange = TRUE))
 
     subPlots <- subPlotter(model) |>
@@ -400,7 +374,6 @@ server <- function(input, output, session) {
     } else {
       datatable(round(modelResults, 2), rownames = FALSE)
     }
-    #modelDataTable <- datatable(round(modelResults, 2), rownames = FALSE)
 
     # FIX: vital dynamics error
     modelLatex <- div(
@@ -426,71 +399,41 @@ server <- function(input, output, session) {
                       reader.)"))
       )
 
-    return(list(
-      modelLatex = modelLatex,
-      modelResults = modelResults,
-      mainPlot = mainPlot,
-      subPlots = subPlots,
-      phaseplanePlot = phaseplanePlot,
-      modelDataTable = modelDataTable
-    ))
-  })
-
-  defaultColors <- c(
-    "#9467bd", "#2ca02c", "#ff7f0e", "#1f77b4", "#d62728",
-    "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"
-  )
-
-  output$plot <- renderUI({
-    renderModel()$mainPlot
-  })
-  output$plotSettings_colorPickers <- renderUI({
-    compartments <- strsplit(compartmentalModel(), "")[[1]]
-    numCompartments <- length(compartments)
-
-    lapply(1:numCompartments, function(i) {
-      colourInput(
-        inputId = paste0(compartments[i], "PlotSettings_color"),
-        label = strong(paste(compartments[i], "Plot Color")),
-        value = defaultColors[i]
-      )
-    })
-  })
-
-  output$phasePlanePlotSettings_colorPickers <- renderUI({
-    # this is an si phase plane so only 1 color
-    colourInput(
-      inputId = "phasePlanePlotSettings_color",
-      label = strong("Phase Plane Plot Color"),
-      value = defaultColors[1]
-    )
-  })
-
-  output$phasePlanePlot <- renderUI(renderModel()$phaseplanePlot)
-  output$subPlots <- renderUI(div(fluidRow(renderModel()$subPlots)))
-
-  output$outputSummary <- renderUI(div(
-    style = "display: flex; flex-direction: column;",
-    renderModel()$modelDataTable, downloadButton("downloadData", "Download as Excel",
-      style = "align-self: flex-start; margin-top: 1vh;"
-    )))
-  output$downloadData <-
+    output$downloadData <-
     downloadHandler(
-      \() paste0(compartmentalModel(), "_Model_Summary", Sys.Date(), ".xlsx"),
+      \() paste0(input$modelSelect, "_Model_Summary", Sys.Date(), ".xlsx"),
       \(file) write_xlsx(renderModel()$modelResults, file)
     )
-  output$mathematicalModel <- renderUI(renderModel()$modelLatex)
 
-  updateTextAndColourInputs <- function() {
-    for (id in names(input)) {
-      if (grepl("Settings_", id)) {
-        updateTextInput(session, id, value = "")
-        ## TODO: this does not work, need to find away to reset
-        ## colors without relying on the settings reactive
-        updateColourInput(session, id, value = "")
-      }
-    }
-  }
+
+    mainPanel(
+      id = "outputPanel",
+      tabsetPanel(
+        id = "tabSet",
+        tabPanel("Plot",
+                 br(),
+                 mainPlot,
+                 br(),
+                 div(fluidRow(subPlots))),
+       { if (!exposedCompartmentInModel())
+           tabPanel("Phase Plane",
+                    br(),
+                    phaseplanePlot)},
+        tabPanel("Output Summary",
+                 br(),
+                 div(style = "display: flex; flex-direction: column;",
+                     modelDataTable,
+                     downloadButton("downloadData",
+                                    "Download as Excel",
+                                    style = "align-self: flex-start; margin-top: 1vh;"))),
+        tabPanel("Mathematical Model",
+                 br(),
+                 modelLatex),
+        ))
+
+  })
+
+  output$outputPanel <- renderUI(renderModel())
 
   ## When the user presses the reset button the numeric inputs are reset to the
   ## default values available for the model compartments' parameters and

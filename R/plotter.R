@@ -21,53 +21,16 @@ compartment_names <- c(
     D = "Deceased"
 )
 
-# Helper function to get plot settings
-getAndValidateSettings <- function(model, settings, defaultTitle, defaultXAxisLabel, defaultYAxisLabel) {
-    list(
-        title = if (!is.null(settings$title) && settings$title != "") {
-            settings$title
-        } else {
-            defaultTitle
-        },
-        xAxisLabel = if (!is.null(settings$xAxisLabel) && settings$xAxisLabel != "") {
-            settings$xAxisLabel
-        } else {
-            defaultXAxisLabel
-        },
-        yAxisLabel = if (!is.null(settings$yAxisLabel) && settings$yAxisLabel != "") {
-            settings$yAxisLabel
-        } else {
-            defaultYAxisLabel
-        }
-    )
-}
 
-plotter <- function(model, settings) {
-  
-  labels <- getAndValidateSettings(
-    model, settings,
-    paste(model$selectedModel, "Epidemic Model"),
-    "Time",
-    "Number of People"
-  )
-  
+plotter <- function(model) {
+
   compartments <- strsplit(model$selectedModel, "")[[1]]
-  
-  if (!is.null(settings$colors) && length(settings$colors) > 0) {
-    settings$colors <- Filter(Negate(is.null), settings$colors)
-  }
-  if (!is.null(settings$colors) && length(settings$colors) >= length(compartments)) {
-    colors <- settings$colors[1:length(compartments)]
-  } else {
-    colors <- defaultColors[1:length(compartments)]
-  }
-  names(colors) <- compartment_names[compartments]
   
   plot <- ggplot2::ggplot(model$data, ggplot2::aes(x = time)) +
     ggplot2::labs(
-      title = labels$title,
-      x = labels$xAxisLabel,
-      y = labels$yAxisLabel
+      title = paste(model$selectedModel, "Epidemic Model"),
+      x = "Time",
+      y = "Number of People"
     )
   
   if (model$plotterType == "binomial") {
@@ -77,8 +40,6 @@ plotter <- function(model, settings) {
         alpha = 0.3, linewidth = 0.7
       )
     }
-    # tmp patch untill I figure out how "iteration" effects colors mappings
-    colors <- defaultColors[1:length(compartments)]
   } else {
     for (compartment in compartments) {
       plot <- plot + ggplot2::geom_line(
@@ -91,41 +52,29 @@ plotter <- function(model, settings) {
   plot <- plot +
     theme_classic() +
     plotTheme +
-    scale_color_manual(
-      values = colors,
-      name = "Compartments"
-    ) +
+    ggplot2::scale_color_brewer(palette = "Dark2") +
     ggplot2::guides(color = ggplot2::guide_legend(title = paste(model$selectedModel, "Model")))
   
 }
 
-
 # Phase plane plotter for SI models
-phasePlanePlotterSI <- function(model, settings) {
-    labels <- getAndValidateSettings(
-        model, settings,
-        paste(model$selectedModel, "Phase Plane"),
-        "Susceptible (S)",
-        "Infected (I)"
-    )
-
-    color <- if (!is.null(settings$color)) settings$color else defaultColors[1]
+phasePlanePlotterSI <- function(model) {
 
     if (model$plotterType == "binomial") {
         plot <- ggplot2::ggplot(model$data, ggplot2::aes(x = S, y = I, group = iteration, color = iteration)) +
             ggplot2::geom_path(alpha = 0.3, linewidth = 0.7) 
     } else {
         plot <- ggplot2::ggplot(model$data, ggplot2::aes(x = S, y = I)) +
-            ggplot2::geom_path(color = color, linewidth = 0.7)
+            ggplot2::geom_path(color = "#1f77b4", linewidth = 0.7)
     }
 
     plot <- plot +
       theme_classic() +
       plotTheme +
       ggplot2::labs(
-        title = labels$title,
-        x = labels$xAxisLabel,
-        y = labels$yAxisLabel
+        title = paste(model$selectedModel, "Phase Plane"),
+        x = "Susceptible (S)", 
+        y = "Infected (I)"
       ) +
       ggplot2::theme(legend.position = "none") +
       ggplot2::scale_x_continuous(expand = c(0, 0)) +

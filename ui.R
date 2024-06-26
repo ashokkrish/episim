@@ -47,33 +47,7 @@ generatePlotSettingsUI <- function(id) {
           exit = animations$fading_exits$fadeOutUp))))
 }
 
-modelResultsPanel <- mainPanel(
-  tabsetPanel(
-    id = "tabs",
-    tabPanel("Plot",
-             br(),
-             conditionalPanel(
-               condition = "input.modelSelect != ''",
-               generatePlotSettingsUI("plotSettings")),
-             uiOutput("plot"),
-             br(),
-             conditionalPanel(condition = "output.plot != null",
-                              uiOutput("subPlots"))),
-    tabPanel("Phase Plane",
-             value = "phasePlane",
-             br(),
-             conditionalPanel(
-               condition = "input.modelSelect != ''",
-               generatePlotSettingsUI("phasePlanePlotSettings")
-             ),
-             uiOutput("phasePlanePlot")),
-    tabPanel("Output Summary",
-             value ="outputSummary",
-             br(),
-             uiOutput("outputSummary")),
-    tabPanel("Mathematical Model",
-             br(),
-             uiOutput("mathematicalModel"))))
+modelResultsPanel <- uiOutput("outputPanel")
 
 actionButtonStyle <-
   "color: #fff; background-color: #337ab7; border-color: #2e6da4;"
