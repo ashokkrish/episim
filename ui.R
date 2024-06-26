@@ -137,7 +137,17 @@ episimModelAuthorshipTab <-
             a("Episim GitHub", href = "https://github.com/ashokkrish/episim", target = "_blank")),
           style = r"(a[href^='mailto']::before {content: '📧 ';} a[href^='tel']::before {content: '📞 ';})")))
 
+## Applicatino defaults
 modelChoices <-
+  list("Application-default compartmental models" =
+         list("SIR" = "SIR_FALSE",
+              "SIRS" = "SIRS_FALSE",
+              "SIRD" = "SIRD_FALSE",
+              "SEIR" = "SEIR_FALSE",
+              "SEIRS" = "SEIRS_FALSE",
+              "SEIRD" = "SEIRD_FALSE"))
+
+publishedModelChoices <-
   defaultInputValues %>%
   rename(name = readablePublicationName) %>%
   select(name, modelType) %>%
@@ -147,14 +157,10 @@ modelChoices <-
   pivot_wider(names_from = name, values_from = widerValue) %>%
   unnest(cols = names(.)) %>%
   as.list() %>%
-  list("Published models" = .) %>%
-  append(list("SIR" = "SIR_FALSE",
-              "SIRS" = "SIRS_FALSE",
-              "SIRD" = "SIRD_FALSE",
-              "SEIR" = "SEIR_FALSE",
-              "SEIRS" = "SEIRS_FALSE",
-              "SEIRD" = "SEIRD_FALSE") %>%
-         list("Application defaults" = .))
+  list("Published models" = .)
+
+if (length(publishedModelChoices[["Published models"]]) >= 1)
+  modelChoices %<>% append(publishedModelChoices)
 
 modelSelect <-
   pickerInput("modelSelect",

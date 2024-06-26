@@ -11,10 +11,6 @@ server <- function(input, output, session) {
   exposedCompartmentInModel <- reactive({ str_detect(compartmentalModel(), "E") })
   deadCompartmentInModel <- reactive({ str_detect(compartmentalModel(), "D") })
 
-  ## observe(shinyjs::hide("outputPanel")) %>%
-  ##   bindEvent(reactiveValuesToList(input) %>%
-  ##             subset(not(is_in(names(.), c("run")))))
-
   ## Ensure that stochasticity is only enabled for the model for which it is
   ## implemented. There is also a conditionalPanel surrounding the "stochastic"
   ## radio buttons in ui.R.
@@ -26,10 +22,12 @@ server <- function(input, output, session) {
     else {
       enable(selector = "input[name='stochastic'][value='1']")
       if (input$stochastic == 1) {
-        if (input$trueMassAction == 1)
+        if (input$trueMassAction == 1) {
           disable(selector = "input[name='distribution'][value='0']")
-        else
+          updateRadioButtons(inputId = "distribution", selected = 1)
+        } else {
           enable(selector = "input[name='distribution'][value='0']")
+        }
       }
     }
   })
@@ -201,10 +199,15 @@ server <- function(input, output, session) {
 
   ## A reactive value like input, but with hidden and irrelevant inputs removed.
   greedy_visibleInputs <- reactive({
+    shinyjs::hide(selector = ".col-sm-8")
+
     shiny::validate(need(compartmentalModel(), "A model must be selected."))
+    msg <- "The compartment values (except D) must sum to N before simulating."
+    shiny::validate(need(compartmentsEqualPopulation(), message = msg),
+                    need(recoveryRatePositive(),
+                         message = "Recovery rate must be positive."))
+
     selectedModel <- compartmentalModel()
-    ## TODO: this could be improved, but I'm not sure how. This is kinda awful
-    ## and should be built-in to Shiny.
       reactiveValuesToList(
         reactiveValues(
           trueMassAction = input$trueMassAction,
@@ -242,13 +245,7 @@ server <- function(input, output, session) {
   ## information: https://shiny.posit.co/r/reference/shiny/1.7.2/debounce.html.
   visibleInputs <- debounce(greedy_visibleInputs, 500)
 
-
   output$outputPanel <- renderUI({
-    msg <- "The compartment values (except D) must sum to N before simulating."
-    shiny::validate(need(compartmentsEqualPopulation(), message = msg),
-                    need(recoveryRatePositive(),
-                         message = "Recovery rate must be positive."))
-
     msg <- "Reactive value propagating... please wait."
     if (exposedCompartmentInModel()) shiny::validate(need(input$exposed,
                                                           message = msg))
@@ -323,7 +320,7 @@ server <- function(input, output, session) {
         function(file) write_xlsx(modelResults, file)
       )
 
-    ## shinyjs::show("outputPanel")
+    shinyjs::show(selector = ".col-sm-8")
 
     mainPanel(id = "outputPanel",
               tabsetPanel(
