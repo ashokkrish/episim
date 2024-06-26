@@ -5,18 +5,8 @@ server <- function(input, output, session) {
   compartmentalModel <- reactive(model()[[1]])
   publication <- reactive(model()[[2]])
 
-  observe({print(paste("The compartmental model selection is:", compartmentalModel()))})
-
   exposedCompartmentInModel <- reactive({ str_detect(compartmentalModel(), "E") })
   deadCompartmentInModel <- reactive({ str_detect(compartmentalModel(), "D") })
-
-  observe({
-    if (exposedCompartmentInModel()) {
-      hideTab(inputId = "tabs", target = "phasePlane")
-    } else {
-      showTab(inputId = "tabs", target = "phasePlane")
-    }
-  })
 
   ## Ensure that stochasticity is only enabled for the model for which it is
   ## implemented. There is also a conditionalPanel surrounding the "stochastic"
@@ -37,8 +27,11 @@ server <- function(input, output, session) {
     }
   })
 
+  observe(do.call(ifelse(exposedCompartmentInModel(), "hideTab", "showTab"),
+                  list(inputId = "tabs", target = "phasePlane")))
+
   observe(do.call(ifelse(input$stochastic == 1, "hideTab", "showTab"),
-                  args = list(inputId = "tabs", target = "outputSummary")))
+                  list(inputId = "tabs", target = "outputSummary")))
 
   rules <- tribble(
     ~ model, # A regular expression
@@ -108,80 +101,6 @@ server <- function(input, output, session) {
         globalValidator$add_validator(vld)
       })
   })
-
-  rules <- tribble(
-  ~ model, # A regular expression
-  ~ ruleList,
-  "S.*S", # Waning learned immunity
-  list(
-    xi = c(sv_gt(0), sv_lte(1))
-  ),
-  "D", # Death
-  list(
-    delta = c(sv_between(0, 1)),
-    dead = c(sv_integer(), sv_gte(0))
-  ),
-  "E", # Exposure
-  list(
-    sigma = c(sv_gt(0), sv_lte(1)),
-    exposed = c(sv_integer(), sv_gte(0))
-  ),
-
-  # Global rules
-  NA,
-  list(
-    ## Vital dynamics
-    muBirth = c(sv_between(0, 1)),
-    muDeath = c(sv_between(0, 1)),
-
-    ## Global rules for compartments; only the compartments that are actually
-    ## common to all models can be included here, otherwise all models will be
-    ## invalidated if an inapplicable compartment has an invalid input (e.g.
-    ## the exposed and dead compartments have invalid input while SIR is
-    ## selected).
-    population = c(sv_integer(), sv_gt(0)),
-    susceptible = c(sv_integer(), sv_gt(0)),
-    infected = c(sv_integer(), sv_gte(0)),
-    ## The above example means you---the current editor---must move the
-    ## recovered rule to each model featuring the recovery compartment if ever
-    ## you include an SI model (having no recovered compartment), and remove it
-    ## from the global rule. Make sense? Godspeed.
-    recovered = c(sv_integer(), sv_gte(0)),
-
-    ## Global rules for parameters
-    beta = c(sv_gt(0), sv_lte(1)),
-    gamma = c(sv_gt(0)),
-
-    ## Simulation options
-    replicates = c(sv_integer(), sv_gt(0)),
-    timesteps = c(sv_gt(0))
-    )
-  )
-
-  globalValidator <- addRuleListToValidator(
-    InputValidator$new(),
-    filter(rules, is.na(model))[, 2][[1]][[1]]
-  )
-
-  validatorsAndLambdas <- {
-    filter(rules, !is.na(model)) |>
-      rowwise() |>
-      mutate(vld = list(addRuleListToValidator(InputValidator$new(), ruleList)),
-            ## FIXME: the value of the selection should be a character vector...
-            lambda = list(eval(bquote(\() grepl(.(model), compartmentalModel())))),
-            .keep = "none")
-  }
-
-  isolate(
-    mapply(
-      FUN = \(validator, lambda) {
-        validator$condition(lambda)
-        globalValidator$add_validator(validator)
-      },
-      validatorsAndLambdas[[1]],
-      validatorsAndLambdas[[2]]
-    )
-  )
 
   ## FIXME: All models have at least one set of default values, a "fallback".
   ## Some models have more than one set which is specific to the model and its
