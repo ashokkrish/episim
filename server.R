@@ -1,8 +1,8 @@
 server <- function(input, output, session) {
   observe_helpers(withMathJax = TRUE, help_dir = "www/markdown")
 
-  model <- reactive(str_split_1(req(input$modelSelect), "_"))
-  compartmentalModel <- reactive(model()[[1]])
+  model <- reactive({ str_split_1(req(input$modelSelect), "_") })
+  compartmentalModel <- reactive({ model()[[1]] })
   publication <- reactive({
     name <- model()[[2]]
     if (length(name) == 1) NA else name
@@ -198,36 +198,42 @@ server <- function(input, output, session) {
   ## A reactive value like input, but with hidden and irrelevant inputs removed.
   greedy_visibleInputs <- reactive({
     shiny::validate(need(compartmentalModel(), "A model must be selected."))
+    selectedModel <- compartmentalModel()
     ## TODO: this could be improved, but I'm not sure how. This is kinda awful
     ## and should be built-in to Shiny.
     relevantInputs <-
       reactiveValuesToList(
         reactiveValues(
-          modelSelect = compartmentalModel(),
           trueMassAction = input$trueMassAction,
+          stochastic = input$stochastic,
+          distribution = input$distribution,
           vitalDynamics = input$vitalDynamics,
           muBirth = input$muBirth,
           muDeath = input$muDeath,
-          stochastic = input$stochastic,
-          distribution = input$distribution,
-          replicates = input$replicates,
-          rerun = input$rerun,
           timesteps = input$timesteps,
+
+          rerun = input$rerun,
+
           beta = input$beta,
           gamma = input$gamma,
           delta = input$delta,
           sigma = input$sigma,
           xi = input$xi,
+
           population = input$population,
           susceptible = input$susceptible,
           exposed = input$exposed,
           infected = input$infected,
           recovered = input$recovered,
           dead = input$dead))
-    visibleInputs <-
+
+    localVisibleInputs <-
       relevantInputs[!(names(relevantInputs) %in% input$hiddenInputs)]
-    stopifnot(is.list(visibleInputs))
-    append(visibleInputs, input$replicates)
+
+    localVisibleInputs %<>%
+      ## FIXME: why is it necessary to put replicates here?
+      append(list(replicates = input$replicates)) %>%
+      append(list(modelSelect = compartmentalModel()))
   })
 
   ## NOTE: prevent the reactive value from invalidating renderModel too often,
@@ -247,23 +253,52 @@ server <- function(input, output, session) {
                                                           message = msg))
     if (deadCompartmentInModel()) shiny::validate(need(input$dead,
                                                        message = msg))
-    plotterType <- "normal"
     modelResults <-
       if (input$stochastic == 1) {
         if (input$distribution == 0) {
           shiny::validate(need(input$replicates, message = "Replicates are needed."))
-          doCall(uniformSI, args = visibleInputs())
-        } else {
-          plotterType <- "binomial"
           shiny::validate(need(input$replicates, message = "Replicates are needed."))
-          doCall(binomialSI, args = visibleInputs())
+          doCall(uniformSI, args = req(visibleInputs()))
+        } else {
+          shiny::validate(need(input$replicates, message = "Replicates are needed."))
+          doCall(binomialSI, args = req(visibleInputs()))
         }
       } else {
-        doCall(ehpi:::epi, args = visibleInputs())|>
+        req(visibleInputs())
+
+        ## FIXME: visibleInputs causes a very strange error to occur. I have
+        ## verified that the problem lay there by ruling out ehpi::epi by
+        ## calling epi directly with a fixed set of arguments, calling epi
+        ## directly with the same arguments as _should be_ passed to doCall by
+        ## visibleInputs. I have ruled out doCall by allowing it to call
+        ## ehpi::epi and providing the same list of arguments I used when I
+        ## called it directly. I have also ruled out dplyr::select here by
+        ## commenting that out and reproducing the error without it. I have also
+        ## ruled out shiny::req by commenting that out and reproducing the error
+        ## without it.
+        ##
+        ## theArgumentsMentionedInTheFIXME <-
+        ##   list(population = 500,
+        ##        susceptible = 499,
+        ##        infected = 1,
+        ##        recovered = 0,
+        ##        beta = 0.001,
+        ##        gamma = 0.1,
+        ##        outputRows = 50)
+        ##
+        ## doCall(epi, args = theArgumentsMentionedIntheFIXME) %>%
+        doCall(epi, args = visibleInputs()) %>%
           select(c(time, N, matches(str_split_1(compartmentalModel(), ""))))
       }
 
-    model <- list(data = modelResults, selectedModel = compartmentalModel(), plotterType = plotterType)
+    model <- list(data = modelResults,
+                  selectedModel = compartmentalModel(),
+                  plotterType =
+                    if (all(input$stochastic == 1, input$distribution == 1))
+                      "binomial"
+                    else
+                      "normal")
+
     mainPlot <- ggplotly(plotter(model)) %>%
       layout(xaxis = list(autorange = TRUE), yaxis = list(autorange = TRUE))
 
@@ -272,77 +307,73 @@ server <- function(input, output, session) {
 
     subPlots <- subPlotter(model) |>
       map(\(plot, index) {
-        column(
-          6, ggplotly(plot) %>%
-            layout(xaxis = list(autorange = TRUE), yaxis = list(autorange = TRUE)),
-          br()
-        )
+        column(6,
+               ggplotly(plot) %>%
+               layout(xaxis = list(autorange = TRUE),
+                      yaxis = list(autorange = TRUE)),
+               br())
       })
 
-    modelDataTable <- if (plotterType == "binomial") {
-      numericColumns <- sapply(modelResults, is.numeric)
-      modelResults[numericColumns] <- round(modelResults[numericColumns], 2)
-      datatable(modelResults, rownames = FALSE)
-    } else {
-      datatable(round(modelResults, 2), rownames = FALSE)
-    }
+    modelDataTable <-
+      modelResults[sapply(modelResults, is.numeric)] %>%
+      round(2) %>%
+      datatable(rownames = FALSE)
 
     # FIX: vital dynamics error
-    modelLatex <- div(
-       generate_latex(c(r"(\textbf{MATHEMATICAL MODELS})")) |> helpText() |> withMathJax(),
-       if (input$stochastic == 1) {
-         doCall(renderStochasticModelLaTex, args = visibleInputs())
-         tagList(
-            doCall(renderStochasticModelLaTex, args = visibleInputs()),
-            generate_latex(c(r"(\textbf{MODEL EXPLANATION})")) |> helpText() |> withMathJax(),
-            doCall(renderStochasticDescription, args = visibleInputs())
-          )
-        } else {
-          doCall(renderModelLaTeX, args = visibleInputs())
-        },
-        r"(\textbf{Compartmental Models})",
-        img(
-          src = paste0("images/", req(compartmentalModel()), ".svg"),
-          contentType = "image/svg",
-          width = "45%",
-          alt = gsub("\n[\t\ ]+?", " ",
-                     r"(The diagram of the model compartments failed to load, or
+    modelLatex <- withMathJax(div(
+      generate_latex(c(r"(\textbf{MATHEMATICAL MODELS})")),
+      if (input$stochastic == 1) {
+        doCall(renderStochasticModelLaTex, args = visibleInputs())
+        tagList(
+          doCall(renderStochasticModelLaTex, args = visibleInputs()),
+          generate_latex(c(r"(\textbf{MODEL EXPLANATION})")),
+          doCall(renderStochasticDescription, args = visibleInputs())
+        )
+      } else {
+        doCall(renderModelLaTeX, args = visibleInputs())
+      },
+      r"(\textbf{Compartmental Models})",
+      img(
+        src = paste0("images/", req(compartmentalModel()), ".svg"),
+        contentType = "image/svg",
+        width = "45%",
+        alt = gsub("\n[\t\ ]+?", " ",
+                   r"(The diagram of the model compartments failed to load, or
                       the accessibility text is being read by a screen
                       reader.)"))
-      )
+    ))
 
     output$downloadData <-
       downloadHandler(
-        \() paste0(input$modelSelect, "_Model_Summary", Sys.Date(), ".xlsx"),
-        \(file) write_xlsx(renderModel()$modelResults, file)
+        function() paste0(input$modelSelect, "_Model_Summary", Sys.Date(), ".xlsx"),
+        function(file) write_xlsx(renderModel()$modelResults, file)
       )
 
-
-    mainPanel(
-      id = "outputPanel",
-      tabsetPanel(
-        id = "tabSet",
-        tabPanel("Plot",
-                 br(),
-                 mainPlot,
-                 br(),
-                 div(fluidRow(subPlots))),
-       { if (!exposedCompartmentInModel())
-           tabPanel("Phase Plane",
-                    br(),
-                    phaseplanePlot)},
-        tabPanel("Output Summary",
-                 br(),
-                 div(style = "display: flex; flex-direction: column;",
-                     modelDataTable,
-                     downloadButton("downloadData",
-                                    "Download as Excel",
-                                    style = "align-self: flex-start; margin-top: 1vh;"))),
-        tabPanel("Mathematical Model",
-                 br(),
-                 modelLatex),
-        ))
-
+    mainPanel(id = "outputPanel",
+              tabsetPanel(
+                id = "tabSet",
+                tabPanel(
+                  "Plot",
+                  br(),
+                  mainPlot,
+                  br(),
+                  div(fluidRow(subPlots))
+                ),
+                if (!exposedCompartmentInModel()) {
+                  tabPanel("Phase Plane", br(), phaseplanePlot)
+                },
+                tabPanel(
+                  "Output Summary",
+                  br(),
+                  div(style = "display: flex; flex-direction: column;",
+                      modelDataTable,
+                      downloadButton(
+                        "downloadData",
+                        "Download as Excel",
+                        style = "align-self: flex-start; margin-top: 1vh;"
+                      ))
+                ),
+                tabPanel("Mathematical Model", br(), modelLatex)))
   })
 
   output$outputPanel <- renderUI(renderModel())
@@ -355,7 +386,6 @@ server <- function(input, output, session) {
   ## observers.
   observe({
     isolate(updateNumericInputs(defaults(), session))
-    updateTextAndColourInputs()
   }) |> bindEvent(input$resetNumericInputs)
   ## DONT try to combine these; the UX-logic is as it should be with these two
   ## observers.
@@ -380,20 +410,20 @@ server <- function(input, output, session) {
 
   compartmentsEqualPopulation <- reactive({
     shiny::validate(need(compartmentalModel(), "A model must be selected."),
-                    ## need(input$population, "A population is required."),
-                    ## need(input$susceptible, "A number of people must be susceptible."),
-                    ## need(input$exposed, "A number of people must be exposed."),
-                    ## need(input$infected, "A number of people must be infected."),
-                    ## need(input$recovered, "A number of people must be recovered.")
-                    )
-    variables <- c(input$susceptible,
-                   input$exposed,
-                   input$infected,
-                   input$recovered)
-    names(variables) <- c("S", "E", "I", "R")
-    applicableVariables <-
-      variables[str_detect(compartmentalModel(), names(variables))]
+                    need(input$population, "A population is required."),
+                    need(input$susceptible, "A number of people must be susceptible."),
+                    need(input$infected, "A number of people must be infected."),
+                    need(input$recovered, "A number of people must be recovered."))
+
+    applicableVariables <- c(input$susceptible, input$infected, input$recovered)
+
+    if (exposedCompartmentInModel()) {
+      shiny::validate(need(input$exposed, "A number of people must be exposed."))
+      applicableVariables %<>% append(input$exposed)
+    }
+
     boolean <- !(input$population == sum(applicableVariables))
+
     stopifnot(length(boolean) == 1)
     message <- "Population must be equal to the sum of the initial compartments values!"
     feedbackDanger("population", boolean, message)
