@@ -2,9 +2,10 @@ $(document)
 .ready(function() {
     $(head).add('<link rel="stylesheet" href="modelSelect.css">');
 
+
     $(document).on('shiny:inputchanged', function(event) {
         // If the model selection widget was interacted with, and it't not empty...
-        if (event.name === 'modelSelect' && !([''].includes(event.value))) {
+        if (event.name === 'modelSelect' && !([''].includes(event.value.split("_")[0]))) {
             // modify the CSS applied to modelSelect.
             $('div:has(> #modelSelect-label)').css('margin-bottom', '1rem');
 

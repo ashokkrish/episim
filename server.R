@@ -3,7 +3,10 @@ server <- function(input, output, session) {
 
   model <- reactive(str_split_1(req(input$modelSelect), "_"))
   compartmentalModel <- reactive(model()[[1]])
-  publication <- reactive(model()[[2]])
+  publication <- reactive({
+    name <- model()[[2]]
+    if (length(name) == 1) NA else name
+  })
 
   exposedCompartmentInModel <- reactive({ str_detect(compartmentalModel(), "E") })
   deadCompartmentInModel <- reactive({ str_detect(compartmentalModel(), "D") })
@@ -27,10 +30,9 @@ server <- function(input, output, session) {
     }
   })
 
-  observe(do.call(ifelse(exposedCompartmentInModel(), "hideTab", "showTab"),
+  observe(do.call(if (exposedCompartmentInModel()) hideTab else showTab,
                   list(inputId = "tabs", target = "phasePlane")))
-
-  observe(do.call(ifelse(input$stochastic == 1, "hideTab", "showTab"),
+  observe(do.call(if (input$stochastic == 1) hideTab else showTab,
                   list(inputId = "tabs", target = "outputSummary")))
 
   rules <- tribble(
@@ -104,14 +106,31 @@ server <- function(input, output, session) {
 
   ## FIXME: All models have at least one set of default values, a "fallback".
   ## Some models have more than one set which is specific to the model and its
-  ## configuration.
+  ## configuration. TODO: filter and obtain the defaults differently when the
+  ## model selected is part of the Ashok defaults.
   defaults <- reactive({
     modelSpecific <-
       filter(defaultInputValues,
              modelType == req(compartmentalModel()),
-             readablePublicationName == req(publication()),
              trueMassAction == input$trueMassAction,
              vitalDynamics == input$vitalDynamics)
+
+    if (is.na(publication())) {
+      modelSpecific %<>%
+        filter(is.na(readablePublicationName))
+    } else {
+      modelSpecific %<>%
+        filter(readablePublicationName == publication())
+    }
+
+    if (input$stochastic == 0) {
+      modelSpecific %<>%
+        filter(is.na(stochastic))
+    } else {
+      modelSpecific %<>%
+        filter(stochastic == case_when(input$distribution == 0 ~ "uniform",
+                                       input$distribution == 1 ~ "binomial"))
+    }
 
     defaultValueSets <- dim(modelSpecific)[1]
     if (defaultValueSets != 1) {
@@ -124,7 +143,7 @@ server <- function(input, output, session) {
 
       ## Overwrite the object
       modelSpecific <- filter(defaultInputValues,
-                            modelType == input$modelSelect,
+                            modelType == compartmentalModel(),
                             is.na(trueMassAction),
                             is.na(vitalDynamics),
                             is.na(stochastic))
@@ -133,32 +152,8 @@ server <- function(input, output, session) {
     modelSpecific |>
       select(!c(vitalDynamics,
                 trueMassAction,
-                stochastic)) |>
-      select(where(\(x) all(!is.na(x))))
+                stochastic))
   })
-
-  observe({
-    toggleClass(id = "vital-dynamics-well",
-                class = "well",
-                condition = input$vitalDynamics == 1)
-  })
-
-  observe({
-    toggleClass(id = "model-stochasticity-well",
-                class = "well",
-                condition = input$stochastic == 1)
-  })
-
-  observe({
-    print(defaults())
-  })
-
-  observe({
-    if (all(input$totalMassAction == 1, input$stochastic == 1)) {
-      updateRadioButtons(inputId = "distribution",
-                         selected = 1)
-    }
-  }) |> bindEvent(input$stochastic)
 
   ## Whenever the model selection changes, the widget values throughout the
   ## application are updated according to the defaults specified for the model
@@ -170,7 +165,7 @@ server <- function(input, output, session) {
 
     output$commonParameters <- renderUI({
       rateLabels <-
-        if (isolate(exposedCompartmentInModel()))
+        if (exposedCompartmentInModel())
           c(beta = "exposure", gamma = "infection")
         else
           c(beta = "infection", gamma = "recovery")
@@ -208,7 +203,7 @@ server <- function(input, output, session) {
     relevantInputs <-
       reactiveValuesToList(
         reactiveValues(
-          modelSelect = input$modelSelect,
+          modelSelect = compartmentalModel(),
           trueMassAction = input$trueMassAction,
           vitalDynamics = input$vitalDynamics,
           muBirth = input$muBirth,
@@ -241,8 +236,6 @@ server <- function(input, output, session) {
   ## information: https://shiny.posit.co/r/reference/shiny/1.7.2/debounce.html.
   visibleInputs <- debounce(greedy_visibleInputs, 500)
 
-  observe({ print(req(visibleInputs())) })
-
   renderModel <- reactive({
     msg <- "The compartment values (except D) must sum to N before simulating."
     shiny::validate(need(compartmentsEqualPopulation(), message = msg),
@@ -258,15 +251,15 @@ server <- function(input, output, session) {
     modelResults <-
       if (input$stochastic == 1) {
         if (input$distribution == 0) {
+          shiny::validate(need(input$replicates, message = "Replicates are needed."))
           doCall(uniformSI, args = visibleInputs())
         } else {
           plotterType <- "binomial"
+          shiny::validate(need(input$replicates, message = "Replicates are needed."))
           doCall(binomialSI, args = visibleInputs())
         }
       } else {
-        {
-          doCall(ehpi:::epi, args = visibleInputs())
-        } |>
+        doCall(ehpi:::epi, args = visibleInputs())|>
           select(c(time, N, matches(str_split_1(compartmentalModel(), ""))))
       }
 
@@ -319,10 +312,10 @@ server <- function(input, output, session) {
       )
 
     output$downloadData <-
-    downloadHandler(
-      \() paste0(input$modelSelect, "_Model_Summary", Sys.Date(), ".xlsx"),
-      \(file) write_xlsx(renderModel()$modelResults, file)
-    )
+      downloadHandler(
+        \() paste0(input$modelSelect, "_Model_Summary", Sys.Date(), ".xlsx"),
+        \(file) write_xlsx(renderModel()$modelResults, file)
+      )
 
 
     mainPanel(
@@ -387,20 +380,19 @@ server <- function(input, output, session) {
 
   compartmentsEqualPopulation <- reactive({
     shiny::validate(need(compartmentalModel(), "A model must be selected."),
-                    need(input$population, "A population is required."),
-                    need(input$susceptible, "A number of people must be susceptible."),
-                    need(input$exposed, "A number of people must be exposed."),
-                    need(input$infected, "A number of people must be infected."),
-                    need(input$recovered, "A number of people must be recovered."))
-    variables <- c(input$population,
-                   input$susceptible,
+                    ## need(input$population, "A population is required."),
+                    ## need(input$susceptible, "A number of people must be susceptible."),
+                    ## need(input$exposed, "A number of people must be exposed."),
+                    ## need(input$infected, "A number of people must be infected."),
+                    ## need(input$recovered, "A number of people must be recovered.")
+                    )
+    variables <- c(input$susceptible,
                    input$exposed,
                    input$infected,
                    input$recovered)
-    names(variables) <- c("N", "S", "E", "I", "R")
+    names(variables) <- c("S", "E", "I", "R")
     applicableVariables <-
-      variables[names(variables) %in%
-                  unique(str_split(req(compartmentalModel()), "")[[1]])]
+      variables[str_detect(compartmentalModel(), names(variables))]
     boolean <- !(input$population == sum(applicableVariables))
     stopifnot(length(boolean) == 1)
     message <- "Population must be equal to the sum of the initial compartments values!"
@@ -411,7 +403,6 @@ server <- function(input, output, session) {
   ## TODO: if a SI or SEI model without an R compartment is ever introduced then
   ## this needs to be modified.
   recoveryRatePositive <- reactive({
-    print(exposedCompartmentInModel())
     if (exposedCompartmentInModel()) {
       message <- "Sigma must be greater than zero when a recovered compartment exists."
       boolean <- req(input$sigma) == 0

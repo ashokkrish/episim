@@ -52,13 +52,14 @@ modelResultsPanel <- uiOutput("outputPanel")
 actionButtonStyle <-
   "color: #fff; background-color: #337ab7; border-color: #2e6da4;"
 resetButton <- actionButton("resetNumericInputs",
-                            "RESET",
+                            "Reset inputs",
+                            icon("recycle"),
                             style = actionButtonStyle)
 
 ## NOTE: https://englishlessonsbrighton.co.uk/names-letters-english-alphabet/
 ### Parameters
 delta <- conditionalPanel(
-  r"{['SIRD', 'SEIRD'].includes(input.modelSelect)}",
+  r"{['SIRD', 'SEIRD'].includes(window.compartmentalModel)}",
   numericInput("delta", r"[Fatality rate (\(\delta\))]", 0.5,
     min = 0, max = 1,
     step = 0.01,
@@ -67,7 +68,7 @@ delta <- conditionalPanel(
 )
 
 sigma <- conditionalPanel(
-  r"{['SEIR', 'SEIRS', 'SEIRD'].includes(input.modelSelect)}",
+  r"{['SEIR', 'SEIRS', 'SEIRD'].includes(window.compartmentalModel)}",
   numericInput("sigma", r"[Rate of recovery (\(\sigma\))]", 0.5,
     min = 0, max = 1,
     step = 0.01,
@@ -76,7 +77,7 @@ sigma <- conditionalPanel(
 )
 
 xi <- conditionalPanel(
-  r"{['SIRS', 'SEIRS'].includes(input.modelSelect)}",
+  r"{['SIRS', 'SEIRS'].includes(window.compartmentalModel)}",
   numericInput("xi", r"[Rate of loss of immunity (\(\xi\))]", 0.5,
     min = 0, max = 1,
     step = 0.01,
@@ -93,12 +94,12 @@ R <- numericInput("recovered", r"[Recovered (\(R\))]", 0, min = 0, step = 1, wid
 ## Given the modelSelection string is available in the calling environment
 ## of these functions, display (or don't) the appropriate input.
 D <- conditionalPanel(
-  r"(['SIRD', 'SEIRD'].includes(input.modelSelect))",
+  r"(['SIRD', 'SEIRD'].includes(window.compartmentalModel))",
   numericInput("dead", r"[Dead (\(D\))]", 0, min = 0, step = 1, width = "300px")
 )
 
 E <- conditionalPanel(
-  r"{['SEIR', 'SEIRS', 'SEIRD'].includes(input.modelSelect)}",
+  r"{['SEIR', 'SEIRS', 'SEIRD'].includes(window.compartmentalModel)}",
   numericInput("exposed", r"[Exposed (\(E\))]", 0, min = 0, step = 1, width = "300px")
 )
 
@@ -138,29 +139,28 @@ episimModelAuthorshipTab <-
 
 modelChoices <-
   defaultInputValues %>%
-    rename(name = readablePublicationName) %>%
-    select(name, modelType) %>%
-    filter(!is.na(name)) %>%
-    mutate(widerValue = as.vector(map2(name, modelType, \(name, modelType) sprintf("%s_%s", modelType, name)))) %>%
-    select(name, widerValue) %>%
-    pivot_wider(names_from = name, values_from = widerValue) %>%
-    unnest(cols = names(.)) %>%
-    as.list() %>%
-    list("Published models" = .) %>%
-    append(list("SIR" = "SIR_NA",
-                "SIRS" = "SIRS_NA",
-                "SIRD" = "SIRD_NA",
-                "SEIR" = "SEIR_NA",
-                "SEIRS" = "SEIRS_NA",
-                "SEIRD" = "SEIRD_NA") %>%
-            list("Application defaults" = .))
+  rename(name = readablePublicationName) %>%
+  select(name, modelType) %>%
+  filter(!is.na(name)) %>%
+  mutate(widerValue = as.vector(map2(name, modelType, \(name, modelType) sprintf("%s_%s", modelType, name)))) %>%
+  select(name, widerValue) %>%
+  pivot_wider(names_from = name, values_from = widerValue) %>%
+  unnest(cols = names(.)) %>%
+  as.list() %>%
+  list("Published models" = .) %>%
+  append(list("SIR" = "SIR_FALSE",
+              "SIRS" = "SIRS_FALSE",
+              "SIRD" = "SIRD_FALSE",
+              "SEIR" = "SEIR_FALSE",
+              "SEIRS" = "SEIRS_FALSE",
+              "SEIRD" = "SEIRD_FALSE") %>%
+         list("Application defaults" = .))
 
 modelSelect <-
   pickerInput("modelSelect",
               strong("Epidemic Model"),
-              width = 0.98,
-              choices = modelChoices,
-              selected = NULL)
+              width = "100%",
+              choices = modelChoices)
 
 massAction <-
   radioButtons("trueMassAction",
@@ -169,7 +169,7 @@ massAction <-
                inline = TRUE)
 
 modelStochasticity <- conditionalPanel(
-  r"--(input.modelSelect == 'SIR')--",
+  r"--(window.compartmentalModel.includes('SIR'))--",
   radioButtons(
     "stochastic",
     strong("Model Stochasticity"),
@@ -228,7 +228,7 @@ modelVariables <-
 
 ### Design
 updateValuesWithDefaultsSwitch <-
-  conditionalPanel(r"(input.modelSelect != '')",
+  conditionalPanel(r"(window.compartmentalModel != '')",
     helper(
       checkboxInput(inputId = "freeze",
                     label = "Freeze update of inputs with defaults on model (and option) change",
@@ -241,11 +241,14 @@ modelConfigurationPanel <-
   sidebarPanel(id = "inputPanel",
                modelSelect,
                updateValuesWithDefaultsSwitch,
-               conditionalPanel(r"--(input.modelSelect !== '')--",
+               conditionalPanel(r"--(window.compartmentalModel !== '')--",
                                 div(id = "modelConfiguration",
                                     modelOptions,
                                     modelParameters,
                                     modelVariables),
+                                actionButton("renderPlotButton",
+                                             "Render plots",
+                                             icon("play")),
                                 resetButton))
 
 disclaimer <-

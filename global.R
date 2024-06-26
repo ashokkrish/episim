@@ -19,6 +19,7 @@ library(DT)
 library(reactlog)
 library(shinyFeedback)
 library(reshape2)
+library(magrittr)
 source("R/plotter.R")
 
 ## Project-local packages
@@ -26,7 +27,7 @@ if (!require(ehpi))
   devtools::install_github("bryce-carson/ehpi")
 library(ehpi)
 
-options(shiny.reactlog = TRUE)
+## options(shiny.reactlog = TRUE)
 
 ## FUNCTIONS
 updateNumericInputs <- function(defaults, session) {
