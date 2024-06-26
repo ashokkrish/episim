@@ -59,7 +59,7 @@ resetButton <- actionButton("resetNumericInputs",
 ## NOTE: https://englishlessonsbrighton.co.uk/names-letters-english-alphabet/
 ### Parameters
 delta <- conditionalPanel(
-  r"{['SIRD', 'SEIRD'].includes(window.compartmentalModel)}",
+  r"{['SIRD', 'SEIRD'].includes(input.modelSelect.split('_')[0])}",
   numericInput("delta", r"[Fatality rate (\(\delta\))]", 0.5,
     min = 0, max = 1,
     step = 0.01,
@@ -68,7 +68,7 @@ delta <- conditionalPanel(
 )
 
 sigma <- conditionalPanel(
-  r"{['SEIR', 'SEIRS', 'SEIRD'].includes(window.compartmentalModel)}",
+  r"{['SEIR', 'SEIRS', 'SEIRD'].includes(input.modelSelect.split('_')[0])}",
   numericInput("sigma", r"[Rate of recovery (\(\sigma\))]", 0.5,
     min = 0, max = 1,
     step = 0.01,
@@ -77,7 +77,7 @@ sigma <- conditionalPanel(
 )
 
 xi <- conditionalPanel(
-  r"{['SIRS', 'SEIRS'].includes(window.compartmentalModel)}",
+  r"{['SIRS', 'SEIRS'].includes(input.modelSelect.split('_')[0])}",
   numericInput("xi", r"[Rate of loss of immunity (\(\xi\))]", 0.5,
     min = 0, max = 1,
     step = 0.01,
@@ -94,12 +94,12 @@ R <- numericInput("recovered", r"[Recovered (\(R\))]", 0, min = 0, step = 1, wid
 ## Given the modelSelection string is available in the calling environment
 ## of these functions, display (or don't) the appropriate input.
 D <- conditionalPanel(
-  r"(['SIRD', 'SEIRD'].includes(window.compartmentalModel))",
+  r"(['SIRD', 'SEIRD'].includes(input.modelSelect.split('_')[0]))",
   numericInput("dead", r"[Dead (\(D\))]", 0, min = 0, step = 1, width = "300px")
 )
 
 E <- conditionalPanel(
-  r"{['SEIR', 'SEIRS', 'SEIRD'].includes(window.compartmentalModel)}",
+  r"{['SEIR', 'SEIRS', 'SEIRD'].includes(input.modelSelect.split('_')[0])}",
   numericInput("exposed", r"[Exposed (\(E\))]", 0, min = 0, step = 1, width = "300px")
 )
 
@@ -169,7 +169,7 @@ massAction <-
                inline = TRUE)
 
 modelStochasticity <- conditionalPanel(
-  r"--(window.compartmentalModel.includes('SIR'))--",
+  r"--(['SIR'].includes(input.modelSelect.split('_')[0]))--",
   radioButtons(
     "stochastic",
     strong("Model Stochasticity"),
@@ -219,7 +219,7 @@ modelParameters <-
   wellPanel(id = "parameters",
             h3("Parameters"),
             uiOutput("commonParameters"), # beta and gamma
-            div(id = "additionalParameters", delta, sigma, xi))
+            div(id = "additionalParameters", sigma, delta, xi))
 
 modelVariables <-
   wellPanel(id = "variables",
@@ -228,7 +228,7 @@ modelVariables <-
 
 ### Design
 updateValuesWithDefaultsSwitch <-
-  conditionalPanel(r"(window.compartmentalModel != '')",
+  conditionalPanel(r"(input.modelSelect.split('_')[0])",
     helper(
       checkboxInput(inputId = "freeze",
                     label = "Freeze update of inputs with defaults on model (and option) change",
@@ -241,14 +241,11 @@ modelConfigurationPanel <-
   sidebarPanel(id = "inputPanel",
                modelSelect,
                updateValuesWithDefaultsSwitch,
-               conditionalPanel(r"--(window.compartmentalModel !== '')--",
+               conditionalPanel(r"--(input.modelSelect.split('_')[0])--",
                                 div(id = "modelConfiguration",
                                     modelOptions,
                                     modelParameters,
                                     modelVariables),
-                                actionButton("renderPlotButton",
-                                             "Render plots",
-                                             icon("play")),
                                 resetButton))
 
 disclaimer <-
