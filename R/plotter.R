@@ -49,10 +49,18 @@ plotter <- function(model) {
     }
   }
   
+  colors <- defaultColors[1:length(compartments)]
+  names(colors) <- compartment_names[compartments]
+
   plot <- plot +
     theme_classic() +
     plotTheme +
-    ggplot2::scale_color_brewer(palette = "Dark2") +
+    scale_color_manual(
+      values = colors,
+      name = "Compartments"
+    ) +
+
+
     ggplot2::guides(color = ggplot2::guide_legend(title = paste(model$selectedModel, "Model")))
   
 }
