@@ -199,8 +199,6 @@ server <- function(input, output, session) {
 
   ## A reactive value like input, but with hidden and irrelevant inputs removed.
   greedy_visibleInputs <- reactive({
-    shinyjs::hide(selector = ".col-sm-8")
-
     shiny::validate(need(compartmentalModel(), "A model must be selected."))
     msg <- "The compartment values (except D) must sum to N before simulating."
     shiny::validate(need(compartmentsEqualPopulation(), message = msg),
@@ -255,6 +253,11 @@ server <- function(input, output, session) {
       if (input$stochastic == 1) {
         shiny::validate(need(input$replicates,
                              message = "Replicates are needed."))
+        ## MAYBE TODO FIXME: this doesn't seem to have an effect! It is strange
+        ## that this check is needed here to prevent an occurrence of #98 with
+        ## respect to input$replicates, given that it immediately follows a
+        ## shiny::validate & need call. req(input$replicates, cancelOutput =
+        ## "progress")
         doCall(if (input$distribution == 0) uniformSI else binomialSI,
                args = req(visibleInputs()))
       } else {
@@ -285,10 +288,12 @@ server <- function(input, output, session) {
                br())
       })
 
-    modelDataTable <-
-      modelResults[sapply(modelResults, is.numeric)] %>%
-      round(2) %>%
-      datatable(rownames = FALSE)
+    if (input$stochastic != 1) {
+      modelDataTable <-
+        modelResults[sapply(modelResults, is.numeric)] %>%
+        round(2) %>%
+        datatable(rownames = FALSE)
+    }
 
     # FIX: vital dynamics error
     modelLatex <- withMathJax(div(
@@ -303,7 +308,7 @@ server <- function(input, output, session) {
       } else {
         doCall(renderModelLaTeX, args = visibleInputs())
       },
-      r"(\textbf{Compartmental Models})",
+      generate_latex(c(r"(\textbf{COMPARTMENTAL MODELS})")),
       img(
         src = paste0("images/", req(compartmentalModel()), ".svg"),
         contentType = "image/svg",
@@ -320,8 +325,6 @@ server <- function(input, output, session) {
         function(file) write_xlsx(modelResults, file)
       )
 
-    shinyjs::show(selector = ".col-sm-8")
-
     mainPanel(id = "outputPanel",
               tabsetPanel(
                 id = "tabSet",
@@ -335,17 +338,19 @@ server <- function(input, output, session) {
                 if (!exposedCompartmentInModel()) {
                   tabPanel("Phase Plane", br(), phaseplanePlot)
                 },
-                tabPanel(
-                  "Output Summary",
-                  br(),
-                  div(style = "display: flex; flex-direction: column;",
-                      modelDataTable,
-                      downloadButton(
-                        "downloadData",
-                        "Download as Excel",
-                        style = "align-self: flex-start; margin-top: 1vh;"
-                      ))
-                ),
+                if (input$stochastic != 1) {
+                  tabPanel(
+                    "Output Summary",
+                    br(),
+                    div(style = "display: flex; flex-direction: column;",
+                        modelDataTable,
+                        downloadButton(
+                          "downloadData",
+                          "Download as Excel",
+                          style = "align-self: flex-start; margin-top: 1vh;"
+                        ))
+                  )
+                },
                 tabPanel("Mathematical Model", br(), modelLatex)))
   })
 
@@ -361,10 +366,7 @@ server <- function(input, output, session) {
   ## DONT try to combine these; the UX-logic is as it should be with these two
   ## observers.
   observe({
-    if (input$freeze == TRUE) {
-      updateTextAndColourInputs()
-      isolate(updateNumericInputs(defaults(), session))
-    }
+    if (input$freeze == FALSE) isolate(updateNumericInputs(defaults(), session))
   }) |> bindEvent(input$freeze)
 
   ## DONT change the return value in the affirmative case (NULL) is ill-advised.
