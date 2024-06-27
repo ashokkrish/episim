@@ -341,7 +341,13 @@ page_sidebar(
          id = "modelSelectCustomizationsScript",
          async = NA,
          src = "modelSelect.js"
-  ),
+       ),
+  tags$script(
+         type = "text/javascript",
+         id = "sidebarRemovalScript",
+         async = NA,
+         src = "sidebar.js"
+       ),
   tags$script(
     type = "text/javascript",
     id = "MathJax-script",

@@ -1,6 +1,6 @@
 $(document)
 .ready(function() {
-    $(head).add('<link rel="stylesheet" href="modelSelect.css">');
+    $('head').add('<link rel="stylesheet" href="modelSelect.css">');
 
 
     $(document).on('shiny:inputchanged', function(event) {
