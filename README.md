@@ -9,6 +9,8 @@ The (deterministic) compartmental models supported are
 - SEIRS
 - SEIRD
 
+Give it a try at:  https://episimshinyapp-xdbxlazwcq-uc.a.run.app/ 
+
 ### Plotly chart editing
 Once plots have been made, there is a pencil icon in the modebar of any Plotly-renderd chart. Clicking this will send that plot to the Chart Editor tab, where you can edit the chart to your heart's content. Unfortunately, [there is a visual bug](https://github.com/ashokkrish/episim/issues/141) which we haven't been able to resolve with an hour and a half of effort on just that, despite knowing the exact issue and knowing a fix which works in a JavaScript console, but which we can't automate reliably ([#141](https://github.com/ashokkrish/episim/issues/141)).
 
