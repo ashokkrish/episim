@@ -9,6 +9,9 @@ The (deterministic) compartmental models supported are
 - SEIRS
 - SEIRD
 
+### Plotly chart editing
+Once plots have been made, there is a pencil icon in the modebar of any Plotly-renderd chart. Clicking this will send that plot to the Chart Editor tab, where you can edit the chart to your heart's content. Unfortunately, [there is a visual bug](https://github.com/ashokkrish/episim/issues/141) which we haven't been able to resolve with an hour and a half of effort on just that, despite knowing the exact issue and knowing a fix which works in a JavaScript console, but which we can't automate reliably ([#141](https://github.com/ashokkrish/episim/issues/141)).
+
 ## Overview
 Non-spatial epidemic modeling refers to the study and simulation of disease spread without explicitly considering the spatial location or geographic distribution of individuals or populations. In contrast to spatial epidemic modeling, which takes into account the physical locations of individuals or groups, non-spatial models focus on the dynamics of disease transmission within a population without considering the spatial relationships.
 
