@@ -21,7 +21,6 @@ library(shinyFeedback)
 library(reshape2)
 library(magrittr)
 library(reactcharteditor)
-library(keys)
 
 ## Project-local packages
 if (!require(ehpi))

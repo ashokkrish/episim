@@ -1,25 +1,18 @@
 server <- function(input, output, session) {
   observe_helpers(withMathJax = TRUE, help_dir = "www/markdown")
 
-  ## REACT CHART EDITOR
-  addKeys("dismissEditor", c("escape", "shift+c"))
-  ## When the user clicks the edit plot button the editButtonClicked event will
-  ## be created, and then the main panel should be hidden until the user presses
-  ## the escape key or presses a button.
   observe({
-    shinyjs::hide(selector = "#simulation")
-    shinyjs::show(selector = "#chart-editor-container")
     update_plotly_editor(session,
                          "react-chart-editor",
                          ## TODO: edit the reactcharteditoR package so that the
                          ## following input name is customizable.
                          configuration = list(plotId = input$editButtonClicked),
                          value = list())
+    ## FIXME: this override is not applied at the right time. As soon as it is
+    ## applied, Bootstrap CSS nonsense will take over again. Fix a display issue
+    ## in the chart editor that Bootstrap is responsible for.
+    runjs(r"---[$('div.fold *').css('box-sizing', 'content-box');]---")
   })
-  observe({
-    shinyjs::hide(selector = "#chart-editor-container")
-    shinyjs::show(selector = "#simulation")
-  }) %>% bindEvent(input$dismissEditor)
 
   model <- reactive({ str_split_1(req(input$modelSelect), "_") })
   compartmentalModel <- reactive({ model()[[1]] })
