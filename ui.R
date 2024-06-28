@@ -185,9 +185,10 @@ modelStochasticity <- conditionalPanel(
 )
 
 probability <- radioButtons("distribution",
-  strong("Probability Distribution"),
-  choices = list("Uniform" = 0, "Binomial" = 1),
-  inline = TRUE)
+                            strong("Probability Distribution"),
+                            choices = list("Uniform" = 0, "Binomial" = 1),
+                            selected = 1,
+                            inline = TRUE)
 
 ## FIXME: use this CSS path to fix the margin-bottom of the vital dynamics checkbox within this well panel: div.well:nth-child(4) > div:nth-child(1); set the margin-bottom property to zero pixels.
 vitalDynamics <-
@@ -267,14 +268,20 @@ responsibly. Authors are not liable for any direct or indirect consequences
 of this usage.)"
   ))
 
-episimModelTab <-
-  nav_panel(title = "Model",
-    sidebarLayout(withMathJax(modelConfigurationPanel), modelResultsPanel))
+episimModelTab <- nav_panel(title = "Model",
+                            div(id = "simulation",
+                                sidebarLayout(withMathJax(modelConfigurationPanel),
+                                              modelResultsPanel)))
+
+episimModelChartEditor <- nav_panel("Chart Editor",
+                                    div(id = "plotly-editor-container",
+                                        plotly_editor("react-chart-editor")))
 
 nonspatial <- navset_card_pill(
   title = "Non-spatial Compartmental Models of Epidemiology",
   placement = "above",
   episimModelTab,
+  episimModelChartEditor,
   episimModelAuthorshipTab,
   nav_spacer(),
   nav_menu(title = "Links",

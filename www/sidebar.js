@@ -4,5 +4,5 @@ $(document)
         // Keep trying to hide the button until it works.
         do {
             $('button.collapse-toggle').hide();
-        } while ($('button.collapse-toggle').length() === 0);
+        } while ($('button.collapse-toggle').length === 0);
     });
