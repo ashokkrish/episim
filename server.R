@@ -1,12 +1,35 @@
 server <- function(input, output, session) {
   observe_helpers(withMathJax = TRUE, help_dir = "www/markdown")
 
+  ## REACT CHART EDITOR
+  addKeys("dismissEditor", c("escape", "shift+c"))
+  ## When the user clicks the edit plot button the editButtonClicked event will
+  ## be created, and then the main panel should be hidden until the user presses
+  ## the escape key or presses a button.
+  observe({
+    shinyjs::hide(selector = "#simulation")
+    shinyjs::show(selector = "#chart-editor-container")
+    update_plotly_editor(session,
+                         "react-chart-editor",
+                         ## TODO: edit the reactcharteditoR package so that the
+                         ## following input name is customizable.
+                         configuration = list(plotId = input$editButtonClicked),
+                         value = list())
+  })
+  observe({
+    shinyjs::hide(selector = "#chart-editor-container")
+    shinyjs::show(selector = "#simulation")
+  }) %>% bindEvent(input$dismissEditor)
+
   model <- reactive({ str_split_1(req(input$modelSelect), "_") })
   compartmentalModel <- reactive({ model()[[1]] })
   publication <- reactive({
     name <- model()[[2]]
     if (length(name) == 1) NA else name
   })
+
+  ## Disable uniform stochastic in all situations.
+  disable(selector = "input[name='distribution'][value='0']")
 
   exposedCompartmentInModel <- reactive({ str_detect(compartmentalModel(), "E") })
   deadCompartmentInModel <- reactive({ str_detect(compartmentalModel(), "D") })
@@ -26,7 +49,8 @@ server <- function(input, output, session) {
           disable(selector = "input[name='distribution'][value='0']")
           updateRadioButtons(inputId = "distribution", selected = 1)
         } else {
-          enable(selector = "input[name='distribution'][value='0']")
+          ## Never enable the uniform distribution.
+          ## enable(selector = "input[name='distribution'][value='0']")
         }
       }
     }
@@ -368,22 +392,6 @@ server <- function(input, output, session) {
                   )
                 },
                 tabPanel("Mathematical Model", br(), modelLatex)))
-  })
-
-observeEvent(input$editButtonClicked, {
-    showModal(modalDialog(
-      style = "overflow-y: auto;",
-      title = "Edit",
-      plotly_editor("editorID"),
-      footer = modalButton("Close"),
-      size = "xl",
-      easyClose = TRUE,
-    ))
-  })
-
-    
-  observe({
-    update_plotly_editor(session, "editorID", configuration = list(plotId = input$editButtonClicked), value = list())
   })
 
   ## When the user presses the reset button the numeric inputs are reset to the
