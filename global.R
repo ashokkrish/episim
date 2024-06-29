@@ -21,15 +21,6 @@ library(shinyFeedback)
 library(reshape2)
 library(magrittr)
 
-## Project-local packages
-if (!require(ehpi))
-  devtools::install_github("bryce-carson/ehpi")
-library(ehpi)
-
-if (!require(reactcharteditor))
-  devtools::install_github("Toby-exe/react-chart-editoR")
-library(reactcharteditor)
-
 ## options(shiny.reactlog = TRUE)
 
 ## FUNCTIONS

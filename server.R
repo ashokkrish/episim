@@ -1,28 +1,12 @@
 server <- function(input, output, session) {
   observe_helpers(withMathJax = TRUE, help_dir = "www/markdown")
 
-  observe({
-    update_plotly_editor(session,
-                         "react-chart-editor",
-                         ## TODO: edit the reactcharteditoR package so that the
-                         ## following input name is customizable.
-                         configuration = list(plotId = input$editButtonClicked),
-                         value = list())
-    ## FIXME: this override is not applied at the right time. As soon as it is
-    ## applied, Bootstrap CSS nonsense will take over again. Fix a display issue
-    ## in the chart editor that Bootstrap is responsible for.
-    runjs(r"---[$('div.fold *').css('box-sizing', 'content-box');]---")
-  })
-
   model <- reactive({ str_split_1(req(input$modelSelect), "_") })
   compartmentalModel <- reactive({ model()[[1]] })
   publication <- reactive({
     name <- model()[[2]]
     if (length(name) == 1) NA else name
   })
-
-  ## Disable uniform stochastic in all situations.
-  disable(selector = "input[name='distribution'][value='0']")
 
   exposedCompartmentInModel <- reactive({ str_detect(compartmentalModel(), "E") })
   deadCompartmentInModel <- reactive({ str_detect(compartmentalModel(), "D") })
@@ -42,8 +26,7 @@ server <- function(input, output, session) {
           disable(selector = "input[name='distribution'][value='0']")
           updateRadioButtons(inputId = "distribution", selected = 1)
         } else {
-          ## Never enable the uniform distribution.
-          ## enable(selector = "input[name='distribution'][value='0']")
+          enable(selector = "input[name='distribution'][value='0']")
         }
       }
     }
@@ -282,19 +265,6 @@ server <- function(input, output, session) {
           select(c(time, N, matches(str_split_1(compartmentalModel(), ""))))
       }
 
-    editBtn <- list(
-      name = "Edit",
-      icon = list(
-        path = "M7.127 22.562l-7.127 1.438 1.438-7.128 5.689 5.69zm1.414-1.414l11.228-11.225-5.69-5.692-11.227 11.227 5.689 5.69zm9.768-21.148l-2.816 2.817 5.691 5.691 2.816-2.819-5.691-5.689z",
-        transform = 'scale(0.7)'
-      ),
-      click = htmlwidgets::JS("
-        function(gd) {
-          Shiny.setInputValue('editButtonClicked', gd.id);
-        }
-      ")
-    )
-
     model <- list(data = modelResults,
                   selectedModel = compartmentalModel(),
                   plotterType =
@@ -304,20 +274,17 @@ server <- function(input, output, session) {
                       "normal")
 
     mainPlot <- ggplotly(plotter(model)) %>%
-      layout(xaxis = list(autorange = TRUE), yaxis = list(autorange = TRUE)) %>%
-      config(modeBarButtonsToAdd = list(editBtn))
-
+      layout(xaxis = list(autorange = TRUE), yaxis = list(autorange = TRUE))
 
     phaseplanePlot <- ggplotly(phasePlanePlotterSI(model)) %>%
-      layout(xaxis = list(autorange = TRUE), yaxis = list(autorange = TRUE)) %>%
-      config(modeBarButtonsToAdd = list(editBtn))
+      layout(xaxis = list(autorange = TRUE), yaxis = list(autorange = TRUE))
 
     subPlots <- subPlotter(model) |>
       map(\(plot, index) {
         column(6,
                ggplotly(plot) %>%
-               layout(xaxis = list(autorange = TRUE), yaxis = list(autorange = TRUE)) %>%
-               config(modeBarButtonsToAdd = list(editBtn)),     
+               layout(xaxis = list(autorange = TRUE),
+                      yaxis = list(autorange = TRUE)),
                br())
       })
 
