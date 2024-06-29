@@ -272,8 +272,8 @@ server <- function(input, output, session) {
         transform = 'scale(0.7)'
       ),
       click = htmlwidgets::JS("
-        function(gd) {
-          Shiny.setInputValue('editButtonClicked', gd.id);
+        function(plot) {
+          Shiny.setInputValue('editButtonClicked', plot.id);
         }
       ")
     )
@@ -300,7 +300,7 @@ server <- function(input, output, session) {
         column(6,
                ggplotly(plot) %>%
                layout(xaxis = list(autorange = TRUE), yaxis = list(autorange = TRUE)) %>%
-               config(modeBarButtonsToAdd = list(editBtn)),     
+               config(modeBarButtonsToAdd = list(editBtn)),
                br())
       })
 
@@ -370,20 +370,11 @@ server <- function(input, output, session) {
                 tabPanel("Mathematical Model", br(), modelLatex)))
   })
 
-observeEvent(input$editButtonClicked, {
-    showModal(modalDialog(
-      style = "overflow-y: auto;",
-      title = "Edit",
-      plotly_editor("editorID"),
-      footer = modalButton("Close"),
-      size = "xl",
-      easyClose = TRUE,
-    ))
-  })
-
-    
   observe({
-    plotly_editor$update_plotly_editor(session, "editorID", configuration = list(plotId = input$editButtonClicked), value = list())
+    plotly_editor$update_plotly_editor(session,
+                                       "editorID",
+                                       configuration = list(plotId = input$editButtonClicked),
+                                       value = list())
   })
 
   ## When the user presses the reset button the numeric inputs are reset to the
