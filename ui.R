@@ -271,9 +271,7 @@ episimModelTab <-
   nav_panel(title = "Model",
     sidebarLayout(withMathJax(modelConfigurationPanel), modelResultsPanel))
 
-episimModelChartEditor <- nav_panel("Chart Editor",
-                                    div(id = "plotly-editor-container",
-                                        plotly_editor$plotly_editor("react-chart-editor")))
+episimModelChartEditor <- nav_panel("Chart Editor", plotly_editor$plotly_editor("react-chart-editor"))
 
 nonspatial <- navset_card_pill(
   title = "Non-spatial Compartmental Models of Epidemiology",

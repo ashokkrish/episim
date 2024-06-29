@@ -22,14 +22,13 @@ library(reshape2)
 library(magrittr)
 library(reactR)
 
-## HACK NOTE: The box package is requried for using box::use to use
-## reactcharteditor as a local module, rather than as a formal, traditional R
-## package installed from GitHub.
+## HACK NOTE: it is prohibited by box to use library(box), so you must use renv
+## to ensure that box is installed on the remote shinyapps.io server. HACK NOTE:
+## The box package is requried for using box::use to use reactcharteditor as a
+## local module, rather than as a formal, traditional R package installed from
+## GitHub.
 stopifnot("box" %in% installed.packages())
 
-## options(shiny.reactlog = TRUE)
-
-## FUNCTIONS
 updateNumericInputs <- function(defaults, session) {
   if (any(is.null(dim(defaults)), dim(defaults)[1] != 1)) {
     warning("The `defaults` dataframe is not a single row!")
@@ -94,5 +93,4 @@ defaultInputValues <- read_xls(here("data/defaultInputValues.xls"),
                                 col_types = c(rep("text", 3), rep("numeric", 18)),
                                 sheet = "Ashok")
 
-## INITIALIZATION
-shinyAppDir(here::here()) # and hurrah!
+shinyAppDir(here::here()) # and hurrah, we initialize the application!

@@ -372,7 +372,7 @@ server <- function(input, output, session) {
 
   observe({
     plotly_editor$update_plotly_editor(session,
-                                       "editorID",
+                                       "react-chart-editor",
                                        configuration = list(plotId = input$editButtonClicked),
                                        value = list())
   })
