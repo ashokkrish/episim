@@ -1,0 +1,3 @@
+[submodule "react-chart-editor"]
+	path = R/react-chart-editoR
+	url = https://github.com/Toby-exe/react-chart-editoR.git
