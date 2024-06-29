@@ -371,11 +371,14 @@ server <- function(input, output, session) {
   })
 
   observe({
-    plotly_editor$update_plotly_editor(session,
-                                       "react-chart-editor",
-                                       configuration = list(plotId = input$editButtonClicked),
-                                       value = list())
-  })
+    plotly_editor$update_plotly_editor(
+                    session,
+                    "react-chart-editor",
+                    configuration = list(plotId = input$editButtonClicked),
+                    value = list()
+                  )
+    nav_select(id = "nonspatial", selected = "Chart Editor")
+  }) %>% bindEvent(input$editButtonClicked)
 
   ## When the user presses the reset button the numeric inputs are reset to the
   ## default values available for the model compartments' parameters and
