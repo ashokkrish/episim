@@ -265,6 +265,19 @@ server <- function(input, output, session) {
           select(c(time, N, matches(str_split_1(compartmentalModel(), ""))))
       }
 
+    editBtn <- list(
+      name = "Edit",
+      icon = list(
+        path = "M7.127 22.562l-7.127 1.438 1.438-7.128 5.689 5.69zm1.414-1.414l11.228-11.225-5.69-5.692-11.227 11.227 5.689 5.69zm9.768-21.148l-2.816 2.817 5.691 5.691 2.816-2.819-5.691-5.689z",
+        transform = 'scale(0.7)'
+      ),
+      click = htmlwidgets::JS("
+        function(gd) {
+          Shiny.setInputValue('editButtonClicked', gd.id);
+        }
+      ")
+    )
+
     model <- list(data = modelResults,
                   selectedModel = compartmentalModel(),
                   plotterType =
@@ -274,17 +287,20 @@ server <- function(input, output, session) {
                       "normal")
 
     mainPlot <- ggplotly(plotter(model)) %>%
-      layout(xaxis = list(autorange = TRUE), yaxis = list(autorange = TRUE))
+      layout(xaxis = list(autorange = TRUE), yaxis = list(autorange = TRUE)) %>%
+      config(modeBarButtonsToAdd = list(editBtn))
+
 
     phaseplanePlot <- ggplotly(phasePlanePlotterSI(model)) %>%
-      layout(xaxis = list(autorange = TRUE), yaxis = list(autorange = TRUE))
+      layout(xaxis = list(autorange = TRUE), yaxis = list(autorange = TRUE)) %>%
+      config(modeBarButtonsToAdd = list(editBtn))
 
     subPlots <- subPlotter(model) |>
       map(\(plot, index) {
         column(6,
                ggplotly(plot) %>%
-               layout(xaxis = list(autorange = TRUE),
-                      yaxis = list(autorange = TRUE)),
+               layout(xaxis = list(autorange = TRUE), yaxis = list(autorange = TRUE)) %>%
+               config(modeBarButtonsToAdd = list(editBtn)),     
                br())
       })
 
@@ -352,6 +368,22 @@ server <- function(input, output, session) {
                   )
                 },
                 tabPanel("Mathematical Model", br(), modelLatex)))
+  })
+
+observeEvent(input$editButtonClicked, {
+    showModal(modalDialog(
+      style = "overflow-y: auto;",
+      title = "Edit",
+      plotly_editor("editorID"),
+      footer = modalButton("Close"),
+      size = "xl",
+      easyClose = TRUE,
+    ))
+  })
+
+    
+  observe({
+    update_plotly_editor(session, "editorID", configuration = list(plotId = input$editButtonClicked), value = list())
   })
 
   ## When the user presses the reset button the numeric inputs are reset to the
