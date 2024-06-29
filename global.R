@@ -21,6 +21,16 @@ library(shinyFeedback)
 library(reshape2)
 library(magrittr)
 
+## HACK NOTE: The box package is requried for using box::use to use
+## reactcharteditor as a local module, rather than as a formal, traditional R
+## package installed from GitHub. reactcharteditor is a "module" in the box
+## sense, and it is a git submodule located in the R/ subfolder of the Shiny
+## application, alongside the scripts and other R dependencies which are
+## automatically loaded by Shiny. Shiny does not automatically load
+## reactcharteditor, however, because it does not recurse through subdirectories
+## of R/ for automatically attaching packages.
+stopifnot("box" %in% installed.packages())
+
 ## options(shiny.reactlog = TRUE)
 
 ## FUNCTIONS
@@ -75,6 +85,9 @@ addRuleListToValidator <- function(validator, ruleList) {
 }
 
 here::i_am("global.R")
+
+options(box.path = here("R/"))
+box::use(reactcharteditor)
 
 defaultInputValues <- read_xls(here("data/defaultInputValues.xls"),
                                 col_types = c(rep("text", 3), rep("numeric", 18)),
