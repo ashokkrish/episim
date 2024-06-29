@@ -20,6 +20,7 @@ library(reactlog)
 library(shinyFeedback)
 library(reshape2)
 library(magrittr)
+library(reactR)
 
 ## HACK NOTE: The box package is requried for using box::use to use
 ## reactcharteditor as a local module, rather than as a formal, traditional R
