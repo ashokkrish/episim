@@ -383,7 +383,7 @@ observeEvent(input$editButtonClicked, {
 
     
   observe({
-    update_plotly_editor(session, "editorID", configuration = list(plotId = input$editButtonClicked), value = list())
+    plotly_editor$update_plotly_editor(session, "editorID", configuration = list(plotId = input$editButtonClicked), value = list())
   })
 
   ## When the user presses the reset button the numeric inputs are reset to the
