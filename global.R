@@ -90,7 +90,8 @@ options(box.path = here("R"))
 box::use(reactcharteditor/R/plotly_editor)
 
 defaultInputValues <- read_xls(here("data/defaultInputValues.xls"),
-                                col_types = c(rep("text", 3), rep("numeric", 18)),
-                                sheet = "Ashok")
+                               col_types = c(rep("text", 3),
+                                             rep("numeric", 18)),
+                               sheet = "Ashok")
 
 shinyAppDir(here::here()) # and hurrah, we initialize the application!
