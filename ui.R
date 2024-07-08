@@ -208,7 +208,7 @@ modelOptions <- wellPanel(id = "modelOptions",
                           div(massAction, style = "margin: 10px;"),
                           div(id = "model-stochasticity-well",
                               modelStochasticity,
-                              style = "margin-bottom: 0.75rem;",
+                              style = "margin-bottom: 0.75rem; margin-left: 10px;",
                               conditionalPanel(
                                 r"[input.stochastic == '1']",
                                 probability,
