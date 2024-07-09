@@ -7,7 +7,7 @@ css_styles <- HTML(paste0(
   '  }',
   '  .equation-block {',
   '    margin: 0;',
-  '    padding: 0;',
+  '    padding-left: 20px;',
   '    font-size: 20px;', 
   '    text-align: justify;',  # Added property for justified text
   '  }',
@@ -33,7 +33,8 @@ css_styles_description <- HTML(paste0(
   '  .text-container {',
   '    display: block;',
   '    margin: 0;',
-  '    padding: 0;',
+  '    padding-left: 20px;',
+  '    padding-right: 20px;',
   '    font-size: 20px;', 
   '    text-align: justify;',  # Added property for justified text
   '  }',
@@ -71,6 +72,13 @@ renderStochasticDescription <- function(distribution){
   } else { #uniform
     generate_text_discription(uniformDescription) |> helpText() |> withMathJax()
   }
+}
+renderR0Equation <- function(delta = 0){
+  do.call(generateR0Equation,
+          list(delta)) |>
+    generate_latex() |>
+    helpText() |>
+    withMathJax()
 }
 
 
@@ -267,6 +275,10 @@ SEIRS <- function(mu, forceOfInfection)
     R <- paste0(Recover, r"(\sigma {I} - \xi{R} - \mu_D {R}\\)")
   }
   equation <- c(S, E, I, R)
+  return(equation)
+}
+generateR0Equation <- function(delta = 0){
+  if (delta == 0){equation <- r"(R0 = \frac{\beta}{\gamma})"} else {equation <- r"(R0 = \frac{\beta}{\gamma + \delta})"}
   return(equation)
 }
 binomialDescription <- r"(The binomial stochastic epidemic model is a mathematical framework used to simulate the spread of infectious diseases within a population. It is characterized by modeling the probability of disease transmission as a series of Bernoulli trials. In this model, the population is divided into compartments, typically including susceptible (S), infected (I), and recovered (R) individuals. At each time step, the number of new infections is determined by the binomial distribution, reflecting the random nature of contacts between susceptible and infected individuals. The model incorporates parameters such as the infection rate and recovery rate, and it accounts for the inherent randomness in the spread of disease by allowing for variations in the number of new cases in each time period. This stochastic approach provides insights into the variability and unpredictability of epidemic dynamics, complementing deterministic models that offer average outcomes.)"

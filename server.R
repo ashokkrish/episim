@@ -310,6 +310,13 @@ server <- function(input, output, session) {
         round(2) %>%
         datatable(rownames = FALSE)
     }
+    
+    R0TabPanel <- withMathJax(div(
+      generate_latex(c(r"(\textbf{BASIC REPRODUCTION NUMBER FORMULA})")),
+      doCall(renderR0Equation, args = visibleInputs())
+      #R0Value <- doCall(calculateR0(), args = visibleInputs()),
+      #generate_latex(paste0(r"(\textbf{Calculated Value: }", R0Value, ")"))
+    ))
 
     # FIX: vital dynamics error
     modelLatex <- withMathJax(div(
@@ -367,7 +374,8 @@ server <- function(input, output, session) {
                         ))
                   )
                 },
-                tabPanel("Mathematical Model", br(), modelLatex)))
+                tabPanel("Mathematical Model", br(), modelLatex),
+                tabPanel("Basic Reproduction Number", br(), R0TabPanel)))
   })
 
   observe({
