@@ -1,4 +1,4 @@
-calculateR0 <- function(beta = 0, gamma = 0, sigma = 0, delta = 0, xi = 0){
+calculateR0 <- function(beta, gamma, sigma = 0, delta = 0, xi = 0){
   #SI-Type
   if (sigma == 0){
     #if the model is SIR/SIRS/SIRD type

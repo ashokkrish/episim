@@ -35,8 +35,9 @@ css_styles_description <- HTML(paste0(
   '    margin: 0;',
   '    padding-left: 20px;',
   '    padding-right: 20px;',
-  '    font-size: 20px;', 
+  '    font-size: 25px;', 
   '    text-align: justify;',  # Added property for justified text
+  '    font-family: "Times New Roman", Times, serif;',  # Specify Times New Roman font
   '  }',
   '</style>'
 ))

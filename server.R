@@ -313,9 +313,11 @@ server <- function(input, output, session) {
     
     R0TabPanel <- withMathJax(div(
       generate_latex(c(r"(\textbf{BASIC REPRODUCTION NUMBER FORMULA})")),
-      doCall(renderR0Equation, args = visibleInputs())
-      #R0Value <- doCall(calculateR0(), args = visibleInputs()),
-      #generate_latex(paste0(r"(\textbf{Calculated Value: }", R0Value, ")"))
+      doCall(renderR0Equation, args = visibleInputs()),
+      generate_latex(c(r"(\textbf{CALCULATED R0 VALUE: })")),
+      round(doCall(calculateR0, args = visibleInputs()), 2) |> generate_text_discription() |>
+        helpText() |>
+        withMathJax()
     ))
 
     # FIX: vital dynamics error
