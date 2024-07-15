@@ -82,6 +82,11 @@ renderR0Equation <- function(modelSelect, trueMassAction){
     withMathJax()
 }
 
+R0Result <- function(modelSelect,trueMassAction){
+  do.call(paste0(modelSelect,"_R0"),
+          list(trueMassAction))
+}
+
 
 #Susceptible ode
 Susceptible <- r"(    &\frac{dS}{dt} = )"

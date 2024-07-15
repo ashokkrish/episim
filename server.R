@@ -315,7 +315,8 @@ server <- function(input, output, session) {
       generate_latex(r"(\textbf{BASIC REPRODUCTION NUMBER (} \textbf{R}_{\textbf{0}} \textbf{) FORMULA})"),
       doCall(renderR0Equation, args = visibleInputs()),
       generate_latex(r"(\textbf{CALCULATED } \textbf{R}_{\textbf{0}} \textbf{VALUE: })"),
-      round(doCall(calculateR0, args = visibleInputs()), 2) |> generate_text_discription() |>
+      paste0(doCall(R0Result, args = visibleInputs()), r"( = )", round(doCall(calculateR0, args = visibleInputs()), 2)) |> 
+        generate_latex() |>
         helpText() |>
         withMathJax()
     ))
