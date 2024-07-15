@@ -314,7 +314,7 @@ server <- function(input, output, session) {
     R0TabPanel <- withMathJax(div(
       generate_latex(c(r"(\textbf{BASIC REPRODUCTION NUMBER FORMULA})")),
       doCall(renderR0Equation, args = visibleInputs()),
-      generate_latex(c(r"(\textbf{CALCULATED R0 VALUE: })")),
+      generate_latex(r"(\textbf{CALCULATED } \textbf{R}_{\textbf{0}} \textbf{VALUE: })"),
       round(doCall(calculateR0, args = visibleInputs()), 2) |> generate_text_discription() |>
         helpText() |>
         withMathJax()
