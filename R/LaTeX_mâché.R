@@ -74,9 +74,9 @@ renderStochasticDescription <- function(distribution){
     generate_text_discription(uniformDescription) |> helpText() |> withMathJax()
   }
 }
-renderR0Equation <- function(delta = 0){
-  do.call(generateR0Equation,
-          list(delta)) |>
+renderR0Equation <- function(modelSelect, trueMassAction){
+  do.call(paste0(modelSelect,"_R0"),
+          list(trueMassAction)) |>
     generate_latex() |>
     helpText() |>
     withMathJax()
@@ -278,8 +278,52 @@ SEIRS <- function(mu, forceOfInfection)
   equation <- c(S, E, I, R)
   return(equation)
 }
-generateR0Equation <- function(delta = 0){
-  if (delta == 0){equation <- r"(R0 = \frac{\beta}{\gamma})"} else {equation <- r"(R0 = \frac{\beta}{\gamma + \delta})"}
+
+SIR_R0 <- function(trueMassAction){
+  equation <- r"(R_0 = \frac{\beta}{\gamma})"
+  if(as.numeric(trueMassAction) == 0){
+    equation <- r"(R_0 = \frac{\beta}{\gamma}N)"
+  }
+  return(equation)
+}
+
+SIRS_R0 <- function(trueMassAction){
+  equation <- r"(R_0 = \frac{\beta}{\gamma + \xi})"
+  if(as.numeric(trueMassAction) == 0){
+    equation <- r"(R_0 = \frac{\beta}{\gamma + \xi}N)"
+  }
+  return(equation)
+}
+
+SIRD_R0 <- function(trueMassAction){
+  equation <- r"(R_0 = \frac{\beta}{\gamma + \delta})"
+  if(as.numeric(trueMassAction) == 0){
+    equation <- r"(R_0 = \frac{\beta}{\gamma + \delta}N)"
+  }
+  return(equation)
+}
+
+SEIR_R0 <- function(trueMassAction){
+  equation <- r"(R_0 = \frac{\beta}{\sigma})"
+  if(as.numeric(trueMassAction) == 0){
+    equation <- r"(R_0 = \frac{\beta}{\sigma}N)"
+  }
+  return(equation)
+}
+
+SEIRS_R0 <- function(trueMassAction){
+  equation <- r"(R_0 = \frac{\beta}{\sigma + \xi})"
+  if(as.numeric(trueMassAction) == 0){
+    equation <- r"(R_0 = \frac{\beta}{\sigma + \xi}N)"
+  }
+  return(equation)
+}
+
+SEIRD_R0 <- function(trueMassAction){
+  equation <- r"(R_0 = \frac{\beta}{\sigma + \delta})"
+  if(as.numeric(trueMassAction) == 0){
+    equation <- r"(R_0 = \frac{\beta}{\sigma + \delta}N)"
+  }
   return(equation)
 }
 binomialDescription <- r"(The binomial stochastic epidemic model is a mathematical framework used to simulate the spread of infectious diseases within a population. It is characterized by modeling the probability of disease transmission as a series of Bernoulli trials. In this model, the population is divided into compartments, typically including susceptible (S), infected (I), and recovered (R) individuals. At each time step, the number of new infections is determined by the binomial distribution, reflecting the random nature of contacts between susceptible and infected individuals. The model incorporates parameters such as the infection rate and recovery rate, and it accounts for the inherent randomness in the spread of disease by allowing for variations in the number of new cases in each time period. This stochastic approach provides insights into the variability and unpredictability of epidemic dynamics, complementing deterministic models that offer average outcomes.)"
