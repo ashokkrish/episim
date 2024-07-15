@@ -322,7 +322,7 @@ server <- function(input, output, session) {
 
     # FIX: vital dynamics error
     modelLatex <- withMathJax(div(
-      generate_latex(c(r"(\textbf{MATHEMATICAL MODELS})")),
+      generate_latex(c(r"(\textbf{MATHEMATICAL MODEL})")),
       if (input$stochastic == 1) {
         doCall(renderStochasticModelLaTex, args = visibleInputs())
         tagList(
@@ -333,7 +333,7 @@ server <- function(input, output, session) {
       } else {
         doCall(renderModelLaTeX, args = visibleInputs())
       },
-      generate_latex(c(r"(\textbf{COMPARTMENTAL MODELS})")),
+      generate_latex(c(r"(\textbf{SCHEMATIC DIAGRAM})")),
       img(
         src = paste0("images/", req(compartmentalModel()), ".svg"),
         contentType = "image/svg",
