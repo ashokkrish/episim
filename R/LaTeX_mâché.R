@@ -82,9 +82,11 @@ renderR0Equation <- function(modelSelect, trueMassAction){
     withMathJax()
 }
 
-R0Result <- function(modelSelect,trueMassAction){
-  do.call(paste0(modelSelect,"_R0"),
-          list(trueMassAction))
+R0Result <- function(modelSelect,population, beta, gamma, sigma = 0, delta = 0, xi = 0, 
+                     trueMassAction = FALSE){
+  do.call(paste0(modelSelect,"_R0Result"),
+          list(population, beta, gamma, sigma, delta, xi, 
+               trueMassAction)) 
 }
 
 
@@ -328,6 +330,60 @@ SEIRD_R0 <- function(trueMassAction){
   equation <- r"(R_0 = \frac{\beta}{\sigma + \delta})"
   if(as.numeric(trueMassAction) == 0){
     equation <- r"(R_0 = \frac{\beta}{\sigma + \delta}N)"
+  }
+  return(equation)
+}
+
+SIR_R0Result <- function(population, beta, gamma, sigma = 0, delta = 0, xi = 0, 
+                         trueMassAction = FALSE){
+  equation <- paste0("\\frac{", format(beta, scientific = FALSE), "}{", format(gamma, scientific = FALSE), "} ")
+  if (as.numeric(trueMassAction) == 0){
+    equation <- paste0("\\frac{", format(beta, scientific = FALSE), "}{", format(gamma, scientific = FALSE), "} \\times ", format(population, scientific = FALSE))
+  }
+  return(equation)
+}
+
+SIRS_R0Result <- function(population, beta, gamma, sigma = 0, delta = 0, xi = 0, 
+                         trueMassAction = FALSE){
+  equation <- paste0("\\frac{", format(beta, scientific = FALSE), "}{", format(gamma, scientific = FALSE), " + ", format(xi, scientific = FALSE), "}")
+  if(as.numeric(trueMassAction) == 0){
+    equation <- paste0("\\frac{", format(beta, scientific = FALSE), "}{", format(gamma, scientific = FALSE), " + ", format(xi, scientific = FALSE), "} \\times ", format(population, scientific = FALSE))
+  }
+  return(equation)
+}
+
+SIRD_R0Result <- function(population, beta, gamma, sigma = 0, delta = 0, xi = 0, 
+                          trueMassAction = FALSE){
+  equation <- paste0("\\frac{", format(beta, scientific = FALSE), "}{", format(gamma, scientific = FALSE), " + ", format(delta, scientific = FALSE), "}")
+  if(as.numeric(trueMassAction) == 0){
+    equation <- paste0("\\frac{", format(beta, scientific = FALSE), "}{", format(gamma, scientific = FALSE), " + ", format(delta, scientific = FALSE), "} \\times ", format(population, scientific = FALSE))
+  }
+  return(equation)
+}
+
+SEIR_R0Result <- function(population, beta, gamma, sigma = 0, delta = 0, xi = 0, 
+                         trueMassAction = FALSE){
+  equation <- paste0("\\frac{", format(beta, scientific = FALSE), "}{", format(sigma, scientific = FALSE), "} ")
+  if (as.numeric(trueMassAction) == 0){
+    equation <- paste0("\\frac{", format(beta, scientific = FALSE), "}{", format(sigma, scientific = FALSE), "} \\times ", format(population, scientific = FALSE))
+  }
+  return(equation)
+}
+
+SEIRS_R0Result <- function(population, beta, gamma, sigma = 0, delta = 0, xi = 0, 
+                          trueMassAction = FALSE){
+  equation <- paste0("\\frac{", format(beta, scientific = FALSE), "}{", format(sigma, scientific = FALSE), " + ", format(xi, scientific = FALSE), "}")
+  if(as.numeric(trueMassAction) == 0){
+    equation <- paste0("\\frac{", format(beta, scientific = FALSE), "}{", format(sigma, scientific = FALSE), " + ", format(xi, scientific = FALSE), "} \\times ", format(population, scientific = FALSE))
+  }
+  return(equation)
+}
+
+SEIRD_R0Result <- function(population, beta, gamma, sigma = 0, delta = 0, xi = 0, 
+                          trueMassAction = FALSE){
+  equation <- paste0("\\frac{", format(beta, scientific = FALSE), "}{", format(sigma, scientific = FALSE), " + ", format(delta, scientific = FALSE), "}")
+  if(as.numeric(trueMassAction) == 0){
+    equation <- paste0("\\frac{", format(beta, scientific = FALSE), "}{", format(sigma, scientific = FALSE), " + ", format(delta, scientific = FALSE), "} \\times ", format(population, scientific = FALSE))
   }
   return(equation)
 }
