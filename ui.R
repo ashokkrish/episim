@@ -113,19 +113,8 @@ GitHub <- function(username, ...) {
 episimModelAuthorshipTab <-
   nav_panel(
     title = "Authors",
-    h2("Developers", style = "font-weight:bold"),
-    developer("Carson", "Bryce", "B.Sc", href = "https://github.com/bryce-carson/"),
-    developer("Le", "Khanh", href = "https://github.com/kle6951/"),
-    developer("Wondwossen", "Tobias", href = "https://github.com/Toby-exe"),
-    br(),
-
-    h3("Affiliations"),
-    p(tag("sup", 1), "Mount Royal University", br(),
-      "4825 Mount Royal Gate SW", br(),
-      "Calgary, Alberta, Canada", br(),
-      "T3E 6K6"),
-
-    h2("Supervisor"),
+    
+    h2("Supervisor", style = "font-weight:bold"),
     ## TODO: Reformat Ashok's information so the digital links aren't ugly.
     tag("address",
         list(
@@ -135,7 +124,20 @@ episimModelAuthorshipTab <-
             "Calgary, AB, Canada", br(),
             a("akrishnamurthy@mtroyal.ca", href = "mailto:akrishnamurthy@mtroyal.ca"), br(),
             a("Episim GitHub", href = "https://github.com/ashokkrish/episim", target = "_blank")),
-          style = r"(a[href^='mailto']::before {content: '📧 ';} a[href^='tel']::before {content: '📞 ';})")))
+          style = r"(a[href^='mailto']::before {content: '📧 ';} a[href^='tel']::before {content: '📞 ';})")),
+    
+    h2("Developers", style = "font-weight:bold"),
+    developer("Carson", "Bryce", "B.Sc", href = "https://github.com/bryce-carson/"),
+    developer("Le", "Khanh", href = "https://github.com/kle6951/"),
+    developer("Wondwossen", "Tobias", href = "https://github.com/Toby-exe"),
+
+    h3("Affiliations", style = "font-weight:bold"),
+    p(tag("sup", 1), "Mount Royal University", br(),
+      "4825 Mount Royal Gate SW", br(),
+      "Calgary, Alberta, Canada", br(),
+      "T3E 6K6"),
+
+    )
 
 ## Applicatino defaults
 modelChoices <-
